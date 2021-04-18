@@ -1,0 +1,105 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:f="sap.ui.layout.form"
+	controllerName="master.data.MasterData.controller.CreateAddress" xmlns:html="http://www.w3.org/1999/xhtml">
+	<semantic:SemanticPage id="createPage" busy="{createAddressView>/busy}" busyIndicatorDelay="{createAddressView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{createAddressView>/viewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{createAddressView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:deleteAction>
+			<semantic:DeleteAction enabled="{= ${createAddressView>/mode} === 'Edit' ? true : false}" press=".onDelete"/>
+		</semantic:deleteAction>
+		<semantic:closeAction>
+			<semantic:CloseAction press=".onCancel"/>
+		</semantic:closeAction>
+		<semantic:content>
+			<HBox id="vBox">
+				<VBox displayInline="true">
+					<f:SimpleForm id="addressForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+						adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+						singleContainerFullSize="false">
+						<core:Title text="{i18n>titleAddressData}"/>
+						<Label id="typeLabel" text="{i18n>labelAddressType}" required="false" labelFor="kind"/>
+						<Input id="kind" value="{kind}" maxLength="255" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+							suggestionItems="{/Addresses}">
+							<suggestionItems>
+								<core:Item id="suggestionItemID" text="{kind}"/>
+							</suggestionItems>
+						</Input>
+						<Label id="streetLabel" text="{i18n>labelStreet}" required="false" labelFor="street"/>
+						<Input id="street" value="{street}" maxLength="255" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+							suggestionItems="{/Addresses}">
+							<suggestionItems>
+								<core:Item id="streetID" text="{street}"/>
+							</suggestionItems>
+						</Input>
+						<Label id="houseNumberLabel" text="{i18n>labelHouseNumber}" required="false" labelFor="houseNumber"/>
+						<Input id="houseNumber" value="{houseNumber}" maxLength="20" showSuggestion="true" showValueHelp="false"
+							liveChange="_validateSaveEnablement" suggestionItems="{/Addresses}">
+							<suggestionItems>
+								<core:Item id="houseNumberID" text="{houseNumber}"/>
+							</suggestionItems>
+						</Input>
+						<Label id="additionLabel" text="{i18n>labelAddition}" required="false" labelFor="addition"/>
+						<Input id="addition" value="{addition}" maxLength="255" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+							suggestionItems="{/Addresses}">
+							<suggestionItems>
+								<core:Item id="lastNameID" text="{addition}"/>
+							</suggestionItems>
+						</Input>
+						<Label id="zipLabel" text="{i18n>labelZip}" required="true" labelFor="zip"/>
+						<Input id="zip" value="{zip}" maxLength="10" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+							suggestionItems="{/Addresses}">
+							<suggestionItems>
+								<core:Item id="ipID" text="{zip}"/>
+							</suggestionItems>
+						</Input>
+						<Label id="cityLabel" text="{i18n>labelCity}" required="true" labelFor="town"/>
+						<Input id="town" value="{town}" maxLength="255" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+							suggestionItems="{/Addresses}">
+							<suggestionItems>
+								<core:Item id="cityID" text="{town}"/>
+							</suggestionItems>
+						</Input>
+						<Label id="zipPoBoxLabel" text="{i18n>labelZipPoBox}" required="false" labelFor="zipPoBox"/>
+						<Input id="zipPoBox" value="{zipPoBox}" maxLength="10" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+							suggestionItems="{/Addresses}">
+							<suggestionItems>
+								<core:Item id="zipPoBoxID" text="{zipPoBox}"/>
+							</suggestionItems>
+						</Input>
+						<Label id="poBoxLabel" text="{i18n>labelPoBox}" required="false" labelFor="poBox"/>
+						<Input id="poBox" value="{poBox}" maxLength="30" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+							suggestionItems="{/Addresses}">
+							<suggestionItems>
+								<core:Item id="poBoxID" text="{poBox}"/>
+							</suggestionItems>
+						</Input>
+						<Label id="stateLabel" text="{i18n>labelState}" required="false" labelFor="state"/>
+						<Input id="state" value="{state}" maxLength="100" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+							suggestionItems="{/Addresses}">
+							<suggestionItems>
+								<core:Item id="stateID" text="{state}"/>
+							</suggestionItems>
+						</Input>
+						<Label id="countyLabel" text="{i18n>labelCounty}" required="false" labelFor="county"/>
+						<Input id="county" value="{county}" maxLength="100" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+							suggestionItems="{/Addresses}">
+							<suggestionItems>
+								<core:Item id="countyID" text="{county}"/>
+							</suggestionItems>
+						</Input>
+						<Label id="countryLabel" text="{i18n>labelCountry}" required="true" labelFor="country_code"/>
+						<Input id="country_code" value="{country_code}" maxLength="3" showSuggestion="true" showValueHelp="false"
+							valueHelpRequest=".onCountryValueHelpRequested" liveChange="_validateSaveEnablement" suggestionItems="{/Countries}" selectedKey="code">
+							<suggestionItems>
+								<core:Item id="countryID" text="{code} - {name}"/>
+							</suggestionItems>
+						</Input>
+					</f:SimpleForm>
+				</VBox>
+			</HBox>
+		</semantic:content>
+	</semantic:SemanticPage>
+</mvc:View>

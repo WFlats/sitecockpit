@@ -1,0 +1,55 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:html="http://www.w3.org/1999/xhtml"
+	controllerName="base.data.BaseData.controller.Skills">
+	<App>
+		<pages>
+			<Page title="{i18n>titleSkills}" showNavButton="true" navButtonPress="onNavBack">
+				<content>
+					<Table
+						items="{path: '/Skills', parameters: {expand: 'profession, profession/discipline, experience'}, sorter: [{ path: 'profession/discipline/code', descending: false, group: '.getDiscipline' }, {path: 'experience/code'}], groupHeaderFactory: '.createGroupHeader'}"
+						noDataText="{i18n>noData}" id="skillList" busy="{skillView>/busy}" busyIndicatorDelay="{skillView>/delay}"
+						updateFinished="onSkillListUpdateFinished">
+						<headerToolbar>
+							<Toolbar>
+								<Title text="{skillView>/listTitle}"/>
+								<ToolbarSpacer/>
+								<Button id="button1" icon="sap-icon://add" type="Default" tooltip="{i18n>addSkillTooltip}" press="onAddSkill"/>
+							</Toolbar>
+						</headerToolbar>
+						<items>
+							<ColumnListItem type="Active" id="item0" press="onEditSkill">
+								<cells>
+									<Text text="{profession/code}" id="text2"/>
+									<Text text="{profession/description}" id="text3"/>
+									<Text text="{experience/code}" id="text5"/>
+									<Text text="{experience/description}" id="text6"/>
+								</cells>
+							</ColumnListItem>
+						</items>
+						<columns>
+							<Column id="column0">
+								<header>
+									<Label text="{i18n>professionCodeHeader}" id="label0"/>
+								</header>
+							</Column>
+							<Column id="column1">
+								<header>
+									<Label text="{i18n>professionDescriptionHeader}" id="label1"/>
+								</header>
+							</Column>
+							<Column id="column3" hAlign="Center">
+								<header>
+									<Label text="{i18n>experienceCodeHeader}" id="label3"/>
+								</header>
+							</Column>
+							<Column id="column4">
+								<header>
+									<Label text="{i18n>experienceDescriptionHeader}" id="label4"/>
+								</header>
+							</Column>
+						</columns>
+					</Table>
+				</content>
+			</Page>
+		</pages>
+	</App>
+</mvc:View>

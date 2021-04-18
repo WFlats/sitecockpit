@@ -1,0 +1,59 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m">
+	<l:VerticalLayout class="sapUiContentPadding">
+		<l:content>
+			<VBox>
+				<Table id="addForemanList2"
+					items="{path: '/Persons', parameters: {expand: 'profession, profession/discipline, experience, deployment'}, sorter: {path: 'lastName'} }"
+					mode="SingleSelectMaster" selectionChange=".onForemanSelectionChange" includeItemInSelection="true"
+					noDataText="{i18n>taskAddForemanNoDataText}" alternateRowColors="true" updateFinished="onAddForemanListUpdateFinished"
+					busy="{taskView>/busy}">
+					<headerToolbar>
+						<Toolbar>
+							<content>
+								<Title text="{taskView>/addForemanListTitle}"/>
+								<ToolbarSpacer/>
+								<Select id="professionSelect2" forceSelection="true" change="handleProfessionChange"
+									items="{ path: '/Professions' , sorter: {path: 'description'} }" selectedKey="{i18n>selectionKeyForeman}">
+									<core:Item key="{description}" text="{description}"/>
+								</Select>
+								<ToolbarSeparator/>
+								<SearchField id="foremanSearchField2" search="onForemanSearch" liveChange="onForemanSearch" enableSuggestions="true"
+									placeholder="{i18n>searchLastNamePlaceHolder}" suggestionItems="{ path: '/Persons', sorter: {path: 'lastName'} }" width="40%">
+									<suggestionItems>
+										<SuggestionItem text="{lastName} {firstName}" key="{ID}"/>
+									</suggestionItems>
+								</SearchField>
+								<ToolbarSeparator/>
+								<CheckBox id="commitCheckBox" text="{i18n>commitButtonText}" selected="true"/>
+							</content>
+						</Toolbar>
+					</headerToolbar>
+					<columns>
+						<Column width="40%">
+							<Label text="{i18n>addWorkerName}"/>
+						</Column>
+						<Column width="30%">
+							<Label text="{i18n>addWorkerProfession}"/>
+						</Column>
+						<Column hAlign="Center">
+							<Label text="{i18n>addWorkerDiscipline}"/>
+						</Column>
+						<Column hAlign="Center">
+							<Label text="{i18n>addWorkerExperience}"/>
+						</Column>
+					</columns>
+					<items>
+						<ColumnListItem type="Active">
+							<cells>
+								<Text text="{lastName} {firstName}"/>
+								<Text text="{profession/description}"/>
+								<Text text="{profession/discipline/code}"/>
+								<Text text="{experience/code}"/>
+							</cells>
+						</ColumnListItem>
+					</items>
+				</Table>
+			</VBox>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

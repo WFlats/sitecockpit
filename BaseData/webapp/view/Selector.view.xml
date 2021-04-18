@@ -1,0 +1,30 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="base.data.BaseData.controller.Selector"
+	xmlns:html="http://www.w3.org/1999/xhtml">
+	<App>
+		<pages>
+			<Page title="{i18n>startScreenTitle}">
+				<content>
+					<Table items="{path: 'selectorModel>/items'}" noDataText="{i18n>noData}" id="selectorList" alternateRowColors="true">
+						<headerToolbar>
+							<Toolbar>
+								<Title text="{i18n>startScreenToolbarTitle}"/>
+							</Toolbar>
+						</headerToolbar>
+						<items>
+							<ColumnListItem type="Active" press="onSelection">
+								<cells>
+									<ObjectIdentifier title="{selectorModel>display}"/>
+								</cells>
+							</ColumnListItem>
+						</items>
+						<columns>
+							<Column id="column1" hAlign="Center">
+								<Text text="{i18n>startScreenTableHeader}" id="label1"/>
+							</Column>
+						</columns>
+					</Table>
+				</content>
+			</Page>
+		</pages>
+	</App>
+</mvc:View>

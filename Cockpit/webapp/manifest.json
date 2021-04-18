@@ -1,0 +1,217 @@
+{
+	"_version": "1.12.0",
+	"sap.app": {
+		"id": "cockpit.Cockpit",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"resources": "resources.json",
+		"dataSources": {
+			"mainService": {
+				"uri": "/srv_api/odata/v2/scService/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0",
+					"localUri": "localService/metadata.xml"
+				}
+			}
+		},
+		"sourceTemplate": {
+			"id": "sap.ui.ui5-template-plugin.2masterdetailmodule",
+			"version": "1.70.0"
+		},
+		"crossNavigation": {
+			"inbounds": {
+				"intent1": {
+					"signature": {
+						"parameters": {},
+						"additionalParameters": "allowed"
+					},
+					"semanticObject": "cockpit",
+					"action": "display",
+					"title": "{{appTitle}}",
+					"subTitle": "{{appDescription}}",
+					"icon": "sap-icon://gantt-bars",
+					"indicatorDataSource": {
+						"dataSource": ""
+					}
+				}
+			}
+		}
+	},
+	"sap.platform.cf": {
+		"oAuthScopes": ["$XSAPPNAME.Project_User"]
+	},
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "sap-icon://detail-view",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+	"sap.ui5": {
+		"rootView": {
+			"viewName": "cockpit.Cockpit.view.App",
+			"type": "XML",
+			"async": true,
+			"id": "app"
+		},
+		"dependencies": {
+			"minUI5Version": "1.84.4",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {},
+				"sap.f": {},
+				"sap.ushell": {},
+				"sap.collaboration": {
+					"lazy": true
+				}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "cockpit.Cockpit.i18n.i18n"
+				}
+			},
+			"": {
+				"dataSource": "mainService",
+				"preload": true
+			}
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.f.routing.Router",
+				"viewType": "XML",
+				"viewPath": "cockpit.Cockpit.view",
+				"controlId": "layout",
+				"controlAggregation": "beginColumnPages",
+				"bypassed": {
+					"target": "notFound"
+				},
+				"async": true
+			},
+			"routes": [{
+				"pattern": "",
+				"name": "master",
+				"target": "master"
+			}, {
+				"pattern": "Locations/{no}",
+				"name": "object",
+				"target": ["master", "object"]
+			}, {
+				"name": "Recipes",
+				"pattern": "Recipes",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "Recipes"]
+			}, {
+				"name": "BIM",
+				"pattern": "BIM",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "BIM"]
+			}, {
+				"name": "Task",
+				"pattern": "Tasks/{ID}",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "Task"]
+			}, {
+				"name": "WorkForce",
+				"pattern": "WorkForce/{ID}",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "WorkForce"]
+			}, {
+				"name": "Clashes",
+				"pattern": "Clashes",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "Clashes"]
+			}],
+			"targets": {
+				"master": {
+					"viewName": "Master",
+					"viewLevel": 1,
+					"viewId": "master"
+				},
+				"object": {
+					"viewName": "Detail",
+					"viewId": "detail",
+					"viewLevel": 1,
+					"controlAggregation": "midColumnPages",
+					"clearControlAggregation": true,
+					"controlId": "layout",
+					"parent": ""
+				},
+				"detailObjectNotFound": {
+					"viewName": "DetailObjectNotFound",
+					"viewId": "detailObjectNotFound",
+					"controlAggregation": "midColumnPages"
+				},
+				"notFound": {
+					"viewName": "NotFound",
+					"viewId": "notFound"
+				},
+				"BIM": {
+					"viewType": "XML",
+					"viewName": "BIM",
+					"viewId": "BIM",
+					"controlAggregation": "endColumnPages",
+					"viewLevel": 1
+				},
+				"Recipes": {
+					"viewType": "XML",
+					"viewName": "Recipes",
+					"controlAggregation": "endColumnPages",
+					"viewId": "recipes",
+					"viewLevel": 1,
+					"clearControlAggregation": false
+				},
+				"Task": {
+					"viewType": "XML",
+					"viewName": "Task",
+					"viewId": "Task",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages",
+					"clearControlAggregation": false
+				},
+				"WorkForce": {
+					"viewType": "XML",
+					"viewName": "WorkForce",
+					"viewId": "WorkForce",
+					"controlAggregation": "endColumnPages",
+					"viewLevel": 1,
+					"clearControlAggregation": false
+				},
+				"Clashes": {
+					"viewType": "XML",
+					"viewName": "Clashes",
+					"viewId": "Clashes",
+					"controlAggregation": "endColumnPages",
+					"viewLevel": 1
+				}
+			}
+		},
+		"flexEnabled": true
+	}
+}

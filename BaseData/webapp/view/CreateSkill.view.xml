@@ -1,0 +1,36 @@
+<mvc:View xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core"
+	xmlns:unified="sap.ui.unified" controllerName="base.data.BaseData.controller.CreateSkill">
+	<semantic:SemanticPage id="createPage" busy="{createSkillView>/busy}" busyIndicatorDelay="{createSkillView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{createSkillView>/viewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<VBox id="vBox" class="sapUiSmallMargin">
+				<f:SimpleForm id="skillForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+					adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="false">
+					<Label id="professionLabel" text="{i18n>professionSelectLabel}" required="true" labelFor="profession"/>
+					<Select id="profession" forceSelection="true" showSecondaryValues="true"
+						items="{ path: '/Professions' , parameters: {expand: 'discipline'}, sorter: { path: 'discipline/code' } }" selectedKey="{profession_ID}"
+						change="_validateSaveEnablement">
+						<core:ListItem id="selectProfessionItem" key="{ID}" text="{discipline/code} - {code}" additionalText="{description}"/>
+					</Select>
+					<Label id="experienceLabel" text="{i18n>experienceSelectLabel}" required="true" labelFor="experience"/>
+					<Select id="experience" forceSelection="true" showSecondaryValues="true" items="{ path: '/Experiences' , sorter: { path: 'code' } }"
+						selectedKey="{experience_ID}" change="_validateSaveEnablement">
+						<core:ListItem id="selectExperienceItem" key="{ID}" text="{code}" additionalText="{description}"/>
+					</Select>
+				</f:SimpleForm>
+			</VBox>
+		</semantic:content>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{createSkillView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:deleteAction>
+			<semantic:DeleteAction enabled="{= ${createSkillView>/mode} === 'Edit' ? true : false}" press=".onDelete"/>
+		</semantic:deleteAction>
+		<semantic:closeAction>
+			<semantic:CloseAction press=".onCancel"/>
+		</semantic:closeAction>
+	</semantic:SemanticPage>
+</mvc:View>

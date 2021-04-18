@@ -1,0 +1,122 @@
+{
+	"_version": "3.0.0",
+	"identification": {
+		"id": "4ca1b15b-7469-432c-bda9-d7e93fb9e101-1593586337319",
+		"entityType": "bundle"
+	},
+	"payload": {
+		"catalogs": [{
+			"_version": "3.0.0",
+			"identification": {
+				"id": "defaultCatalogId",
+				"title": "{{title}}",
+				"entityType": "catalog",
+				"i18n": "i18n/defaultCatalogId.properties"
+			},
+			"payload": {
+				"viz": []
+			}
+		}],
+		"groups": [{
+			"_version": "3.0.0",
+			"identification": {
+				"id": "administration",
+				"title": "{{title}}",
+				"entityType": "group",
+				"i18n": "i18n/administration.properties"
+			},
+			"payload": {
+				"viz": [{
+					"id": "base.data.BaseData-0-1593610367545",
+					"appId": "base.data.BaseData",
+					"vizId": "BaseData-display"
+				}, {
+					"id": "master.data.MasterData-1-1593610367545",
+					"appId": "master.data.MasterData",
+					"vizId": "masterdata-display"
+				}, {
+					"id": "recipe.RecipeEditor-2-1593610367545",
+					"appId": "recipe.RecipeEditor",
+					"vizId": "recipe-display"
+				}]
+			}
+		}, {
+			"_version": "3.0.0",
+			"identification": {
+				"id": "project-management",
+				"title": "{{title}}",
+				"entityType": "group",
+				"i18n": "i18n/project-management.properties"
+			},
+			"payload": {
+				"viz": [{
+					"id": "project.data.ProjectData-0-1593610367545",
+					"appId": "project.data.ProjectData",
+					"vizId": "ProjectData-display"
+				}, {
+					"id": "cockpit.Cockpit-1-1593610367545",
+					"appId": "cockpit.Cockpit",
+					"vizId": "cockpit-display"
+				}, {
+					"id": "site.recorder.SiteRecorder-2-1593610367545",
+					"appId": "site.recorder.SiteRecorder",
+					"vizId": "siterecorder-display"
+				}]
+			}
+		}, {
+			"_version": "3.0.0",
+			"identification": {
+				"id": "analytics",
+				"title": "{{title}}",
+				"entityType": "group",
+				"i18n": "i18n/analytics.properties"
+			},
+			"payload": {
+				"viz": [{
+					"id": "card.Analytics.CardAnalytics-0-1593610367545",
+					"appId": "card.Analytics.CardAnalytics",
+					"vizId": "Analytics-display"
+				}, {
+					"id": "labour.timesheet.LabourTimesheet-1-1599807783464",
+					"appId": "labour.timesheet.LabourTimesheet",
+					"vizId": "timesheet-display"
+				}]
+			}
+		}],
+		"sites": [{
+			"_version": "3.0.0",
+			"identification": {
+				"id": "1e97aed7-274c-4f28-8c8b-ef36e8f2c46c-1593586337319",
+				"entityType": "site",
+				"title": "SAP Fiori launchpad site on Cloud Foundry",
+				"description": "SAP Fiori launchpad site on Cloud Foundry, deployed from SAP Web IDE"
+			},
+			"payload": {
+				"config": {
+					"ushellConfig": {
+						"renderers": {
+							"fiori2": {
+								"componentData": {
+									"config": {
+										"applications": {
+											"Shell-home": {}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"groupsOrder": ["administration", "project-management", "analytics"],
+				"sap.cloud.portal": {
+					"config": {
+						"theme.id": "sap_fiori_3",
+						"theme.active": ["sap_fiori_3", "sap_fiori_3_dark", "sap_belize_hcb", "sap_belize_hcw"],
+						"showSessionTimeoutDialog": true,
+						"ui5VersionNumber": "1.84.8"
+					}
+				}
+			}
+		}]
+	}
+}

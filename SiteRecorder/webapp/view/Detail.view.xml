@@ -1,0 +1,227 @@
+<mvc:View controllerName="site.recorder.SiteRecorder.controller.Detail" xmlns="sap.m" xmlns:semantic="sap.f.semantic"
+	xmlns:footerbar="sap.ushell.ui.footerbar" xmlns:mvc="sap.ui.core.mvc">
+	<semantic:SemanticPage id="detailPage" busy="{detailView>/busy}" busyIndicatorDelay="{detailView>/delay}">
+		<semantic:titleHeading>
+			<Title text="{taskName} ({number})" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction text="{path: 'status', formatter: '.formatter.statusButtonText'}" enabled="{= ${status} !== 5 ? true : false}"
+				press="onStatusPressed" tooltip="{path: 'status', formatter: '.formatter.statusButtonTooltip'}"/>
+		</semantic:titleMainAction>
+		<semantic:titleCustomTextActions>
+			<Button id="startStopButton" icon="{path: 'status', formatter: '.formatter.startStopIconFormatter'}" enabled="true"
+				visible="{= ${status} > 1 ? true : false}" press="onStartStopPressed"
+				tooltip=" {path: 'status' , formatter: '.formatter.startStopButtonTooltip' }"/>
+			<Button id="refreshButton" icon="sap-icon://refresh" press=".onRefresh" visible="true" enabled="true" tooltip="{i18n>tooltipRefresh}"/>
+		</semantic:titleCustomTextActions>
+		<semantic:headerContent>
+			<ObjectHeader title=" {shortText}"
+				number=" {parts: [{path: 'detailView>/cumulativeQuantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}, {path: 'i18n>ofTotal' }, {path: 'quantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}]} "
+				numberUnit=" {path: 'UoM/code' }">
+				<ObjectAttribute title="{i18n>actualStart}"
+					text="{path: 'actualStart', type:'sap.ui.model.type.DateTime', formatOptions: {format: 'yMdhm'}}"/>
+				<ObjectAttribute title="{i18n>plannedEnd}" text="{path: 'plannedEnd', type:'sap.ui.model.type.DateTime', formatOptions: {format: 'yMdhm'}}"/>
+				<ObjectAttribute id="estimatedEnd" title="{i18n>estimatedEnd}"
+					text="{path: 'estimatedEnd', type:'sap.ui.model.type.DateTime', formatOptions: {format: 'yMdhm'}}"/>
+				<ObjectAttribute id="shiftAttribute" title="{i18n>shiftName}" text="{shift/code}"/>
+				<statuses>
+					<ObjectStatus title="{i18n>KPI}" text="{KPI}" state="{path: 'KPI', formatter: '.formatter.stateFormatter'}"
+						icon="{path: 'KPI', formatter: '.formatter.iconFormatter'}" visible="{= ${status} > 1 ? true : false}"/>
+					<ProgressIndicator class="sapUiNoMarginBottom" width="50%" percentValue="{= ${detailView>/cumulativeQuantity} / ${quantity} * 100}"
+						displayValue="{parts: [{path: 'detailView>/cumulativeQuantity'}, {path: 'quantity'}], formatter: '.formatter.progress'} %" showValue="true"
+						state="{path: 'KPI', formatter: '.formatter.stateFormatter'}" visible="{= ${status} > 1 ? true : false}" displayOnly="true"/>
+					<ObjectStatus title="{i18n>foreman}" text="{supervisor/lastName} {supervisor/firstName}"/>
+					<!--
+					<ObjectStatus title="{i18n>taskCompany}" text="{company/companyName}"/>
+					-->
+				</statuses>
+			</ObjectHeader>
+		</semantic:headerContent>
+		<semantic:content>
+			<IconTabBar id="taskIconTabBar" visible="true" expandable="true" expanded="true" applyContentPadding="true" backgroundDesign="Solid"
+				headerBackgroundDesign="Solid" enableTabReordering="true" headerMode="Inline">
+				<items>
+					<IconTabFilter text="{i18n>measurementsTabLabel}" count="{detailView>/countMeasurements}" visible="true" design="Vertical">
+						<Table id="measurementList" items="{ path: 'measurements', sorter: {path: 'measurementDateTime', type:'sap.ui.model.type.Date'}}"
+							noDataText="{i18n>taskMeasurementListNoData}" alternateRowColors="true" updateFinished="onMeasurementListUpdateFinished"
+							includeItemInSelection="true">
+							<headerToolbar>
+								<Toolbar id="measurementItemsToolbar">
+									<Title id="measurementItemsHeader" text="{detailView>/measurementItemListTitle}"/>
+									<ToolbarSpacer/>
+									<Button id="addMeasurementButton" icon="sap-icon://add" type="Ghost" enabled="{= ${status} > 1 ? true : false}"
+										tooltip="{i18n>addMeasurement}" press="onAddMeasurement"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>DateTimeLabel}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>user}"/>
+								</Column>
+								<Column hAlign="End">
+									<Label text="{i18n>quantityLabel}"/>
+								</Column>
+								<Column hAlign="End">
+									<Label text="{i18n>measurementHoursLabel}"/>
+								</Column>
+								<Column hAlign="End">
+									<Label text="{i18n>productivityLabel}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onPressMeasurement">
+									<cells>
+										<Text text="{path: 'measurementDateTime', type:'sap.ui.model.type.DateTime', formatOptions: {format: 'yMdhm'}}"/>
+										<Text text="{modifiedBy}"/>
+										<Text text="{measurementQuantity}"/>
+										<Text text="{path: 'netDuration', formatter: '.formatter.hoursToHoursMinutes'}"/>
+										<Text text="{parts: [{path: 'measurementQuantity'}, {path: 'netDuration'}], formatter: '.formatter.numberDivision'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<swipeContent>
+								<Button icon="sap-icon://delete" type="Reject" tooltip="{i18n>deleteMeasurementTooltip}" press="handleDeleteMeasurement"/>
+							</swipeContent>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter text="{i18n>problemsTabLabel}" visible="true" design="Vertical" count="{detailView>/countProblemCards}">
+						<Table id="problemsList"
+							items="{ path: 'problems', parameters: {expand: 'problem, severity'}, filters: {path: 'isProblem', operator: 'EQ', value1: true}, sorter: {path: 'problemDateTime'}}"
+							updateFinished="onProblemListUpdateFinished" noDataText="{i18n>taskProblemListNoData}" includeItemInSelection="true">
+							<headerToolbar>
+								<Toolbar id="problemToolbar">
+									<Title id="problemTitle" text="{detailView>/problemItemListTitle}"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Ghost" enabled="{= ${status} > 1 ? true : false}" tooltip="{i18n>addProblemTooltip}"
+										press="onAddProblem"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>DateTimeLabel}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>problemDescription}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>problemType}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>severityLabel}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onEditProblem">
+									<cells>
+										<Text text="{path: 'problemDateTime', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+										<Text text="{shortText}"/>
+										<Text text="{path: 'problem/description'}"/>
+										<Text text="{path: 'severity/description'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter text="{i18n>qualityTabLabel}" visible="true" design="Vertical" count="{detailView>/countQualityCards}">
+						<Table
+							items="{ path: 'problems', parameters: {expand: 'quality, severity'}, filters: {path: 'isQuality', operator: 'EQ', value1: true}, sorter: {path: 'problemDateTime'}}"
+							id="qualityList" updateFinished="onQualityListUpdateFinished" noDataText="{i18n>taskQualityListNoData}">
+							<headerToolbar>
+								<Toolbar id="qualityToolbar">
+									<Title id="qualityTitle" text="{detailView>/qualityItemListTitle}"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Ghost" enabled="{= ${status} > 1 ? true : false}" tooltip="{i18n>addQualityTooltip}"
+										press="onAddQuality"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>DateTimeLabel}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>problemDescription}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>qualityType}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>severityLabel}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onEditQuality">
+									<cells>
+										<Text text="{path: 'problemDateTime', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+										<Text text="{shortText}"/>
+										<Text text="{path: 'quality/description'}"/>
+										<Text text="{path: 'severity/description'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="taskIconTabFilterHnS" text="{i18n>iconTabProblemsHSTitle}" iconColor="Default" count="{detailView>/countHnSCards}">
+						<Table id="HnSList" width="auto"
+							items="{path:'problems', parameters: {expand: 'severity, HealthandSafety'}, filters: {path: 'isHnS', operator: 'EQ', value1: true}, sorter:{path:'problemDateTime', descending:true}}"
+							noDataText="{i18n>problemListHSNoData}" alternateRowColors="true" includeItemInSelection="true" updateFinished="onHnSListUpdateFinished">
+							<headerToolbar>
+								<Toolbar id="HnSToolbar">
+									<Title id="HnSTitle" text="{detailView>/HnSItemListTitle}"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Ghost" enabled="{= ${status} > 1 ? true : false}" tooltip="{i18n>addHnSTooltip}" press="onAddHnS"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>DateTimeLabel}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>HnSDescription}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>HnSType}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>severityLabel}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onEditHnS">
+									<cells>
+										<Text text="{path: 'problemDateTime', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+										<Text text="{shortText}"/>
+										<Text text="{path: 'HealthandSafety/description', type:'sap.ui.model.type.String'}"/>
+										<Text text="{path: 'severity/description', type:'sap.ui.model.type.String'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+				</items>
+			</IconTabBar>
+		</semantic:content>
+		<!--Semantic ShareMenu Buttons
+		<semantic:sendEmailAction>
+			<semantic:SendEmailAction id="shareEmail" visible="false" press=".onSendEmailPress"/>
+		</semantic:sendEmailAction>
+		<semantic:shareInJamAction>
+			<semantic:ShareInJamAction id="shareInJam" visible="{false}" press=".onShareInJamPress"/>
+		</semantic:shareInJamAction>
+		<semantic:saveAsTileAction>
+			<footerbar:AddBookmarkButton id="shareTile" title="{detailView>/saveAsTileTitle}"/>
+		</semantic:saveAsTileAction> -->
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

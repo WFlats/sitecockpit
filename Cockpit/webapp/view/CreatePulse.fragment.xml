@@ -1,0 +1,16 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m">
+	<l:VerticalLayout class="sapUiContentPadding" width="100%">
+		<l:content>
+			<Label text="Code" labelFor="code"/>
+			<Input id="code" type="Text" value="{code}" showSuggestion="true" showValueHelp="false" valueHelpRequest="handleValueHelp"
+				suggestionItems="{/Pulses}">
+				<suggestionItems>
+					<core:Item id="suggestionItemID" text="{code}"/>
+				</suggestionItems>
+			</Input>
+			<Label text="Description" labelFor="shortText"/>
+			<TextArea id="shortText" required="true" showExceededText="true" maxLength="50" width="100%" valueLiveUpdate="true"
+				liveChange="handlePulseCreateChange"/>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

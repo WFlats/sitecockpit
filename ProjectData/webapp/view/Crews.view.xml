@@ -1,0 +1,147 @@
+<mvc:View controllerName="project.data.ProjectData.controller.Crews" xmlns="sap.m" xmlns:semantic="sap.f.semantic"
+	xmlns:mvc="sap.ui.core.mvc" xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core" xmlns:dnd="sap.ui.core.dnd">
+	<semantic:SemanticPage id="crewsPage" busy="{crewsView>/busy}" busyIndicatorDelay="{crewsView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{crewsView>/crewsTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:headerContent>
+			<f:SimpleForm id="crewForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+				adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+				singleContainerFullSize="true">
+				<Label id="nameLabel" text="{i18n>crewNameLabel}" labelFor="name" required="true"/>
+				<Input id="name" maxLength="50" type="Text" value="{crewName}" showSuggestion="true" showValueHelp="false" liveChange="_validateCrewName"
+					suggestionItems="{/Crews}">
+					<suggestionItems>
+						<core:Item id="ID" text="{crewName}"/>
+					</suggestionItems>
+				</Input>
+			</f:SimpleForm>
+		</semantic:headerContent>
+		<semantic:content>
+			<VBox visible="{= ${appView>/mode} === 'Edit' ? true : false}">
+				<Panel>
+					<content>
+						<Table id="crewMembersList" width="auto"
+							items="{path: 'crewMembers', parameters: {expand: 'profession, profession/discipline, experience, company'}, sorter:[{path: 'company/companyName', group: true}, {path:'lastName'}] }"
+							updateFinished=".onCrewMembersListUpdateFinished" includeItemInSelection="true" mode="MultiSelect" selectionChange=".onSelectionChange"
+							noDataText="{i18n>crewMembersNoDataText}" busyIndicatorDelay="{crewsView>/delay}">
+							<headerToolbar>
+								<Toolbar>
+									<Title id="crewsTitle" text="{crewsView>/crewMembersListTitle}" titleStyle="H3" level="H3"/>
+									<ToolbarSpacer/>
+									<Button id="removeButton" icon="sap-icon://negative" type="Ghost" tooltip="{i18n>removeCrewMembersTooltip}"
+										enabled="{crewsView>/crewMemberSelected}" press=".onRemoveCrewMembers"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Text text="{i18n>name}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>crewMemberListProfession}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true" hAlign="Center">
+									<Text text="{i18n>crewMemberListDiscipline}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>crewMemberListCompany}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>crewMemberListChargeHand}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<ObjectIdentifier title="{lastName}" text="{firstName}"/>
+										<Text text="{profession/description} {experience/code}"/>
+										<Text text="{profession/discipline/code}"/>
+										<Text text="{company/companyName}"/>
+										<RadioButton select=".onChargeHandSelect"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<dragDropConfig>
+								<dnd:DragInfo id="dragWorker" groupName="crewMemberToAvailable" sourceAggregation="items"/>
+								<dnd:DropInfo id="dropWorker" groupName="availableToCrewMember" drop="onAssignWorkersToCrewDnD"/>
+							</dragDropConfig>
+						</Table>
+					</content>
+				</Panel>
+				<Panel>
+					<content>
+						<Table id="workersList" width="auto"
+							items="{path: '/Persons', parameters: {expand: 'profession, profession/discipline, experience, company, deployment'}, sorter:[{path: 'company/companyName', group: true}, {path:'lastName'}]}"
+							mode="MultiSelect" updateFinished=".onWorkerListUpdateFinished" selectionChange=".onWorkersSelectionChange" includeItemInSelection="true"
+							noDataText="{i18n>noWorkersAvailableText}" busyIndicatorDelay="{crewsView>/delay}" rememberSelections="false">
+							<headerToolbar>
+								<OverflowToolbar id="headerToolbarId">
+									<Title id="workersTitle" text="{crewsView>/availableWorkersListTitle}" titleStyle="H4" level="H4"/>
+									<ToolbarSpacer id="spacerId"/>
+									<SearchField id="searchField" showRefreshButton="true" tooltip="{i18n>workerSearchByProfessionTooltip}"
+										placeholder="{i18n>placeholderSearchByProfession}" search=".onSearch" width="auto">
+										<layoutData>
+											<OverflowToolbarLayoutData minWidth="150px" maxWidth="240px" shrinkable="true" priority="NeverOverflow"/>
+										</layoutData>
+									</SearchField>
+									<ToolbarSeparator/>
+									<Button id="addWorkersButton" icon="sap-icon://add" press="onAssignWorkersToCrew" enabled="{crewsView>/availableWorkerSelected}"
+										tooltip="{i18n>assignWorkersToCrewTooltip}"/>
+								</OverflowToolbar>
+							</headerToolbar>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<ObjectIdentifier title="{lastName}" text="{firstName}"/>
+										<Text text="{profession/description}"/>
+										<Text text="{profession/discipline/code}"/>
+										<Text text="{experience/code}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<columns>
+								<Column>
+									<Text text="{i18n>name}"/>
+								</Column>
+								<Column >
+									<Text text="{i18n>crewMemberListProfession}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true" hAlign="Center">
+									<Text text="{i18n>crewMemberListDiscipline}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true" hAlign="Center">
+									<Text text="{i18n>crewMemberListExperience}"/>
+								</Column>
+							</columns>
+							<dragDropConfig>
+								<dnd:DragInfo id="dragWorkerID" groupName="availableToCrewMember" sourceAggregation="items"/>
+								<dnd:DropInfo id="dropWorkerID" groupName="crewMemberToAvailable" drop="onRemoveCrewMembersDnD"/>
+							</dragDropConfig>
+						</Table>
+					</content>
+				</Panel>
+			</VBox>
+		</semantic:content>
+		<semantic:deleteAction>
+			<semantic:DeleteAction id="deleteCrew" enabled="true" press=".onDeleteCrew"/>
+		</semantic:deleteAction>
+		<!--Semantic ShareMenu Buttons-->
+		<semantic:sendEmailAction>
+			<semantic:SendEmailAction id="shareEmail" press=".onSendEmailPress"/>
+		</semantic:sendEmailAction>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeButton" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction id="saveButton" text="Save" enabled="{crewsView>/enableSave}" press=".onSaveCrew"/>
+		</semantic:titleMainAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

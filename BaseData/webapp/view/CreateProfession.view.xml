@@ -1,0 +1,40 @@
+<mvc:View xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core"
+	controllerName="base.data.BaseData.controller.CreateProfession">
+	<semantic:SemanticPage id="createPage" busy="{createProfessionView>/busy}" busyIndicatorDelay="{createProfessionView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{createProfessionView>/viewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<VBox id="vBox" class="sapUiSmallMargin">
+				<f:SimpleForm id="disciplineForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3"
+					labelSpanS="12" adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="false">
+					<Label id="codeLabel" text="{i18n>labelProfessionCode}" required="true" labelFor="code"/>
+					<Input id="code" value="{code}" maxLength="10" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+						suggestionItems="{/Professions}">
+						<suggestionItems>
+							<core:Item id="suggestionItemID" text="{code}"/>
+						</suggestionItems>
+					</Input>
+					<Label id="descriptionLabel" text="{i18n>labelProfessionDescription}" required="true" labelFor="description"/>
+					<TextArea id="description" value="{description}" required="true" width="100%" rows="2" maxLength="50" showExceededText="true"
+						wrapping="None" liveChange="_validateSaveEnablement"></TextArea>
+					<Label id="discplineIDLabel" text="{i18n>labelDisciplineOfProfession}" required="false" labelFor="discipline"/>
+					<Select id="disciplineCode" forceSelection="false" showSecondaryValues="true" items="{ path: '/Disciplines' , sorter: { path: 'code' } }"
+						selectedKey="{discipline_ID}" change="_validateSaveEnablement">
+						<core:ListItem id="selectDisciplineItem" key="{ID}" text="{code}" additionalText="{description}"/>
+					</Select>
+				</f:SimpleForm>
+			</VBox>
+		</semantic:content>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{createProfessionView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:deleteAction>
+			<semantic:DeleteAction enabled="{= ${createProfessionView>/mode} === 'Edit' ? true : false}" press=".onDelete"/>
+		</semantic:deleteAction>
+		<semantic:closeAction>
+			<semantic:CloseAction press=".onCancel"/>
+		</semantic:closeAction>
+	</semantic:SemanticPage>
+</mvc:View>

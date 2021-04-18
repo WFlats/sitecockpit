@@ -1,0 +1,85 @@
+<mvc:View controllerName="labour.timesheet.LabourTimesheet.controller.Detail" xmlns="sap.m" xmlns:semantic="sap.f.semantic"
+	xmlns:footerbar="sap.ushell.ui.footerbar" xmlns:mc="sap.suite.ui.microchart" xmlns:mvc="sap.ui.core.mvc">
+	<semantic:SemanticPage id="detailPage" busy="{detailView>/busy}" busyIndicatorDelay="{detailView>/delay}">
+		<semantic:titleHeading>
+			<Title text="{i18n>timesheetTitle}"/>
+		</semantic:titleHeading>
+		<semantic:headerContent>
+			<ObjectHeader id="objectHeader" title="{firstName} {lastName}" showTitleSelector="false"
+				number="{parts: [{path: 'detailView>/actualWorkingHours'}, {path: 'detailView>/shiftWorkingHours'}] , formatter: '.formatter.percentageWorked'} "
+				numberUnit="{i18n>productive}">
+				<ObjectAttribute id="profession" title="{i18n>professionLabel}" text="{profession/description} - {experience/description}"/>
+				<ObjectAttribute id="shiftName" title="{i18n>shiftLabel}" text="{detailView>/shiftName}"/>
+				<ObjectAttribute id="crewName" title="{i18n>crewLabel}" text="{memberOfCrew/crewName} ({memberOfCrew/crewNumber})"/>
+				<statuses>
+					<ObjectStatus title="{i18n>productiveHours}" text="{path: 'detailView>/actualWorkingHours', formatter: '.formatter.hoursToHoursMinutes'}"/>
+					<ObjectStatus title="{i18n>hoursOfShift}" text="{path: 'detailView>/shiftWorkingHours', formatter: '.formatter.hoursToHoursMinutes'}"/>
+					<ObjectStatus title="{i18n>idleHours}" text="{path: 'detailView>/idleHours', formatter: '.formatter.hoursToHoursMinutes'}"/>
+				</statuses>
+			</ObjectHeader>
+		</semantic:headerContent>
+		<semantic:content>
+			<Table id="timesheetList" width="auto"
+				items="{path: 'timeSheetEntries', parameters: {expand: 'task, task/location, shiftPart, shiftPart/timeType, project'}, sorter: [{path: 'task/taskName', descending: false, group: '.getTask'}, {path: 'task/number'}, {path: 'startTimeHrs'}], groupHeaderFactory: '.createGroupHeader'}"
+				mode="MultiSelect" includeItemInSelection="true" updateFinished=".onListUpdateFinished" selectionChange=".onSelectionChange"
+				noDataText="{i18n>detailLineItemTableNoDataText}" busyIndicatorDelay="{detailView>/lineItemTableDelay}">
+				<headerToolbar>
+					<Toolbar>
+						<Title id="lineItemsTitle" text="{detailView>/lineItemListTitle}" titleStyle="H3" level="H3"/>
+						<ToolbarSpacer/>
+						<Button press="minusDay" icon="sap-icon://less" type="Transparent" tooltip="{i18n>prevDay}"/>
+						<DatePicker id="datePicker"
+							value="{path: 'appView>/selectedDate', type:'sap.ui.model.type.Date', formatOptions: { style: 'medium', strictParsing: true}}"
+							width="200px" displayFormat="short" change="onDateChanged"/>
+						<Button press="plusDay" icon="sap-icon://add" type="Transparent" tooltip="{i18n>nextDay}"/>
+						<ToolbarSeparator/>
+						<Button press=".onDelete" icon="sap-icon://delete" enabled="{detailView>/selected}" type="Transparent"/>
+					</Toolbar>
+				</headerToolbar>
+				<columns>
+					<Column>
+						<Label text="{i18n>shiftPartHeader}"/>
+					</Column>
+					<Column hAlign="End">
+						<Label text="{i18n>startHeader}"/>
+					</Column>
+					<Column hAlign="End">
+						<Label text="{i18n>endHeader}"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true" hAlign="End">
+						<Label text="{i18n>hoursHeader}"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true" hAlign="End">
+						<Label text="{i18n>rateHader}"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true" hAlign="End">
+						<Label text="{i18n>costHeader}"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<Text text="{shiftPart/timeType/code}"/>
+							<Text text="{parts: [{path: 'startTimeHrs'}, {path: 'startTimeMins'}], formatter: '.formatter.hoursMinutes' }"/>
+							<Text text="{parts: [{path: 'endTimeHrs'}, {path: 'endTimeMins'}], formatter: '.formatter.hoursMinutes' }"/>
+							<Text text="{hoursWorked}"/>
+							<ObjectNumber number="{rate}" unit="{project/currency_code}"/>
+							<ObjectNumber number="{calculatedCost}" unit="{project/currency_code}"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</semantic:content>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

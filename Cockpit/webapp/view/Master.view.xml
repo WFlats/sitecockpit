@@ -1,0 +1,62 @@
+<mvc:View controllerName="cockpit.Cockpit.controller.Master" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:m="sap.m"
+	xmlns:core="sap.ui.core" xmlns:dnd="sap.ui.core.dnd" xmlns="sap.ui.table">
+	<semantic:SemanticPage id="masterPage" preserveHeaderStateOnScroll="true" toggleHeaderOnTitleClick="false">
+		<semantic:titleHeading>
+			<m:Title id="masterPageTitle" text="{masterView>/title}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<TreeTable id="projectTreeTable" selectionMode="MultiToggle" selectionBehavior="RowOnly" enableColumnReordering="true" fixedColumnCount="0"
+				rowSelectionChange="onLocationPick" visibleRowCount="16" enableBusyIndicator="true" beforeOpenContextMenu="onContextMenu"
+				paste="onPasteLocation" rows="{path: '/Projects', filters: [{path: 'code', operator: 'EQ', value1: '0'}]}">
+				<dragDropConfig>
+					<dnd:DragDropInfo sourceAggregation="rows" targetAggregation="rows" dragStart="onDragStart" drop="onDrop"/>
+				</dragDropConfig>
+				<extension>
+					<m:OverflowToolbar>
+						<m:Title id="locationTreeTitle" text="{i18n>locationTreeTitle}" level="H3"/>
+						<m:ToolbarSpacer/>
+						<m:Button type="Transparent" id="addButton" icon="sap-icon://add" press="onAddLocation" visible="{masterView>/editMode}" enabled="false"
+							tooltip="{i18n>addLocationTooltip}"/>
+						<m:Button type="Transparent" id="editButton" icon="sap-icon://edit" press="onEditLocation" visible="{masterView>/editMode}" enabled="false"
+							tooltip="{i18n>editLocationTooltip}"/>
+						<m:Button type="Transparent" id="deleteButton" icon="sap-icon://delete" press="onDeleteLocation" visible="{masterView>/editMode}"
+							enabled="false" tooltip="{i18n>deleteLocationTooltip}"/>
+						<m:ToolbarSeparator visible="{masterView>/editMode}"/>
+						<m:Button type="Transparent" id="menuButton" icon="sap-icon://menu" press="onLocationMenu" visible="{masterView>/editMode}"
+							enabled="{masterView>/editMode}" tooltip="{i18n>menuButtonTooltip}"/>
+					</m:OverflowToolbar>
+				</extension>
+				<columns>
+					<Column width="35%">
+						<m:Label text="{i18n>projectTreeCode}"/>
+						<template>
+							<m:Text text="{code}" wrapping="false"/>
+						</template>
+					</Column>
+					<Column width="35%">
+						<m:Label text="{i18n>projectTreeDescription}"/>
+						<template>
+							<m:Text text="{description}" wrapping="false"/>
+						</template>
+					</Column>
+					<Column width="15%" hAlign="End">
+						<m:Label text="{i18n>projectTreePlannedStart}"/>
+						<template>
+							<m:Text text="{path: 'startDate', type:'sap.ui.model.type.DateTime', formatOptions: {format: 'yMd'}}" wrapping="false"/>
+						</template>
+					</Column>
+					<Column width="15%" hAlign="End">
+						<m:Label text="{i18n>projectTreePlannedEnd}"/>
+						<template>
+							<m:Text text="{path: 'endDate', type:'sap.ui.model.type.DateTime', formatOptions: {format: 'yMd'}}" wrapping="false"/>
+						</template>
+					</Column>
+				</columns>
+			</TreeTable>
+		</semantic:content>
+		<semantic:titleCustomIconActions>
+			<m:OverflowToolbarToggleButton icon="sap-icon://edit" press="onEdit" tooltip="{i18n>buttonEditTooltip}"/>
+			<m:OverflowToolbarButton icon="sap-icon://upload-to-cloud" press="onLoadP6" tooltip="{i18n>buttonImportScheduleTooltip}"/>
+		</semantic:titleCustomIconActions>
+	</semantic:SemanticPage>
+</mvc:View>

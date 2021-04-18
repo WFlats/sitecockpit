@@ -1,0 +1,181 @@
+<mvc:View xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:layout="sap.ui.layout" xmlns:dnd="sap.ui.core.dnd"
+	controllerName="recipe.RecipeEditor.controller.Detail">
+	<semantic:SemanticPage id="detailPage" busy="{detailView&gt;/busy}" busyIndicatorDelay="{detailView&gt;/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{code}" level="H2"/>
+		</semantic:titleHeading>
+		<!-- TitleExpanded content-->
+		<semantic:titleSnappedContent>
+			<Text id="shortTextId" text="{shortText}"/>
+		</semantic:titleSnappedContent>
+		<!-- TitleSnapped content-->
+		<semantic:titleExpandedContent>
+			<Text id="shortTextId2" text="{shortText}"/>
+		</semantic:titleExpandedContent>
+		<semantic:headerContent>
+			<layout:HorizontalLayout id="horLayoutId" allowWrapping="true">
+				<layout:VerticalLayout id="verLayoutId" class="sapUiMediumMarginEnd">
+					<ObjectAttribute id="oAttId1" title="{i18n&gt;disciplineTitle}"/>
+					<ObjectAttribute id="oAttId2" title="" text="{discipline/code} {discipline/description}"/>
+				</layout:VerticalLayout>
+				<layout:VerticalLayout id="verLayoutId2" class="sapUiMediumMarginEnd">
+					<ObjectAttribute id="oAttId3" text="{i18n&gt;productivityTitle}"/>
+					<ObjectNumber id="objectHeaderNumber" number="{ path: 'productivity', parameters: {expand: 'UoM'}, formatter: '.formatter.threeDecimals' }"
+						unit="{UoM/code} {i18n&gt;masterListPerHour}"/>
+				</layout:VerticalLayout>
+				<layout:VerticalLayout id="verLayoutId3" class="sapUiMediumMarginEnd">
+					<ObjectAttribute id="oAttId4" text="{i18n>waitingTime}"/>
+					<ObjectNumber id="objectHeaderWait" number="{ path: 'waitDuration', formatter: '.formatter.dhmFromMsAsString' }" unit="{i18n>ddhhmm}"/>
+				</layout:VerticalLayout>
+			</layout:HorizontalLayout>
+		</semantic:headerContent>
+		<semantic:content>
+			<IconTabBar id="recipeIconTabBar" visible="true" expandable="true" expanded="true" applyContentPadding="true" backgroundDesign="Solid"
+				headerBackgroundDesign="Solid" enableTabReordering="true" headerMode="Inline">
+				<items>
+					<IconTabFilter id="iconTabFilterSkills" text="{i18n>iconTabSkillsTitle}" count="{detailView>/totalRequiredSkills}" showAll="false"
+						iconColor="Default" iconDensityAware="true" visible="true" design="Vertical">
+						<Table id="lineItemsList" width="auto"
+							items="{path: 'requiredSkills', parameters: {expand: 'skill, skill/profession, skill/profession/discipline, skill/experience'}, sorter: { path: 'rank', type:'sap.ui.model.type.Integer', descending: false}}"
+							updateFinished=".onListUpdateFinished" noDataText="{i18n>detailLineItemTableNoDataText}" mode="MultiSelect"
+							busyIndicatorDelay="{detailView>lineItemTableDelay}" selectionChange=".onSkillSelectionChange" includeItemInSelection="true">
+							<headerToolbar>
+								<Toolbar id="headerToolbarId">
+									<Title id="lineItemsTitle" text="{detailView&gt;/lineItemListTitle}" titleStyle="H3" level="H3"/>
+									<ToolbarSpacer id="spacerId"/>
+									<Button id="addSkillButton" icon="sap-icon://add" type="Default" tooltip="{i18n>editRequiredSkillsTooltip}" press="onEditSkill"/>
+									<Button id="removeSkillButton" icon="sap-icon://negative" type="Default" tooltip="{i18n>editRequiredSkillsTooltip}" press="onRemoveSkill"
+										enabled="{detailView>/skillSelected}"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column id="professionColumnId">
+									<Text id="professionTextId" text="{i18n>detailLineItemTableProfessionColumn}"/>
+								</Column>
+								<Column id="disciplineColumnId" hAlign="Center">
+									<Text id="disciplineTextId" text="{i18n>detailLineItemTableDisciplineColumn}"/>
+								</Column>
+								<Column id="experienceColumnId" minScreenWidth="Tablet" demandPopin="true" hAlign="Center">
+									<Text id="experienceTextId" text="{i18n>detailLineItemTableExperienceColumn}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem id="columnListItemId" type="Active" tooltip="{i18n>pressSkillToRemoveTooltip}">
+									<cells>
+										<Text id="professionDataId" text="{skill/profession/description}"/>
+										<Text id="disciplineDataId" text="{skill/profession/discipline/code}"/>
+										<Text id="experienceDataId" text="{skill/experience/code}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<dragDropConfig>
+								<dnd:DragInfo id="dragID" groupName="requiredToAvailable" sourceAggregation="items"/>
+								<dnd:DropInfo id="dropID" groupName="availableToRequired" drop="onAddSkill"/>
+								<dnd:DragDropInfo id="dragDropID" sourceAggregation="items" targetAggregation="items" dropPosition="Between" dragStart="onDragStart"
+									drop="onMoveSkill"/>
+							</dragDropConfig>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="iconTabFilterMaterial" text="{i18n>iconTabMaterialTitle}" count="" showAll="false" iconColor="Default"
+						iconDensityAware="true" visible="true" design="Vertical"></IconTabFilter>
+					<IconTabFilter id="iconTabFilterEquipment" text="{i18n>iconTabEquipmentTitle}" count="" showAll="false" iconColor="Default"
+						iconDensityAware="true" visible="true" design="Vertical"></IconTabFilter>
+					<IconTabFilter id="iconTabFilterResults" text="{i18n>iconTabResultsTitle}" count="{detailView>/totalResults}" showAll="false" visible="true"
+						design="Vertical">
+						<Table id="resultItemsList" width="auto"
+							items="{path: 'recipeResults', parameters: {expand: 'project, company'}, sorter: { path: 'recordingDate', type:'sap.ui.model.type.DateTime', descending: true}}"
+							mode="MultiSelect" includeItemInSelection="true" selectionChange=".onResultListSelectionChange" updateFinished=".onResultListUpdateFinished"
+							noDataText="{i18n>noResultsDataText}" busyIndicatorDelay="{detailView>lineItemTableDelay}">
+							<headerToolbar>
+								<Toolbar id="resultsHeaderID">
+									<Title id="resultItemsTitle" text="{detailView>/resultsItemListTitle}" titleStyle="H3" level="H3"/>
+									<ToolbarSpacer/>
+									<Button id="resultsDeleteButton" icon="sap-icon://delete" press=".onDeleteResults" enabled="false"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column id="dateColumnId" width="10%">
+									<Text id="dateTextId" text="{i18n>resultTableDateLabel}"/>
+								</Column>
+								<Column id="projectColumnId">
+									<Text id="projectTextId" text="{i18n>resultTableProjectLabel}"/>
+								</Column>
+								<Column id="companyColumnId" minScreenWidth="Tablet" demandPopin="true">
+									<Text id="companyTextId" text="{i18n>resultTableCompanyLabel}"/>
+								</Column>
+								<Column id="quantityColumnId" minScreenWidth="Tablet" demandPopin="true" hAlign="End" width="10%">
+									<Text id="quantityTextId" text="{i18n>resultTableQuantityLabel}"/>
+								</Column>
+								<Column id="durationColumnId" minScreenWidth="Tablet" demandPopin="true" hAlign="End" width="8%">
+									<Text id="durationTextId" text="{i18n>resultTableDurationLabel}"/>
+								</Column>
+								<Column id="plannedProductivityColumnId" minScreenWidth="Tablet" demandPopin="true" hAlign="End">
+									<Text id="plannedProductivityTextId" text="{i18n>resultTablePlannedProductivityLabel}"/>
+								</Column>
+								<Column id="actualProductivityColumnId" minScreenWidth="Tablet" demandPopin="true" hAlign="End">
+									<Text id="actualProductivityTextId" text="{i18n>resultTableProductivityLabel}"/>
+								</Column>
+								<Column id="crewSizeColumnId" minScreenWidth="Tablet" demandPopin="true" hAlign="Center" width="7%">
+									<Text id="crewSizeTextId" text="{i18n>resultTableCrewSizeLabel}"/>
+								</Column>
+								<Column id="perHeadProductivityColumnId" minScreenWidth="Tablet" demandPopin="true" hAlign="End">
+									<Text id="aperHeadProductivityTextId" text="{i18n>resultTableProdPerWorkerLabel}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem id="resultListItemId" type="Active" press="onResultPressed" tooltip="">
+									<cells>
+										<Text id="dateDataId" text="{path: 'recordingDate', type:'sap.ui.model.type.DateTime', formatOptions: {format: 'yMd'}}"/>
+										<Text id="ojectDataId" text="{project/code}"/>
+										<Text id="companyDataId" text="{company/companyName}"/>
+										<ObjectNumber id="quantityDataId"
+											number="{ path:'quantity', type: 'sap.ui.model.type.Float', formatOptions: {showMeasure: false}, formatter: '.formatter.currencyValue'}"/>
+										<ObjectNumber id="durationDataId"
+											number="{ path:'netDuration', type: 'sap.ui.model.type.Float', formatOptions: {showMeasure: false}, formatter: '.formatter.hoursToHoursMinutes'}"/>
+										<ObjectNumber id="plannedPerformanceDataId"
+											number="{ path:'productivityPlan', type: 'sap.ui.model.type.Float', formatOptions: {showMeasure: false}, formatter: '.formatter.currencyValue'}"/>
+										<ObjectNumber id="performanceDataId" number="{ parts: [{path:'quantity'}, {path:'netDuration'}], formatter: '.formatter.productivity'}"
+											state="{ parts: [ {path: 'productivityPlan'}, {path: 'quantity'}, {path: 'netDuration'} ], formatter: '.formatter.productivityState' }"/>
+										<Text id="crewSizeDataId" text="{path: 'headCount', type:'sap.ui.model.type.Integer'}"/>
+										<ObjectNumber id="perHeadPerformanceDataId"
+											number="{ parts: [{path:'quantity'}, {path:'netDuration'}, {path:'headCount'}], formatter: '.formatter.productivityPerHead'}"
+											state="{ parts: [ {path: 'productivityPlan'}, {path: 'quantity'}, {path: 'netDuration'} ], formatter: '.formatter.productivityState' }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+				</items>
+			</IconTabBar>
+		</semantic:content>
+		<!--
+		<semantic:addAction>
+			<semantic:AddAction id="addRecipe" press=".onAddRecipe"/>
+		</semantic:addAction>
+		-->
+		<semantic:deleteAction>
+			<semantic:DeleteAction id="deleteRecipe" press=".onDeleteRecipe"/>
+		</semantic:deleteAction>
+		<semantic:copyAction>
+			<semantic:CopyAction id="copyRecipe" press=".onCopyRecipe"/>
+		</semantic:copyAction>
+		<semantic:editAction>
+			<semantic:EditAction id="editRecipe" press=".onEditRecipe"/>
+		</semantic:editAction>
+		<!--Semantic ShareMenu Buttons-->
+		<semantic:sendEmailAction>
+			<semantic:SendEmailAction id="shareEmail" press=".onSendEmailPress"/>
+		</semantic:sendEmailAction>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device&gt;/system/phone} &amp;&amp; !${appView&gt;/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device&gt;/system/phone} &amp;&amp; ${appView&gt;/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

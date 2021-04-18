@@ -1,0 +1,501 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns:l="sap.ui.layout" xmlns="sap.m" xmlns:semantic="sap.f.semantic"
+	controllerName="cockpit.Cockpit.controller.Task" xmlns:core="sap.ui.core">
+	<semantic:SemanticPage id="taskPage" busy="{taskView>/busy}" busyIndicatorDelay="{taskView>/delay}">
+		<semantic:titleHeading>
+			<Title text="{taskName} ({number})"/>
+		</semantic:titleHeading>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction text="{path: 'status', formatter: '.formatter.statusButtonText'}" enabled="{= ${status} !== 5 ? true : false}"
+				press="onTaskStatePress" tooltip="{path: 'status', formatter: '.formatter.statusButtonTooltip'}"/>
+		</semantic:titleMainAction>
+		<semantic:titleCustomTextActions>
+			<Button id="startStopButton" icon="{path: 'status', formatter: '.formatter.startStopIconFormatter'}" enabled="true"
+				visible="{= ${status} === 2 || ${status} === 3 ? true : false}" press="onStartStopPressed"
+				tooltip="{path: 'status', formatter: '.formatter.startStopButtonTooltip'}"/>
+			<Button id="editQuantsDates" type="Ghost" icon="sap-icon://edit" press="handleStartQuantityEdit" tooltip="{i18n>tooltipEditPerformance}"/>
+			<Button id="refreshButton" icon="sap-icon://refresh" press=".onRefresh" visible="true" enabled="true" tooltip="{i18n>tooltipRefresh}"/>
+		</semantic:titleCustomTextActions>
+		<semantic:headerContent>
+			<ObjectHeader title="{path: 'shortText'}" showTitleSelector="false"
+				number="{parts: [{path: 'taskView>/cumulativeQuantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}, {path: 'i18n>ofTotal' }, {path: 'quantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}]} "
+				numberUnit="{path: 'UoM/code' }">
+				<ObjectAttribute title="{i18n>taskLocation}" text="{location/code} {location/description}"/>
+				<ObjectAttribute title="{i18n>taskDiscipline}" text="{discipline/code} {discipline/description}"/>
+				<ObjectAttribute id="shiftAttribute" title="{i18n>taskShiftName}" text="{shift/code}"/>
+				<statuses>
+					<ObjectStatus title="{i18n>taskIconTabPerformanceTitle}" text="{KPI}" state="{path: 'KPI', formatter: '.formatter.stateFormatter'}"
+						icon="{path: 'KPI', formatter: '.formatter.iconFormatter'}" visible="{= ${status} > 1 ? true : false}"/>
+					<ProgressIndicator class="sapUiNoMarginBottom" width="50%" percentValue="{= ${taskView>/cumulativeQuantity} / ${quantity} * 100}"
+						displayValue="{parts: [{path: 'taskView>/cumulativeQuantity'}, {path: 'quantity'}], formatter: '.formatter.progress'} %" showValue="true"
+						state="{path: 'KPI', formatter: '.formatter.stateFormatter'}" visible="{= ${status} > 1 ? true : false}" displayOnly="true"/>
+					<ObjectStatus class="sapMObjectStatusLarge" text="{path: 'status', formatter: '.formatter.statusTextFormatter'}"
+						state="{= ${status} === 3 ? 'Error': ${status} === 5 ? 'Success' : 'None'}"
+						icon="{path: 'status', formatter:'.formatter.taskIconFormatter'}"/>
+				</statuses>
+			</ObjectHeader>
+		</semantic:headerContent>
+		<semantic:content>
+			<IconTabBar id="taskIconTabBar" visible="true" expandable="true" expanded="true" applyContentPadding="true" backgroundDesign="Solid"
+				headerBackgroundDesign="Solid" enableTabReordering="true" headerMode="Inline" tabDensityMode="Compact">
+				<items>
+					<IconTabFilter id="taskIconTabFilterPerformance" text="{i18n>taskIconTabPerformanceTitle}" icon="sap-icon://kpi-corporate-performance"
+						iconColor="{= ${KPI} >= 1.000 ? 'Positive' : ${KPI} > 0.900 ? 'Critical' : 'Negative'}">
+						<Table alternateRowColors="true">
+							<headerToolbar>
+								<Toolbar>
+									<content>
+										<Title text="{i18n>taskPerformanceTitle}"/>
+									</content>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text=""/>
+								</Column>
+								<Column hAlign="Right">
+									<Label text="{i18n>taskPlanned}"/>
+								</Column>
+								<Column hAlign="Right">
+									<Label text="{i18n>taskCurrent}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskMeasurementQuantity} [{path: 'UoM/code'}]"/>
+										<Text text="{ path:'quantity', type:'sap.ui.model.type.Float', formatOptions: { decimals: 3 } }"/>
+										<Text text="{taskView>/cumulativeQuantity}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskProductivity} [{path: 'UoM/code'}{i18n>UoMperHr}]"/>
+										<Text text="{parts: [{path:'plannedProductivity'}, {path: 'productivityFactor'}], formatter: '.formatter.numberProduct'}"/>
+										<Text text="{path:'currentProductivity', type:'sap.ui.model.type.Float', formatter: '.formatter.numberUnit'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskKPI}"/>
+										<Text text="1.000"/>
+										<Text text="{path: 'KPI', formatter: '.formatter.numberUnit'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskStartDate}"/>
+										<Text text="{path:'plannedStart', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+										<Text text="{path:'actualStart', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskEndDate}"/>
+										<Text text="{path:'plannedEnd', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+										<Text id="estimatedEnd" text="{path:'estimatedEnd', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskStopDuration} [{i18n>hoursMinutes}]"/>
+										<Text text="00:00"/>
+										<Text id="actualStopDuration"
+											text="{parts: [{path:'stopDuration'}, {path: 'stoppedAt'}, {path: 'status'}], formatter: '.formatter.stopDurationTillNow'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskNetDuration} [{i18n>hoursMinutes}]"/>
+										<Text
+											text="{parts: [{path:'quantity'}, {path:'plannedProductivity'}, {path:'productivityFactor'}], formatter: '.formatter.plannedNetDuration'}"/>
+										<Text text="{parts: [{path:'quantity'}, {path:'currentProductivity'}], formatter: '.formatter.currentNetDuration'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>waitDuration} [{i18n>waitTimeUnit}]"/>
+										<Text id="recipeWaitDuration" text="{path:'recipe/waitDuration', formatter: '.formatter.dhmFromMsAsString'}"/>
+										<Text text="{path:'waitDuration', formatter: '.formatter.dhmFromMsAsString'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<!-- items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskLabourHours} [{i18n>hoursMinutes}]"/>
+										<Text text="{path: 'taskView>/plannedLabourHours', formatter: '.formatter.hoursToHoursMinutes'}"/>
+										<Text text="{path: 'taskView>/actualLabourHours', formatter: '.formatter.hoursToHoursMinutes'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskLabourHoursPerUoM} {path: 'UoM/code'}"/>
+										<Text text="{parts: [{path: 'taskView>/plannedLabourHours'}, {path: 'quantity'}], formatter: '.formatter.labourHoursPerUoM'}"/>
+										<Text
+											text="{parts: [{path: 'taskView>/actualLabourHours'}, {path: 'taskView>/cumulativeQuantity'}], formatter: '.formatter.labourHoursPerUoM'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskLabourCost} [{taskView>/currency}]"/>
+										<Text text="{taskView>/plannedLabourCost}"/>
+										<Text text="{taskView>/actualLabourCost}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskLabourCostPerUoM} {path: 'UoM/code'}"/>
+										<Text text="{parts: [{path: 'taskView>/plannedLabourCost'}, {path: 'quantity'}], formatter: '.formatter.labourCostPerUoM'}"/>
+										<Text
+											text="{parts: [{path: 'taskView>/actualLabourCost'}, {path: 'taskView>/cumulativeQuantity'}], formatter: '.formatter.labourCostPerUoM'}"/>
+									</cells>
+								</ColumnListItem>
+							</items -->
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter text="{i18n>taskIconTabMeasurementsTitle}" count="{taskView>/countMeasurements}" icon="sap-icon://measurement-document">
+						<Table id="measurementList" items="{ path: 'measurements', sorter: {path: 'measurementDateTime', type:'sap.ui.model.type.Date'}}"
+							noDataText="{i18n>taskMeasurementListNoData}" alternateRowColors="true" updateFinished="onMeasurementListUpdateFinished"
+							includeItemInSelection="true">
+							<headerToolbar>
+								<Toolbar id="measurementItemsToolbar">
+									<Title id="taskMeasurementItemsHeader" text="{taskView>/measurementItemListTitle}"/>
+									<ToolbarSpacer/>
+									<Button id="addMeasurementButton" icon="sap-icon://add" type="Default" enabled="{= ${status} === 2 ? true : false}"
+										tooltip="{i18n>addMeasurement}" press="onAddMeasurement"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>DateTimeLabel}"/>
+								</Column>
+								<Column hAlign="End">
+									<Label text="{i18n>quantityLabel}"/>
+								</Column>
+								<Column hAlign="End">
+									<Label text="{i18n>measurementHoursLabel}"/>
+								</Column>
+								<Column hAlign="End">
+									<Label text="{i18n>productivityLabel}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onPressMeasurement">
+									<cells>
+										<Text text="{path: 'measurementDateTime', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+										<Text text="{measurementQuantity}"/>
+										<Text text="{path: 'netDuration', formatter: '.formatter.hoursToHoursMinutes'}"/>
+										<Text text="{parts: [{path: 'measurementQuantity'}, {path: 'netDuration'}], formatter: '.formatter.numberDivision'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<swipeContent>
+								<Button icon="sap-icon://delete" type="Reject" tooltip="{i18n>deleteMeasurementTooltip}" press="handleDeleteMeasurement"/>
+							</swipeContent>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="taskIconTabFilterWorkers" text="{i18n>taskIconTabWorkersTitle}" count="{taskView>/countLabour}" icon="sap-icon://group">
+						<Toolbar>
+							<Title text="{i18n>foremanLabel} {supervisor/lastName} {supervisor/firstName}" level="H3"/>
+							<ToolbarSpacer/>
+							<Button id="laborAnalytics" type="Ghost" visible="{= ${taskView>/countCrews} + ${taskView>/countWorkers} > 0 ? true : false}"
+								icon="sap-icon://vertical-bar-chart" tooltip="{i18n>workerChartButtonTooltip}" press="onLaborChart"/>
+							<ToolbarSeparator visible="{= ${taskView>/countCrews} + ${taskView>/countWorkers} > 0 ? true : false}"/>
+							<Button id="addEditForeman" type="Ghost" icon="sap-icon://add" press="onAddEditForeman" tooltip="{i18n>taskAddForeman}"/>
+							<Button id="removeForeman" type="Ghost" icon="sap-icon://negative" press="onRemoveForeman" enabled="{= ${supervisor_ID} ? true : false}"
+								tooltip="{i18n>taskRemoveForemanTooltip}"/>
+						</Toolbar>
+						<Table id="taskCrewsList" width="auto"
+							items="{path: 'crews', parameters: {expand: 'crew, crew/chargeHand, crew/crewMembers, crew/crewMembers/profession, crew/crewMembers/profession/discipline, crew/crewMembers/experience, crew/crewMembers/wageClass'}}"
+							mode="MultiSelect" selectionChange=".onCrewSelectionChange" includeItemInSelection="true" noDataText="{i18n>taskCrewListNoData}"
+							alternateRowColors="true" updateFinished="onCrewListUpdateFinished">
+							<headerToolbar>
+								<Toolbar>
+									<content>
+										<Title text="{taskView>/crewItemListTitle}"/>
+										<ToolbarSpacer/>
+										<Button id="addCrews" type="Default" icon="sap-icon://add" press="onAddCrew" tooltip="{i18n>taskAddCrew}"/>
+										<Button id="removeCrews" type="Default" icon="sap-icon://negative" press="onRemoveCrew" enabled="{taskView>/crewSelected}"
+											tooltip="{i18n>taskRemoveCrew}"/>
+									</content>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>taskCrewName}"/>
+								</Column>
+								<Column hAlign="Center">
+									<Label text="{i18n>headCount}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskChargeHand}"/>
+								</Column>
+								<Column hAlign="End">
+									<Label text="{i18n>clashColumnHeader}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="displayCrewMembers">
+									<cells>
+										<Text text="{crew/crewName} ({crew/crewNumber})" tooltip="{path: 'crew/crewMembers', formatter: '.crewMembersFormatter'}"/>
+										<Text text="{path: 'crew/crewMembers', formatter: '.crewMembersHeadCount'}"/>
+										<Text text="{crew/chargeHand/lastName} {crew/chargeHand/firstName}"/>
+										<Button id="showCrewClash" icon="sap-icon://company-view" press="onShowCrewClash" enabled="false" tooltip="Show over allocation"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+						<Table id="taskWorkersList" width="auto"
+							items="{path: 'workers', parameters: {expand: 'worker, worker/profession, worker/profession/discipline, worker/experience, worker/wageClass'}, sorter: {path: 'worker/lastName'}}"
+							mode="MultiSelect" selectionChange=".onWorkerSelectionChange" includeItemInSelection="true" noDataText="{i18n>taskWorkerListNoData}"
+							alternateRowColors="true" updateFinished="onWorkerListUpdateFinished">
+							<headerToolbar>
+								<Toolbar>
+									<content>
+										<Title text="{taskView>/workerItemListTitle}"/>
+										<ToolbarSpacer/>
+										<Button id="addWorkers" type="Default" icon="sap-icon://add" press="onAddWorker" tooltip="{i18n>tooltipAddWorker}"/>
+										<Button id="removeWorkers" type="Default" icon="sap-icon://negative" press="onRemoveWorker" enabled="{taskView>/workerSelected}"
+											tooltip="{i18n>tooltipRemoveWorker}"/>
+									</content>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>name}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>profession}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>discipline}"/>
+								</Column>
+								<Column hAlign="End">
+									<Label text="{i18n>clashColumnHeader}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active">
+									<cells>
+										<Text text="{worker/lastName} {worker/firstName}"/>
+										<Text text="{worker/profession/description} {worker/experience/code}"/>
+										<Text text="{worker/profession/discipline/code}"/>
+										<Button id="showWorkerClash" icon="sap-icon://company-view" press="onShowWorkerClash" enabled="false" tooltip="Show over allocation"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="taskIconTabFilterMaterial" text="{i18n>taskIconTabMaterialTitle}" showAll="false" icon="sap-icon://product"
+						iconColor="Default" iconDensityAware="true" visible="true" design="Vertical">
+						<HBox>
+							<Label text="{i18n>comingSoonText}"/>
+						</HBox>
+					</IconTabFilter>
+					<IconTabFilter id="taskIconTabFilterEquipment" text="{i18n>taskIconTabEquipmentTitle}" icon="sap-icon://inventory">
+						<HBox>
+							<Label text="{i18n>comingSoonText}"/>
+						</HBox>
+					</IconTabFilter>
+					<IconTabFilter id="taskIconTabFilterSub" text="{i18n>taskIconTabSubcontract}" count="" icon="sap-icon://customer-order-entry">
+						<Table alternateRowColors="true">
+							<headerToolbar>
+								<Toolbar>
+									<content>
+										<Title text="{i18n>toolbarTitleSubby} [{taskView>/currency}]"/>
+										<ToolbarSpacer/>
+										<Button id="deleteSubby" type="Default" icon="sap-icon://delete" press="deleteSubby" tooltip="{i18n>delete}"
+											enabled="{= ${taskView>/subcontractEditMode} ? false : true}"/>
+										<Button id="saveSubby" type="Default" icon="{= ${taskView>/subcontractEditMode} ? 'sap-icon://save' : 'sap-icon://edit'}"
+											press="editSaveSubby" tooltip="{i18n>edit}"/>
+									</content>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>company}"/>
+								</Column>
+								<Column hAlign="Right" width="15%" minScreenWidth="Tablet" demandPopin="true">
+									<Label text="{i18n>unitRate}"/>
+								</Column>
+								<Column hAlign="Right" width="20%" minScreenWidth="Tablet" demandPopin="true">
+									<Label text="{i18n>plannedCost}"/>
+								</Column>
+								<Column hAlign="Right" width="20%" minScreenWidth="Tablet" demandPopin="true">
+									<Label text="{i18n>actualCost}"/>
+								</Column>
+								<Column hAlign="Right" width="15%" minScreenWidth="Tablet" demandPopin="true">
+									<Label text="{i18n>lumpSum}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Select id="selectSubby" forceSelection="true" change="handleSubbyChange"
+											items="{ path: '/CompaniesForProjects' , parameters: {expand: 'discipline, company'}, sorter: { path: 'discipline/code' } }"
+											selectedKey="{company_ID}" enabled="{taskView>/subcontractEditMode}">
+											<core:Item key="{ID}" text="{discipline/code} {company/companyName}"/>
+										</Select>
+										<Input id="priceInput" value="{ path:'price', type:'sap.ui.model.type.Float', formatOptions: { decimals: 3 } }" type="Number"
+											enabled="{taskView>/subcontractEditMode}" textAlign="End" change="onPriceChange" liveChange="onPriceEdit"/>
+										<Text id="plannedSubCost" text="{parts: [{path: 'price' }, {path: 'quantity' }], formatter: '.formatter.numberProduct' }"/>
+										<Text id="actualSubCost"
+											text="{parts: [{path: 'price' }, {path: 'taskView>/cumulativeQuantity' }, {path: 'quantity'}, {path: 'lumpSum'}], formatter: '.formatter.numberProductForActualSubCost' }"/>
+										<CheckBox id="lsCheckBox" selected="{lumpSum}" enabled="{taskView>/subcontractEditMode}" select="onLumpSumChanged"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="taskIconTabFilterQuality" text="{i18n>taskIconTabProblemsQualityTitle}" count="{taskView>/countQualityCards}"
+						icon="sap-icon://approvals">
+						<Table id="taskQualityList"
+							items="{path:'problems', parameters: {expand: 'severity, quality'}, filters: {path: 'isQuality', operator: 'EQ', value1: true}, sorter:{path:'problemDateTime', descending:true}}"
+							noDataText="{i18n>taskProblemListQualityNoData}" alternateRowColors="true" includeItemInSelection="true"
+							updateFinished="onQualityListUpdateFinished">
+							<headerToolbar>
+								<Toolbar id="qualityToolbar">
+									<Title id="qualityTitle" text="{taskView>/qualityItemListTitle}"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Default" tooltip="{i18n>taskAddQualityTooltip}" press="onAddQuality"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>taskProblemsDateTime}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskProblemsDescription}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskProblemsTypeDescription}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskProblemsSeverity}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onEditQuality">
+									<cells>
+										<Text text="{path: 'problemDateTime', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+										<Text text="{shortText}"/>
+										<Text text="{path: 'quality/description', type:'sap.ui.model.type.String'}"/>
+										<Text text="{path: 'severity/description', type:'sap.ui.model.type.String'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="taskIconTabFilterProblems" text="{i18n>taskIconTabProblemsProblemsTitle}" count="{taskView>/countProblemCards}"
+						icon="sap-icon://quality-issue">
+						<Table id="taskProblemsList"
+							items="{path:'problems', parameters: {expand: 'severity, problem'}, filters: {path: 'isProblem', operator: 'EQ', value1: true}, sorter:{path:'problemDateTime', descending:true}}"
+							noDataText="{i18n>taskProblemListNoData}" alternateRowColors="true" includeItemInSelection="true"
+							updateFinished="onProblemListUpdateFinished">
+							<headerToolbar>
+								<Toolbar id="problemToolbar">
+									<Title id="problemTitle" text="{taskView>/problemItemListTitle}"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Default" tooltip="{i18n>taskAddProblemTooltip}" press="onAddProblem"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>taskProblemsDateTime}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskProblemsDescription}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskProblemsTypeDescription}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskProblemsSeverity}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onEditProblem">
+									<cells>
+										<Text text="{path: 'problemDateTime', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+										<Text text="{shortText}"/>
+										<Text text="{path: 'problem/description', type:'sap.ui.model.type.String'}"/>
+										<Text text="{path: 'severity/description', type:'sap.ui.model.type.String'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="taskIconTabFilterHnS" text="{i18n>taskIconTabProblemsHSTitle}" count="{taskView>/countHnSCards}"
+						icon="sap-icon://wounds-doc">
+						<Table id="taskHnSList"
+							items="{path:'problems', parameters: {expand: 'severity, HealthandSafety'}, filters: {path: 'isHnS', operator: 'EQ', value1: true}, sorter:{path:'problemDateTime', descending:true}}"
+							noDataText="{i18n>taskProblemListHSNoData}" alternateRowColors="true" includeItemInSelection="true" updateFinished="onHnSListUpdateFinished">
+							<headerToolbar>
+								<Toolbar id="HnSToolbar">
+									<Title id="HnSTitle" text="{taskView>/HnSItemListTitle}"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Default" tooltip="{i18n>taskAddHnSTooltip}" press="onAddHnS"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>taskProblemsDateTime}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskProblemsDescription}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskProblemsTypeDescription}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskProblemsSeverity}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onEditHnS">
+									<cells>
+										<Text text="{path: 'problemDateTime', type:'sap.ui.model.type.Date', formatOptions: {format: 'yMdhm'}}"/>
+										<Text text="{shortText}"/>
+										<Text text="{path: 'HealthandSafety/description', type:'sap.ui.model.type.String'}"/>
+										<Text text="{path: 'severity/description', type:'sap.ui.model.type.String'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+				</items>
+			</IconTabBar>
+		</semantic:content>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseTaskPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

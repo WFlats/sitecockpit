@@ -1,0 +1,32 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:u="sap.ui.unified">
+	<u:Menu>
+		<u:MenuItem text="{i18n>addButtonText}" enabled="false" select="onAddTask"/>
+		<u:MenuItem text="{i18n>editButtonText}" enabled="false" select="editTask"/>
+		<u:MenuItem text="{i18n>deleteButtonText}" enabled="false" select="handleTaskDelete"/>
+		<u:MenuItem text="{i18n>moveItemText}" startsSection="true" enabled="true">
+			<u:Menu>
+				<u:MenuItem text="{i18n>moveToNextShift}" enabled="false" select="toNextShiftStart"/>
+				<u:MenuTextFieldItem label="{i18n>moveByHoursMins}" enabled="false" select="onMoveBy"/>
+			</u:Menu>
+		</u:MenuItem>
+		<u:MenuItem text="{i18n>sequenceItemText}" enabled="true">
+			<u:Menu>
+				<u:MenuItem text="{i18n>sequenceAllTasks} (F9)" startsSection="true" select="sequenceAllTasks"/>
+				<u:MenuItem text="{i18n>sequenceTasks}" select="sequenceSelectedTasks"/>
+				<u:MenuItem text="{i18n>sequenceSameTasks}" select="sequenceSameTasks"/>
+				<u:MenuItem text="{i18n>sequenceRowTasks}" select="sequenceRowTasks"/>
+			</u:Menu>
+		</u:MenuItem>
+		<u:MenuItem text="{i18n>copyMenuItem}" startsSection="true" select="onCopy"/>
+		<u:MenuItem text="{i18n>pasteMenuItem}" select="onPaste"/>
+		<u:MenuItem text="{i18n>createTrains}" startsSection="true" enabled="false" select="createTrains"/>
+		<u:MenuItem text="{i18n>nextStatus}" startsSection="true" enabled="false" select="nextStatus"/>
+		<u:MenuItem text="{i18n>forwardProductivity}" startsSection="true" enabled="false" select="distributeProductivity"/>
+		<u:MenuItem text="{i18n>assignResourcesText}" enabled="true">
+			<u:Menu>
+				<u:MenuItem text="{i18n>assignWorkForce}" startsSection="true" enabled="false" select="addWorkForce"/>
+				<u:MenuItem text="{i18n>assignForeman}" enabled="false" select="addForeman"/>
+			</u:Menu>
+		</u:MenuItem>
+	</u:Menu>
+</core:FragmentDefinition>

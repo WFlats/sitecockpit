@@ -1,0 +1,36 @@
+<mvc:View xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core"
+	controllerName="master.data.MasterData.controller.CreateOrgLevel">
+	<semantic:SemanticPage id="createPage" busy="{createOrgLevelView>/busy}" busyIndicatorDelay="{createOrgLevelView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{createOrgLevelView>/viewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{createOrgLevelView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:deleteAction>
+			<semantic:DeleteAction enabled="{= ${createOrgLevelView>/mode} === 'Edit' ? true : false}" press=".onDelete"/>
+		</semantic:deleteAction>
+		<semantic:closeAction>
+			<semantic:CloseAction press=".onCancel"/>
+		</semantic:closeAction>
+		<semantic:content>
+			<HBox displayInline="true">
+				<f:SimpleForm id="orgLevelForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+					adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="false">
+					<core:Title text="{i18n>titleOrgLevel}"/>
+					<Label id="orgLevelIDLabel" text="{i18n>labelOrgLevel}" required="true" labelFor="orgLevelID"/>
+					<Input id="orgLevelID" value="{orgLevel}" type="Number" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+						suggestionItems="{/OrganisationLevels}">
+						<suggestionItems>
+							<core:Item id="suggestionItemID" text="{orgLevel}"/>
+						</suggestionItems>
+					</Input>
+					<Label id="descriptionLabel" text="{i18n>labelDescription}" required="true" labelFor="description"/>
+					<Input id="description" value="{description}" maxLength="50" showSuggestion="false" showValueHelp="false"
+						liveChange="_validateSaveEnablement"/>
+				</f:SimpleForm>
+			</HBox>
+		</semantic:content>
+	</semantic:SemanticPage>
+</mvc:View>

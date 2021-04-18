@@ -1,0 +1,80 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:dnd="sap.ui.core.dnd"
+	controllerName="project.data.ProjectData.controller.Workers" xmlns:html="http://www.w3.org/1999/xhtml">
+	<semantic:SemanticPage id="crewsPage" busy="{workersView>/busy}" busyIndicatorDelay="{workersView>/delay}">
+		<semantic:titleHeading>
+			<Title id="workerListTitleId" text="{workersView>/availableWorkersListTitle}" titleStyle="H3" level="H3"/>
+		</semantic:titleHeading>
+		<semantic:headerContent>
+			<HBox>
+				<VBox class="sapUiSmallMarginEnd">
+					<Label text="Deployment Start" labelFor="DPStart"/>
+					<DatePicker id="DPStart" width="auto" change="handleChange" class="sapUiSmallMarginBottom"/>
+				</VBox>
+				<VBox>
+					<Label text="Deployment End" labelFor="DPEnd"/>
+					<DatePicker id="DPEnd" width="auto" change="handleChange" class="sapUiSmallMarginBottom"/>
+				</VBox>
+			</HBox>
+		</semantic:headerContent>
+		<semantic:content>
+			<Table id="workersList" width="auto"
+				items="{path: '/Persons', parameters: {expand: 'profession, profession/discipline, experience, company, deployment'}, filters: {path: 'deployment_ID', operator: 'EQ', value1: null}, sorter:[{path: 'company/companyName', group: true}, {path:'lastName'}]}"
+				mode="MultiSelect" updateFinished=".onWorkerListUpdateFinished" selectionChange=".onWorkersSelectionChange" includeItemInSelection="true"
+				noDataText="{i18n>noWorkersAvailableText}" busyIndicatorDelay="{workersView>/delay}" rememberSelections="false">
+				<headerToolbar>
+					<OverflowToolbar id="headerToolbarId">
+						<ToolbarSpacer id="spacerId"/>
+						<SearchField id="searchField" showRefreshButton="true" tooltip="{i18n>workerSearchByProfessionTooltip}"
+							placeholder="{i18n>placeholderSearchByProfession}" search=".onSearch" width="auto">
+							<layoutData>
+								<OverflowToolbarLayoutData minWidth="150px" maxWidth="240px" shrinkable="true" priority="NeverOverflow"/>
+							</layoutData>
+						</SearchField>
+						<ToolbarSeparator/>
+						<Button id="addWorkersButton" icon="sap-icon://add" press="onDeployWorkers" enabled="{workersView>/selected}"
+							tooltip="{i18n>assignWorkersTooltip}"/>
+					</OverflowToolbar>
+				</headerToolbar>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<ObjectIdentifier title="{lastName}" text="{firstName}"/>
+							<Text text="{profession/description}"/>
+							<Text text="{profession/discipline/code}"/>
+							<Text text="{experience/code}"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+				<columns>
+					<Column>
+						<Text text="{i18n>name}"/>
+					</Column>
+					<Column >
+						<Text text="{i18n>crewMemberListProfession}"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true" hAlign="Center">
+						<Text text="{i18n>crewMemberListDiscipline}"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true" hAlign="Center">
+						<Text text="{i18n>crewMemberListExperience}"/>
+					</Column>
+				</columns>
+				<dragDropConfig>
+					<dnd:DragInfo id="dragWorkerID" groupName="availableToDeployed" sourceAggregation="items"/>
+					<dnd:DropInfo id="dropWorkerID" groupName="deployedToAvailable" drop="onRemoveWorker"/>
+				</dragDropConfig>
+			</Table>
+		</semantic:content>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeButton" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

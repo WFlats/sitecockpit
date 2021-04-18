@@ -1,0 +1,73 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<ViewSettingsDialog confirm=".onConfirmViewSettingsDialog" cancel=".onCancelViewSettingsDialog" resetFilters=".onResetFilters"
+		class="sapUiResponsiveMargin">
+		<filterItems>
+			<ViewSettingsCustomItem id="idCustomFilterItem1" text="Status" key="myFilter">
+				<customControl>
+					<RadioButtonGroup id="radioButtons" columns="1" select="handleTaskStatusChange" selectedIndex="0"
+						class="sapUiLargeMarginBegin sapUiLargeMarginTop">
+						<buttons>
+							<RadioButton id="RB0" text="{i18n>statusListAny}"/>
+							<RadioButton id="RB1" text="{i18n>statusListPlanned}"/>
+							<RadioButton id="RB2" text="{i18n>statusListCommitted}"/>
+							<RadioButton id="RB3" text="{i18n>statusListStarted}"/>
+							<RadioButton id="RB4" text="{i18n>statusListStopped}"/>
+							<RadioButton id="RB5" text="{i18n>statusListCompleted}"/>
+							<RadioButton id="RB6" text="{i18n>statusListApproved}"/>
+						</buttons>
+					</RadioButtonGroup>
+				</customControl>
+			</ViewSettingsCustomItem>
+			<ViewSettingsCustomItem id="idCustomFilterItem2" text="{i18n>productivityFilterLabel}" key="productivity">
+				<customControl>
+					<RangeSlider id="productivitySlider" showAdvancedTooltip="true" range="0,200" min="0" max="200" showHandleTooltip="false"
+						inputsAsTooltips="true" class="sapUiLargeMarginTop" change="onProductivityRangeChange"/>
+				</customControl>
+			</ViewSettingsCustomItem>
+			<ViewSettingsCustomItem id="idCustomFilterItem3" text="{i18n>filterDisciplinesLabel}" key="disciplines">
+				<customControl>
+					<MultiComboBox id="disciplneComboBox" selectionFinish="handleDisciplineSelectionFinish" class="sapUiMediumMarginEnd"
+						items="{ path: '/Disciplines', sorter: { path: 'code', descending: false } }" placeholder="Disciplines">
+						<core:Item key="{ID}" text="{code} - {description}"/>
+					</MultiComboBox>
+				</customControl>
+			</ViewSettingsCustomItem>
+			<ViewSettingsCustomItem id="idCustomFilterItem4" text="{i18n>filterCompaniesLabel}" key="companies">
+				<customControl>
+					<MultiComboBox id="companyComboBox" selectionFinish="handleCompanySelectionFinish" class="sapUiMediumMarginEnd"
+						items="{ path: '/CompaniesForProjects', parameters: {expand: 'company, discipline'}, sorter: { path: 'company/companyName', descending: false } }"
+						placeholder="Companies">
+						<core:Item key="{company_ID}" text="{company/companyName} {discipline/code}"/>
+					</MultiComboBox>
+				</customControl>
+			</ViewSettingsCustomItem>
+			<ViewSettingsCustomItem id="idCustomFilterItem5" text="{i18n>filterCrewsLabel}" key="crews">
+				<customControl>
+					<MultiComboBox id="crewsComboBox" selectionFinish="handleCrewSelectionFinish" class="sapUiMediumMarginEnd"
+						items="{ path: '/Crews', parameters: {expand: 'chargeHand'}, sorter: [{ path: 'crewName', descending: false }, {path: 'crewNumber'}] }"
+						placeholder="Crews">
+						<core:Item key="{ID}" text="{crewName} ({crewNumber})"/>
+					</MultiComboBox>
+				</customControl>
+			</ViewSettingsCustomItem>
+			<ViewSettingsCustomItem id="idCustomFilterItem6" text="{i18n>filterWorkersLabel}" key="workers">
+				<customControl>
+					<MultiComboBox id="workersComboBox" selectionFinish="handleWorkerSelectionFinish" class="sapUiMediumMarginEnd"
+						items="{ path: '/Persons', parameters: {expand: 'profession, profession/discipline, experience, deployment'}, sorter: { path: 'lastName', descending: false }}"
+						placeholder="Workers">
+						<core:Item key="{ID}" text="{lastName} {firstName} {profession/description} {experience/code}"/>
+					</MultiComboBox>
+				</customControl>
+			</ViewSettingsCustomItem>
+			<ViewSettingsCustomItem id="idCustomFilterItem7" text="{i18n>filterForemanLabel}" key="foreman">
+				<customControl>
+					<MultiComboBox id="foremanComboBox" selectionFinish="handleForemanSelectionFinish" class="sapUiMediumMarginEnd"
+						items="{ path: '/Persons', parameters: {expand: 'profession, profession/discipline, experience, deployment'}, sorter: { path: 'lastName', descending: false }}"
+						placeholder="Foreman">
+						<core:Item key="{ID}" text="{lastName} {firstName} {profession/description} {experience/code}"/>
+					</MultiComboBox>
+				</customControl>
+			</ViewSettingsCustomItem>
+		</filterItems>
+	</ViewSettingsDialog>
+</core:FragmentDefinition>

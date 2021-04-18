@@ -1,0 +1,101 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m">
+	<l:VerticalLayout class="sapUiContentPadding" width="auto">
+		<l:content>
+			<VBox>
+				<Panel>
+					<Table id="requiredSkillsList" width="auto"
+						items="{path: 'recipe/requiredSkills', parameters: {expand: 'skill, skill/profession, skill/profession/discipline, skill/experience'}, sorter: {path: 'rank'}}"
+						mode="None" selectionChange="" noDataText="{i18n>noSkillsAtRecipe}" alternateRowColors="true"
+						updateFinished="onSkillsListForCrewUpdateFinished">
+						<headerToolbar>
+							<Toolbar>
+								<content>
+									<Title text="{taskView>/skillsForCrewListTitle}"/>
+								</content>
+							</Toolbar>
+						</headerToolbar>
+						<columns>
+							<Column>
+								<Label text="{i18n>profession}"/>
+							</Column>
+							<Column hAlign="Center">
+								<Label text="{i18n>discipline}"/>
+							</Column>
+							<Column hAlign="Center">
+								<Label text="{i18n>experience}"/>
+							</Column>
+						</columns>
+						<items>
+							<ColumnListItem type="Active">
+								<cells>
+									<Text text="{skill/profession/description}"/>
+									<Text text="{skill/profession/discipline/code}"/>
+									<Text text="{skill/experience/code}"/>
+								</cells>
+							</ColumnListItem>
+						</items>
+					</Table>
+				</Panel>
+				<Panel>
+					<Table id="taskAddCrewsList" width="auto"
+						items="{path: '/Crews', parameters: {expand: 'chargeHand, crewMembers, crewMembers/profession, crewMembers/profession/discipline, crewMembers/experience'}, sorter: [{path: 'crewName'}, {path: 'crewNumber'}]}"
+						mode="MultiSelect" selectionChange=".onAddCrewSelectionChange" includeItemInSelection="true" noDataText="{i18n>taskAddCrewListNoData}"
+						alternateRowColors="true" updateFinished="onAddCrewListUpdateFinished" busy="{taskView>/busy}">
+						<headerToolbar>
+							<OverflowToolbar>
+								<content>
+									<Title text="{taskView>/addCrewItemListTitle}"/>
+									<ToolbarSpacer/>
+									<Label text="{i18n>onlyAvailable}"/>
+									<Switch id="availableSwitch" state="false" customTextOn="{i18n>switchOn}" customTextOff="{i18n>switchOff}" change=".onSwitchAvailableCrews">
+										<layoutData>
+											<FlexItemData growFactor="1"/>
+										</layoutData>
+									</Switch>
+								</content>
+							</OverflowToolbar>
+						</headerToolbar>
+						<infoToolbar>
+							<OverflowToolbar id="infoToolbarForCrew" visible="false">
+								<content>
+									<Label text="{i18n>fromDate}"/>
+									<DateTimePicker id="startDatePickerForCrew" dateValue="{plannedStart}" change="onCrewSearchDateChanged">
+										<layoutData>
+											<OverflowToolbarLayoutData minWidth="50px" maxWidth="240px" shrinkable="true" priority="NeverOverflow"/>
+										</layoutData>
+									</DateTimePicker>
+									<Label text="{i18n>untilDate}"/>
+									<DateTimePicker id="endDatePickerForCrew" dateValue="{estimatedEnd}" change="onCrewSearchDateChanged">
+										<layoutData>
+											<OverflowToolbarLayoutData minWidth="50px" maxWidth="240px" shrinkable="true" priority="NeverOverflow"/>
+										</layoutData>
+									</DateTimePicker>
+								</content>
+							</OverflowToolbar>
+						</infoToolbar>
+						<columns>
+							<Column>
+								<Label text="{i18n>taskCrewName}"/>
+							</Column>
+							<Column hAlign="Center">
+								<Label text="{i18n>headCount}"/>
+							</Column>
+							<Column>
+								<Label text="{i18n>taskChargeHand}"/>
+							</Column>
+						</columns>
+						<items>
+							<ColumnListItem type="Active">
+								<cells>
+									<Text text="{crewName} ({crewNumber})" tooltip="{path: 'crewMembers', formatter: '.crewMembersFormatter'}"/>
+									<Text text="{path: 'crewMembers', formatter: '.crewMembersHeadCount'}"/>
+									<Text text="{chargeHand/lastName} {chargeHand/firstName}"/>
+								</cells>
+							</ColumnListItem>
+						</items>
+					</Table>
+				</Panel>
+			</VBox>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

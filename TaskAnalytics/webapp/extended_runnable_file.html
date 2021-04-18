@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta charset="UTF-8">
+
+		<title>Task Analytics</title>
+		
+		<script id="sap-ui-bootstrap" src="https://sapui5.hana.ondemand.com/1.71.23/resources/sap-ui-core.js" data-sap-ui-libs="sap.m" data-sap-ui-theme="sap_belize" data-sap-ui-compatversion="edge" data-sap-ui-resourceroots="{&quot;task.analytics.taskanalytics&quot;: &quot;./&quot;}" data-sap-ui-flexibilityservices="[{&quot;applyConnector&quot;:&quot;PreviewConnector&quot;,&quot;custom&quot;:true,&quot;layers&quot;:[&quot;VENDOR&quot;]}]">
+		</script>
+	<script src="../changes_preview.js"></script>
+
+	<script>(function(){document.addEventListener('load', function(event){
+        	var element = event.target;
+            if( element.id === "OpaFrame"){
+               var opaFrameElementDocument = document.getElementById("OpaFrame").contentWindow.document;
+               var scriptObject = opaFrameElementDocument.createElement("script");
+               scriptObject.type = "text/javascript";
+               scriptObject.innerHTML = "sap.ui.getCore().loadLibrary('sap.ui.fl'); jQuery.getScript('../changes_preview.js')";
+               opaFrameElementDocument.head.appendChild(scriptObject);
+            }
+          },true);})()</script>
+
+
+		<script>
+			sap.ui.getCore().attachInit(function() {
+				new sap.m.Shell({
+					homeIcon: {
+						favicon: "img/P1__Ico16x16.ico"
+					},
+					app: new sap.ui.core.ComponentContainer({
+						height : "100%",
+						name : "task.analytics.taskanalytics"
+					})
+				}).placeAt("content");
+			});
+		</script>
+	</head>
+
+	<body class="sapUiBody" id="content">
+	</body>
+
+</html>

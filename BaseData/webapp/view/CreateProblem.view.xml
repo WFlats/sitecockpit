@@ -1,0 +1,35 @@
+<mvc:View xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core"
+	xmlns:unified="sap.ui.unified" controllerName="base.data.BaseData.controller.CreateProblem">
+	<semantic:SemanticPage id="createPage" busy="{createProblemView>/busy}" busyIndicatorDelay="{createProblemView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{createProblemView>/viewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<VBox id="vBox" class="sapUiSmallMargin">
+				<f:SimpleForm id="problemForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+					adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="false">
+					<Label id="rankLabel" text="{i18n>labelSeverityRank}" required="true" labelFor="rank"/>
+					<Input id="rank" maxLength="3" value="{number}" type="Number" showSuggestion="true" showValueHelp="false"
+						liveChange="_validateSaveEnablement" suggestionItems="{/ProblemTypes}">
+						<suggestionItems>
+							<core:Item id="suggestionItemID" text="{number}"/>
+						</suggestionItems>
+					</Input>
+					<Label id="descriptionLabel" text="{i18n>labelSeverityDescription}" required="true" labelFor="description"/>
+					<TextArea id="description" value="{description}" required="true" width="100%" rows="4" maxLength="50" showExceededText="true"
+						wrapping="None" liveChange="_validateSaveEnablement"></TextArea>
+				</f:SimpleForm>
+			</VBox>
+		</semantic:content>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{createProblemView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:deleteAction>
+			<semantic:DeleteAction enabled="{= ${createProblemView>/mode} === 'Edit' ? true : false}" press=".onDelete"/>
+		</semantic:deleteAction>
+		<semantic:closeAction>
+			<semantic:CloseAction press=".onCancel"/>
+		</semantic:closeAction>
+	</semantic:SemanticPage>
+</mvc:View>

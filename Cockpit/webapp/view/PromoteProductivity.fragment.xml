@@ -1,0 +1,23 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:f="sap.ui.layout.form">
+	<l:VerticalLayout class="sapUiContentPadding">
+		<l:content>
+			<Title text="{i18n>promoteProdTitle} {taskName}"/>
+			<f:SimpleForm id="promoteProdForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="4"
+				labelSpanS="6" adjustLabelSpan="false" emptySpanXL="-1" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+				singleContainerFullSize="false">
+				<Label text="{i18n>plannedProductivityLabel} [{UoM/code} {i18n>UoMperHr}]" labelFor="planProd"/>
+				<Input id="planProd" type="Number" value="{plannedProductivity}" enabled="false" width="67%"/>
+				<Label text="{i18n>productivityFactorLabel}" labelFor="prodFactor"/>
+				<Input id="prodFactor" type="Number" enabled="true" valueLiveUpdate="true" liveChange="onProdFactorChange" width="67%"/>
+				<Label text="{i18n>newProductivityLabel} [{UoM/code} {i18n>UoMperHr}]" labelFor="newProd"/>
+				<Input id="newProd" type="Number" value="{currentProductivity}" enabled="true" valueLiveUpdate="true" liveChange="onNewProdChange"
+					width="67%"/>
+				<Label text="{i18n>increaseEndLabel}" labelFor="endProdPercent"/>
+				<Input id="endProdPercent" type="Number" value="0.00" enabled="true" valueLiveUpdate="true" liveChange="onEndProdPercentageChange"
+					width="67%"/>
+				<Label text="{i18n>endProductivityLabel} [{UoM/code} {i18n>UoMperHr}]" labelFor="endProdPercent"/>
+				<Input id="endProd" type="Number" enabled="true" valueLiveUpdate="true" liveChange="onEndProdChange" width="67%"/>
+			</f:SimpleForm>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

@@ -1,0 +1,13 @@
+{
+	"name": "Cockpit",
+	"description": "",
+	"devDependencies": {
+		"@sap/grunt-sapui5-bestpractice-build": "1.4.1"
+	},
+	"dependencies": {
+		"@sap/approuter": "8.5.4"
+	},
+	"scripts": {
+		"start": "node ./approuter-start.js"
+	}
+}

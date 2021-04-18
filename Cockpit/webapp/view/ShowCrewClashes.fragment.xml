@@ -1,0 +1,49 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m">
+	<l:VerticalLayout class="sapUiContentPadding">
+		<l:content>
+			<VBox>
+				<Table id="crewClashesTaskList" items="{path: 'workforceClashModel>/overlappingTasksOfCrews'}" mode="SingleSelectMaster"
+					selectionChange=".onCrewClashTaskSelectionChange" includeItemInSelection="true" noDataText="" alternateRowColors="true"
+					updateFinished="onCrewClashesListUpdateFinished" busy="{taskView>/busy}" rememberSelections="false">
+					<headerToolbar>
+						<Toolbar>
+							<content>
+								<Title text="{taskView>/crewClashTitle}"/>
+							</content>
+						</Toolbar>
+					</headerToolbar>
+					<columns>
+						<Column>
+							<Label text="{i18n>task}"/>
+						</Column>
+						<Column>
+							<Label text="{i18n>description}"/>
+						</Column>
+						<Column>
+							<Label text="{i18n>location}"/>
+						</Column>
+						<Column hAlign="End">
+							<Label text="{i18n>start}"/>
+						</Column>
+						<Column hAlign="End">
+							<Label text="{i18n>end}"/>
+						</Column>
+					</columns>
+					<items>
+						<ColumnListItem type="Active">
+							<cells>
+								<Text text="{workforceClashModel>taskName} ({workforceClashModel>number})"/>
+								<Text text="{workforceClashModel>shortText}"/>
+								<Text text="{workforceClashModel>location/code} {workforceClashModel>location/description}"/>
+								<Text
+									text="{parts: [{path: 'workforceClashModel>status'}, {path: 'workforceClashModel>plannedStart'}, {path: 'workforceClashModel>actualStart'}], formatter: '.formatter.startDateString'}"/>
+								<Text
+									text="{parts: [{path: 'workforceClashModel>status'}, {path: 'workforceClashModel>plannedEnd'}, {path: 'workforceClashModel>estimatedEnd'}], formatter: '.formatter.endDateString'}"/>
+							</cells>
+						</ColumnListItem>
+					</items>
+				</Table>
+			</VBox>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

@@ -1,0 +1,139 @@
+<mvc:View controllerName="card.Analytics.CardAnalytics.controller.Cards" xmlns:mvc="sap.ui.core.mvc" xmlns:f="sap.f"
+	xmlns:card="sap.f.cards" displayBlock="true" xmlns:m="sap.m" xmlns="sap.suite.ui.microchart">
+	<m:Shell id="shell">
+		<m:App id="app">
+			<m:pages>
+				<m:Page id="page" title="{i18n>title}">
+					<m:headerContent>
+						<m:Button icon="sap-icon://arrow-down" tooltip="{i18n>changeProjectTooltip}" press="selectProject"/>
+					</m:headerContent>
+					<m:content>
+						<m:VBox class="sapUiMediumMargin">
+							<m:Title id="contentTitle" text="" level="H1" textAlign="Center" width="100%"/>
+						</m:VBox>
+						<m:Panel headerText="{i18n>panelHeaderPerformance}" expandable="true" expanded="true">
+							<f:Card class="sapUiMediumMargin" width="300px" height="300px" busy="{cardsView>/busy}">
+								<f:header>
+									<card:Header title="{i18n>productivityCardTitle}" subtitle="{i18n>productivityCardSubTitle}" iconSrc="sap-icon://kpi-corporate-performance"/>
+								</f:header>
+								<f:content>
+									<m:FlexBox width="100%" height="100%" alignItems="Start" justifyContent="SpaceBetween">
+										<m:items>
+											<InteractiveDonutChart id="productivityChart" selectionChanged="onProductivitySelectionChanged">
+												<segments>
+													<InteractiveDonutChartSegment label="" value="" displayedValue=""/>
+												</segments>
+											</InteractiveDonutChart>
+										</m:items>
+									</m:FlexBox>
+								</f:content>
+							</f:Card>
+						</m:Panel>
+						<m:Panel headerText="{i18n>panelHeaderQuality}" expandable="true" expanded="true">
+							<f:Card class="sapUiMediumMargin" width="300px" height="300px" busy="{cardsView>/busy}">
+								<f:header>
+									<card:Header title="{i18n>qualityCardTitle}" subtitle="{i18n>qualityCardSubTitle}" iconSrc="sap-icon://quality-issue"/>
+								</f:header>
+								<f:content>
+									<m:FlexBox width="100%" height="100%" alignItems="Start" justifyContent="SpaceBetween">
+										<m:items>
+											<InteractiveDonutChart id="qualityChart" selectionChanged="onQualitySelectionChanged">
+												<segments>
+													<InteractiveDonutChartSegment label="" value="" displayedValue=""/>
+												</segments>
+											</InteractiveDonutChart>
+										</m:items>
+									</m:FlexBox>
+								</f:content>
+							</f:Card>
+							<f:Card class="sapUiMediumMargin" width="300px" height="300px" busy="{cardsView>/busy}">
+								<f:header>
+									<card:Header title="{i18n>qualityTypeCardTitle}" subtitle="{i18n>qualityTypeCardSubTitle}" iconSrc="sap-icon://quality-issue"/>
+								</f:header>
+								<f:content>
+									<m:FlexBox width="100%" height="100%" alignItems="Start" justifyContent="SpaceBetween">
+										<m:items>
+											<InteractiveDonutChart id="qualityTypeChart" selectionChanged="onQualityTypeSelectionChanged">
+												<segments>
+													<InteractiveDonutChartSegment label="" value="" displayedValue=""/>
+												</segments>
+											</InteractiveDonutChart>
+										</m:items>
+									</m:FlexBox>
+								</f:content>
+							</f:Card>
+						</m:Panel>
+						<m:Panel headerText="{i18n>panelHeaderProblems}" expandable="true" expanded="true">
+							<f:Card class="sapUiMediumMargin" width="300px" height="300px" busy="{cardsView>/busy}">
+								<f:header>
+									<card:Header title="{i18n>problemCardTitle}" subtitle="{i18n>problemCardSubTitle}" iconSrc="sap-icon://lightbulb"/>
+								</f:header>
+								<f:content>
+									<m:FlexBox width="100%" height="100%" alignItems="Start" justifyContent="SpaceBetween">
+										<m:items>
+											<InteractiveDonutChart id="problemChart" selectionChanged="onProblemSelectionChanged">
+												<segments>
+													<InteractiveDonutChartSegment label="" value="" displayedValue=""/>
+												</segments>
+											</InteractiveDonutChart>
+										</m:items>
+									</m:FlexBox>
+								</f:content>
+							</f:Card>
+							<f:Card class="sapUiMediumMargin" width="300px" height="300px" busy="{cardsView>/busy}">
+								<f:header>
+									<card:Header title="{i18n>problemCardTypeTitle}" subtitle="{i18n>problemCardTypeSubTitle}" iconSrc="sap-icon://lightbulb"/>
+								</f:header>
+								<f:content>
+									<m:FlexBox width="100%" height="100%" alignItems="Start" justifyContent="SpaceBetween">
+										<m:items>
+											<InteractiveDonutChart id="problemTypeChart" selectionChanged="onProblemTypeSelectionChanged">
+												<segments>
+													<InteractiveDonutChartSegment label="" value="" displayedValue=""/>
+												</segments>
+											</InteractiveDonutChart>
+										</m:items>
+									</m:FlexBox>
+								</f:content>
+							</f:Card>
+						</m:Panel>
+						<m:Panel headerText="{i18n>panelHeaderHnS}" expandable="true" expanded="true">
+							<f:Card class="sapUiMediumMargin" width="300px" height="300px" busy="{cardsView>/busy}">
+								<f:header>
+									<card:Header title="{i18n>HnSCardTitle}" subtitle="{i18n>HnSCardSubTitle}" iconSrc="sap-icon://wounds-doc"/>
+								</f:header>
+								<f:content>
+									<m:FlexBox width="100%" height="100%" alignItems="Start" justifyContent="SpaceBetween">
+										<m:items>
+											<InteractiveDonutChart id="HnSChart" selectionChanged="onHnSSelectionChanged">
+												<segments>
+													<InteractiveDonutChartSegment label="" value="" displayedValue=""/>
+												</segments>
+											</InteractiveDonutChart>
+										</m:items>
+									</m:FlexBox>
+								</f:content>
+							</f:Card>
+							<f:Card class="sapUiMediumMargin" width="300px" height="300px" busy="{cardsView>/busy}">
+								<f:header>
+									<card:Header title="{i18n>HnSTypeCardTitle}" subtitle="{i18n>HnSTypeCardSubTitle}" iconSrc="sap-icon://wounds-doc"/>
+								</f:header>
+								<f:content>
+									<m:FlexBox width="100%" height="100%" alignItems="Start" justifyContent="SpaceBetween">
+										<m:items>
+											<InteractiveDonutChart id="HnSTypeChart" selectionChanged="onHnSTypeSelectionChanged">
+												<segments>
+													<InteractiveDonutChartSegment label="" value="" displayedValue=""/>
+												</segments>
+											</InteractiveDonutChart>
+										</m:items>
+									</m:FlexBox>
+								</f:content>
+							</f:Card>
+						</m:Panel>
+					</m:content>
+				</m:Page>
+			</m:pages>
+		</m:App>
+	</m:Shell>
+</mvc:View>

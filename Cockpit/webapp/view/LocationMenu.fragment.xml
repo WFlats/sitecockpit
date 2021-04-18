@@ -1,0 +1,9 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:u="sap.ui.unified">
+	<u:Menu id="locationMenu">
+		<u:MenuItem text="{i18n>addMenuText}" enabled="false" select="onAddLocation"/>
+		<u:MenuItem text="{i18n>editButtonText}" enabled="false" select="onEditLocation"/>
+		<u:MenuItem text="{i18n>deleteButtonText}" enabled="false" select="onDeleteLocation"/>
+		<u:MenuItem text="{i18n>copy}" enabled="false" select="onCopyLocation"/>
+		<u:MenuItem text="{i18n>paste}" enabled="false" select="onPasteLocation"/>
+	</u:Menu>
+</core:FragmentDefinition>

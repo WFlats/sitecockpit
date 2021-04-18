@@ -1,0 +1,136 @@
+<mvc:View controllerName="cockpit.Cockpit.controller.Clashes" xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core">
+	<semantic:SemanticPage id="clashesPage" busy="{clashesModel>/busy}" busyIndicatorDelay="{clashesModel>/delay}">
+		<semantic:titleHeading>
+			<Title text="Clashes"/>
+		</semantic:titleHeading>
+		<semantic:headerContent>
+			<ObjectIdentifier title="Space and Resource Overlaps of Tasks" text="Click a row to display the clash in the Planning Board"/>
+		</semantic:headerContent>
+		<semantic:content>
+			<IconTabBar id="clashesTabBar" visible="true" expandable="true" expanded="true" applyContentPadding="true" backgroundDesign="Solid"
+				headerBackgroundDesign="Solid" enableTabReordering="true" headerMode="Inline" tabDensityMode="Compact">
+				<items>
+					<IconTabFilter id="clashesTabFilterSpace" text="Spaces" icon="sap-icon://functional-location" iconColor="Negative">
+						<Table id="clashesSpaceTable" width="auto" items="{path: 'clashModel>spaces'}" mode="SingleSelect"
+							selectionChange=".onClashSpaceSelectionChange" includeItemInSelection="true" noDataText="No space clashes found" alternateRowColors="true"
+							updateFinished="onClashSpacesUpdateFinished">
+							<headerToolbar>
+								<Toolbar>
+									<content>
+										<Title text="Space Clashes"/>
+										<ToolbarSpacer/>
+										<Button id="startSpaceButton" type="Emphasized" text="Go" press="onStartSpaceAnalysis" tooltip="Start clash analysis"/>
+									</content>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="Location"/>
+								</Column>
+								<Column>
+									<Label text="Task1"/>
+								</Column>
+								<Column>
+									<Label text="Task2"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onClashesSpaceSelection">
+									<cells>
+										<ObjectIdentifier title="{clashModel>/spaces/task1.locationCode}" text="{clashModel>/spaces/task1.locationDescription}"/>
+										<ObjectIdentifier title="{clashModel>/spaces/task1.code} ({clashModel>/spaces/task1.number})" text="{clashModel>/spaces/task1.description}"/>
+										<ObjectIdentifier title="{clashModel>/spaces/task2.code} ({clashModel>/spaces/task2.number})" text="{clashModel>/spaces/task2.description}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="clashesTabFilterCrews" text="Crews" icon="sap-icon://citizen-connect" iconColor="Negative">
+						<Table id="clashesCrewsTable" width="auto" items="{path: 'clashModel>crews'}" mode="SingleSelect"
+							selectionChange=".onClashCrewsSelectionChange" includeItemInSelection="true" noDataText="No crew clashes found" alternateRowColors="true"
+							updateFinished="onClashCrewsUpdateFinished">
+							<headerToolbar>
+								<Toolbar>
+									<content>
+										<Title text="Crew Clashes"/>
+										<ToolbarSpacer/>
+										<Button id="startCrewsButton" type="Emphasized" text="Go" press="onStartCrewAnalysis" tooltip="Start clash analysis"/>
+									</content>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="Crew"/>
+								</Column>
+								<Column>
+									<Label text="Task1"/>
+								</Column>
+								<Column>
+									<Label text="Task2"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onClashesSpaceSelection">
+									<cells>
+										<Text text="{clashModel>/crews/crewName} ({clashModel>/crews/crewNumber})"/>
+										<ObjectIdentifier title="{clashModel>/crews/task1.code} ({clashModel>/crews/task1.number})" text="{clashModel>/crews/task1.description}"/>
+										<ObjectIdentifier title="{clashModel>/crews/task2.code} ({clashModel>/crews/task2.number})" text="{clashModel>/crews/task2.description}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="clashesTabFilterWorkers" text="Workers" icon="sap-icon://collaborate" iconColor="Negative">
+						<Table id="clashesWorkersTable" width="auto" items="{path: 'clashModel>workers'}" mode="SingleSelect"
+							selectionChange=".onClashWorkersSelectionChange" includeItemInSelection="true" noDataText="No worker clashes found"
+							alternateRowColors="true" updateFinished="onClashWorkersUpdateFinished">
+							<headerToolbar>
+								<Toolbar>
+									<content>
+										<Title text="Worker Clashes"/>
+										<ToolbarSpacer/>
+										<Button id="startWorkerButton" type="Emphasized" text="Go" press="onStartWorkerAnalysis" tooltip="Start clash analysis"/>
+									</content>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text="Worker"/>
+								</Column>
+								<Column>
+									<Label text="Task1"/>
+								</Column>
+								<Column>
+									<Label text="Task2"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press="onClashesSpaceSelection">
+									<cells>
+										<ObjectIdentifier title="{clashModel>/workers/lastName}" text="{clashModel>/workers/firstName})"/>
+										<ObjectIdentifier title="{clashModel>/workers/task1.code} ({clashModel>/workers/task1.number})"
+											text="{clashModel>/workers/task1.description}"/>
+										<ObjectIdentifier title="{clashModel>/workers/task2.code} ({clashModel>/workers/task2.number})"
+											text="{clashModel>/workers/task2.description}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+				</items>
+			</IconTabBar>
+		</semantic:content>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseRecipePress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

@@ -1,0 +1,225 @@
+{
+	"_version": "1.12.0",
+	"sap.app": {
+		"id": "base.data.BaseData",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"sourceTemplate": {
+			"id": "servicecatalog.connectivityComponentForManifest",
+			"version": "0.0.0"
+		},
+		"dataSources": {
+			"scService": {
+				"uri": "/srv_api/odata/v2/scService/",
+				"type": "OData",
+				"settings": {
+					"localUri": "localService/scService/metadata.xml"
+				}
+			}
+		},
+		"crossNavigation": {
+			"inbounds": {
+				"intent1": {
+					"signature": {
+						"parameters": {},
+						"additionalParameters": "allowed"
+					},
+					"semanticObject": "BaseData",
+					"action": "display",
+					"title": "{{appTitle}}",
+					"subTitle": "{{appDescription}}",
+					"icon": "sap-icon://action-settings"
+				}
+			}
+		}
+	},
+	"sap.platform.cf": {
+		"oAuthScopes": [
+			"$XSAPPNAME.Admin"
+			]
+	},
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+	"sap.ui5": {
+		"flexEnabled": false,
+		"rootView": {
+			"viewName": "base.data.BaseData.view.App",
+			"type": "XML",
+			"async": true,
+			"id": "App"
+		},
+		"dependencies": {
+			"minUI5Version": "1.84.4",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {},
+				"sap.ui.layout": {}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "base.data.BaseData.i18n.i18n"
+				}
+			},
+			"": {
+				"type": "sap.ui.model.odata.v2.ODataModel",
+				"settings": {
+					"defaultOperationMode": "Server",
+					"defaultBindingMode": "OneWay",
+					"defaultCountMode": "Request"
+				},
+				"dataSource": "scService",
+				"preload": true
+			}
+		},
+		"resources": {
+			"css": [{
+				"uri": "css/style.css"
+			}]
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"viewType": "XML",
+				"async": true,
+				"transition": "slide",
+				"viewPath": "base.data.BaseData.view",
+				"controlAggregation": "pages",
+				"controlId": "app",
+				"clearControlAggregation": false
+			},
+			"routes": [{
+				"name": "Selector",
+				"pattern": "",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["Selector"]
+			}],
+			"targets": {
+				"Selector": {
+					"viewType": "XML",
+					"viewName": "Selector",
+					"viewLevel": 1
+				},
+				"Disciplines": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewId": "",
+					"viewName": "Disciplines",
+					"viewLevel": 2
+				},
+				"CreateDiscipline": {
+					"viewType": "XML",
+					"viewName": "CreateDiscipline",
+					"viewLevel": 3
+				},
+				"UoMs": {
+					"viewType": "XML",
+					"viewName": "UoMs",
+					"viewLevel": 2
+				},
+				"CreateUoM": {
+					"viewType": "XML",
+					"viewName": "CreateUoM",
+					"viewLevel": 3
+				},
+				"Experiences": {
+					"viewType": "XML",
+					"viewName": "Experiences",
+					"viewLevel": 2
+				},
+				"CreateExperience": {
+					"viewType": "XML",
+					"viewName": "CreateExperience",
+					"viewLevel": 3
+				},
+				"HnS": {
+					"viewType": "XML",
+					"viewName": "HnS",
+					"viewLevel": 2
+				},
+				"CreateHnS": {
+					"viewType": "XML",
+					"viewName": "CreateHnS",
+					"viewLevel": 3
+				},
+				"Severity": {
+					"viewType": "XML",
+					"viewName": "Severity",
+					"viewLevel": 2
+				},
+				"CreateSeverity": {
+					"viewType": "XML",
+					"viewName": "CreateSeverity",
+					"viewLevel": 3
+				},
+				"Problem": {
+					"viewType": "XML",
+					"viewName": "Problem",
+					"viewLevel": 2
+				},
+				"CreateProblem": {
+					"viewType": "XML",
+					"viewName": "CreateProblem",
+					"viewLevel": 3
+				},
+				"Professions": {
+					"viewType": "XML",
+					"viewName": "Professions",
+					"viewLevel": 2
+				},
+				"CreateProfession": {
+					"viewType": "XML",
+					"viewName": "CreateProfession",
+					"viewLevel": 3
+				},
+				"Quality": {
+					"viewType": "XML",
+					"viewName": "Quality",
+					"viewLevel": 2
+				},
+				"CreateQuality": {
+					"viewType": "XML",
+					"viewName": "CreateQuality",
+					"viewLevel": 3
+				},
+				"Skills": {
+					"viewType": "XML",
+					"viewName": "Skills",
+					"viewLevel": 2
+				},
+				"CreateSkill": {
+					"viewType": "XML",
+					"viewName": "CreateSkill",
+					"viewLevel": 3
+				}
+			}
+		}
+	}
+}

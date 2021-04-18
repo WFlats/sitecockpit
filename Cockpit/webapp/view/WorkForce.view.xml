@@ -1,0 +1,188 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:semantic="sap.f.semantic"
+	controllerName="cockpit.Cockpit.controller.WorkForce" xmlns:html="http://www.w3.org/1999/xhtml">
+	<semantic:SemanticPage id="workForcePage" busy="{workForceView>/busy}" busyIndicatorDelay="{workForceView>/delay}">
+		<semantic:titleHeading>
+			<Title text="Assign Work Force"/>
+		</semantic:titleHeading>
+		<semantic:headerContent>
+			<Table id="requiredSkillsList" width="auto"
+				items="{path: 'recipe/requiredSkills', parameters: {expand: 'skill, skill/profession, skill/profession/discipline, skill/experience'}, sorter: {path: 'rank'}}"
+				mode="None" selectionChange=".onSkillSelect" noDataText="{i18n>noSkillsAtRecipe}" alternateRowColors="true"
+				updateFinished="onSkillsListForWorkForceUpdateFinished">
+				<headerToolbar>
+					<Toolbar>
+						<content>
+							<Title text="{workForceView>/skillsForCrewListTitle}"/>
+							<ToolbarSpacer/>
+							<Button id="clearSkillFilterButton" icon="sap-icon://clear-filter" press=".onClearSkillFilter" enabled="{workForceView>/skillSelected}"
+								tooltip="{i18n>clearSkillFilterTooltip}" visible="{workForceView>/workerTabSelected}"/>
+						</content>
+					</Toolbar>
+				</headerToolbar>
+				<columns>
+					<Column>
+						<Label text="{i18n>profession}"/>
+					</Column>
+					<Column hAlign="Center">
+						<Label text="{i18n>discipline}"/>
+					</Column>
+					<Column hAlign="Center">
+						<Label text="{i18n>experience}"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem type="Active">
+						<cells>
+							<Text text="{skill/profession/description}"/>
+							<Text text="{skill/profession/discipline/code}"/>
+							<Text text="{skill/experience/code}"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</semantic:headerContent>
+		<semantic:content>
+			<IconTabBar id="workForceIconTabBar" visible="true" expandable="true" expanded="true" applyContentPadding="true" backgroundDesign="Solid"
+				headerBackgroundDesign="Solid" enableTabReordering="true" headerMode="Inline" select="onTabSelected">
+				<items>
+					<IconTabFilter id="iconTabFilterCrews" text="{i18n>crews}" count="{workForceView>/crewCount}" showAll="false" icon="" visible="true"
+						design="Vertical">
+						<Table id="addCrewsList" width="auto"
+							items="{path: '/Crews', parameters: {expand: 'chargeHand, crewMembers, crewMembers/profession, crewMembers/profession/discipline, crewMembers/experience'}, sorter: [{path: 'crewName'}, {path: 'crewNumber'}]}"
+							mode="MultiSelect" selectionChange=".onCrewSelectionChange" includeItemInSelection="true" noDataText="{i18n>taskAddCrewListNoData}"
+							alternateRowColors="true" updateFinished="onCrewListUpdateFinished" busy="{workForceView>/busy}">
+							<headerToolbar>
+								<OverflowToolbar>
+									<content>
+										<Title text="{workForceView>/addCrewListTitle}"/>
+										<ToolbarSpacer/>
+										<Label text="{i18n>onlyAvailable}"/>
+										<Switch id="availableSwitch" state="false" customTextOn="{i18n>switchOn}" customTextOff="{i18n>switchOff}" change=".onSwitchAvailableCrews">
+											<layoutData>
+												<FlexItemData growFactor="1"/>
+											</layoutData>
+										</Switch>
+										<Button text="{i18n>assignWorkforce}" enabled="{workForceView>/crewSelected}" type="Emphasized" press="onAddCrew"
+											tooltip="{i18n>assignWorkforceTooltip}"/>
+									</content>
+								</OverflowToolbar>
+							</headerToolbar>
+							<infoToolbar>
+								<OverflowToolbar id="infoToolbarForCrew" visible="false">
+									<content>
+										<Label text="{i18n>fromDate}"/>
+										<DateTimePicker id="startDatePickerForCrew" dateValue="{plannedStart}" change="onCrewSearchDateChanged">
+											<layoutData>
+												<OverflowToolbarLayoutData minWidth="50px" maxWidth="240px" shrinkable="true" priority="NeverOverflow"/>
+											</layoutData>
+										</DateTimePicker>
+										<Label text="{i18n>untilDate}"/>
+										<DateTimePicker id="endDatePickerForCrew" dateValue="{estimatedEnd}" change="onCrewSearchDateChanged">
+											<layoutData>
+												<OverflowToolbarLayoutData minWidth="50px" maxWidth="240px" shrinkable="true" priority="NeverOverflow"/>
+											</layoutData>
+										</DateTimePicker>
+									</content>
+								</OverflowToolbar>
+							</infoToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>taskCrewName}"/>
+								</Column>
+								<Column hAlign="Center">
+									<Label text="{i18n>headCount}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>taskChargeHand}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active">
+									<cells>
+										<Text text="{crewName} ({crewNumber})" tooltip="{path: 'crewMembers', formatter: '.crewMembersFormatter'}"/>
+										<Text text="{path: 'crewMembers', formatter: '.crewMembersHeadCount'}"/>
+										<Text text="{chargeHand/lastName} {chargeHand/firstName}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="iconTabFilterWorkers" text="{i18n>workers}" count="{workForceView>/workerCount}" showAll="false" icon="" visible="true"
+						design="Vertical">
+						<Table id="addWorkersList" width="auto"
+							items="{path: '/Persons', parameters: {expand: 'profession, profession/discipline, experience, deployment'}, sorter: [{path: 'profession/discipline/code', group: '.getDiscipline'}, {path: 'lastName', descending: false}], groupHeaderFactory: '.createGroupHeader'}"
+							mode="MultiSelect" selectionChange="onWorkerSelectionChange" includeItemInSelection="true" noDataText="{i18n>taskAddWorkerListNoData}"
+							alternateRowColors="true" updateFinished="onAddWorkerListUpdateFinished" busy="{workForceView>/busy}">
+							<headerToolbar>
+								<OverflowToolbar>
+									<content>
+										<Title text="{workForceView>/addWorkerListTitle}"/>
+										<ToolbarSpacer/>
+										<Label text="{i18n>onlyAvailableWorkers}"/>
+										<Switch id="dateRangeSwitchWorker" state="false" customTextOn="{i18n>switchOn}" customTextOff="{i18n>switchOff}"
+											change=".onSwitchAvailableWorkers">
+											<layoutData>
+												<FlexItemData growFactor="1"/>
+											</layoutData>
+										</Switch>
+										<Button text="{i18n>assignWorkforce}" enabled="{workForceView>/workerSelected}" type="Emphasized" press="onAddWorker"
+											tooltip="{i18n>assignWorkerTooltip}"/>
+									</content>
+								</OverflowToolbar>
+							</headerToolbar>
+							<infoToolbar>
+								<OverflowToolbar id="infoToolbarWorker" visible="false">
+									<content>
+										<Label text="{i18n>fromDate}"/>
+										<DateTimePicker id="startDatePickerWorker" dateValue="{plannedStart}" change="onWorkerSearchDateChanged">
+											<layoutData>
+												<OverflowToolbarLayoutData minWidth="50px" maxWidth="240px" shrinkable="true" priority="NeverOverflow"/>
+											</layoutData>
+										</DateTimePicker>
+										<Label text="{i18n>untilDate}"/>
+										<DateTimePicker id="endDatePickerWorker" dateValue="{estimatedEnd}" change="onWorkerSearchDateChanged">
+											<layoutData>
+												<OverflowToolbarLayoutData minWidth="50px" maxWidth="240px" shrinkable="true" priority="NeverOverflow"/>
+											</layoutData>
+										</DateTimePicker>
+									</content>
+								</OverflowToolbar>
+							</infoToolbar>
+							<columns>
+								<Column>
+									<Label text="{i18n>addWorkerName}"/>
+								</Column>
+								<Column>
+									<Label text="{i18n>addWorkerProfession}"/>
+								</Column>
+								<Column hAlign="Center">
+									<Label text="{i18n>addWorkerExperience}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active">
+									<cells>
+										<Text text="{lastName} {firstName}"/>
+										<Text text="{profession/description}"/>
+										<Text text="{experience/code}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+				</items>
+			</IconTabBar>
+		</semantic:content>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseWorkForcePress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

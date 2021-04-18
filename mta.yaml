@@ -1,0 +1,210 @@
+ID: SiteCockpit
+_schema-version: '2.1'
+description: mta with all modules
+parameters:
+  deploy_mode: html5-repo
+  config:
+    sizeLimit: 5
+version: 0.0.1
+modules:
+  - name: SiteCockpit_appRouter
+    type: approuter.nodejs
+    path: SiteCockpit_appRouter
+    parameters:
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: SiteCockpit_html5_repo_runtime
+      - name: SiteCockpit-uaa
+      - name: portal_resources_SiteCockpit
+      - name: SiteCockpit-theming
+      - name: srv_api
+        group: destinations
+        properties:
+          forwardAuthToken: true
+          timeout: 120000
+          name: srv_api
+          url: '~{url}'
+  - name: SiteCockpit_ui_deployer
+    type: com.sap.html5.application-content
+    path: SiteCockpit_ui_deployer
+    requires:
+      - name: SiteCockpit_html5_repo_host
+    build-parameters:
+      requires:
+        - name: BaseData
+          artifacts:
+            - './*'
+          target-path: resources/BaseData
+        - name: MasterData
+          artifacts:
+            - './*'
+          target-path: resources/MasterData
+        - name: ProjectData
+          artifacts:
+            - './*'
+          target-path: resources/ProjectData
+        - name: RecipeEditor
+          artifacts:
+            - './*'
+          target-path: resources/RecipeEditor
+        - name: Cockpit
+          artifacts:
+            - './*'
+          target-path: resources/Cockpit
+        - name: SiteRecorder
+          artifacts:
+            - './*'
+          target-path: resources/SiteRecorder
+        - name: CardAnalytics
+          artifacts:
+            - './*'
+          target-path: resources/CardAnalytics
+        - name: LabourTimesheet
+          artifacts:
+            - './*'
+          target-path: resources/LabourTimesheet
+        - name: TaskAnalytics
+          artifacts:
+            - './*'
+          target-path: resources/TaskAnalytics
+  - name: SiteCockpit-db
+    type: hdb
+    path: db
+    parameters:
+      memory: 256M
+      disk-quota: 256M
+    requires:
+      - name: SiteCockpit-db-hdi-container
+  - name: SiteCockpit-srv
+    type: java
+    path: srv
+    parameters:
+      memory: 1024M
+    provides:
+      - name: srv_api
+        properties:
+          url: '${default-url}'
+    requires:
+      - name: SiteCockpit-db-hdi-container
+        properties:
+          JBP_CONFIG_RESOURCE_CONFIGURATION: '[tomcat/webapps/ROOT/META-INF/context.xml: {"service_name_for_DefaultDB" : "~{hdi-container-name}"}]'
+          name: SiteCockpit-uaa
+  - name: BaseData
+    type: html5
+    path: BaseData
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
+  - name: MasterData
+    type: html5
+    path: MasterData
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
+  - name: ProjectData
+    type: html5
+    path: ProjectData
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
+  - name: RecipeEditor
+    type: html5
+    path: RecipeEditor
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
+  - name: Cockpit
+    type: html5
+    path: Cockpit
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
+  - name: SiteRecorder
+    type: html5
+    path: SiteRecorder
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
+  - name: CardAnalytics
+    type: html5
+    path: CardAnalytics
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
+  - name: LabourTimesheet
+    type: html5
+    path: LabourTimesheet
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
+  - name: FLP
+    type: com.sap.portal.content
+    path: FLP
+    parameters:
+      stack: cflinuxfs3
+      memory: 128M
+      buildpack: 'https://github.com/cloudfoundry/nodejs-buildpack/releases/download/v1.6.39/nodejs-buildpack-cflinuxfs3-v1.6.39.zip'
+    requires:
+      - name: portal_resources_SiteCockpit
+      - name: SiteCockpit-uaa
+      - name: SiteCockpit_html5_repo_host
+      - name: SiteCockpit_ui_deployer
+  - name: TaskAnalytics
+    type: html5
+    path: TaskAnalytics
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
+    requires:
+      - name: srv_api
+        group: destinations
+        properties:
+          forwardAuthToken: true
+          timeout: 120000
+          strictSSL: false
+          name: srv_api
+          url: '~{url}'
+resources:
+  - name: SiteCockpit_html5_repo_runtime
+    parameters:
+      service-plan: app-runtime
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+  - name: SiteCockpit_html5_repo_host
+    parameters:
+      service-plan: app-host
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+  - name: SiteCockpit-db-hdi-container
+    type: com.sap.xs.hdi-container
+    properties:
+      hdi-container-name: '${service-name}'
+  - name: SiteCockpit-uaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      path: xs-security.json
+      service-plan: application
+      service: xsuaa
+      config:
+        xsappname: 'SiteCockpit-${space}'
+        tenant-mode: dedicated
+  - name: portal_resources_SiteCockpit
+    parameters:
+      service-plan: standard
+      service: portal
+    type: org.cloudfoundry.managed-service
+  - name: SiteCockpit-theming
+    parameters:
+      service: theming
+      service-plan: standard
+    type: org.cloudfoundry.managed-service

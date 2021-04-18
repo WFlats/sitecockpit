@@ -1,0 +1,98 @@
+<mvc:View controllerName="project.data.ProjectData.controller.Shifts" xmlns="sap.m" xmlns:semantic="sap.f.semantic"
+	xmlns:mvc="sap.ui.core.mvc" xmlns:layout="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core">
+	<semantic:SemanticPage id="shiftsPage" busy="{shiftsView>/busy}" busyIndicatorDelay="{shiftsView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{shiftsView>/shiftsTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<VBox id="vBox" class="sapUiSmallMargin">
+				<f:SimpleForm id="shiftForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+					adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="true">
+					<Label id="codeLabel" text="{i18n>shiftNameLabel}" labelFor="code" required="true"/>
+					<Input id="code" maxLength="50" type="Text" value="{code}" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+						suggestionItems="{/Shifts}">
+						<suggestionItems>
+							<core:Item id="suggestionItemID" text="{code}"/>
+						</suggestionItems>
+					</Input>
+					<Label id="defaultLabel" text="{i18n>shiftDefaultShiftLabel}" labelFor="defaultShift" required="false"/>
+					<CheckBox id="defaultShift" selected="{defaultShift}" select="_validateSaveEnablement"/>
+					<Label id="ignoreWeekendsLabel" text="{i18n>ignoreWeekendsLabel}" labelFor="ignoreWeekends" required="false"/>
+					<CheckBox id="ignoreWeekends" selected="{ignoreWeekends}" select="_validateSaveEnablement"/>
+					<Label id="ignoreHolidaysLabel" text="{i18n>ignoreHolidaysLabel}" labelFor="ignoreHolidays" required="false"/>
+					<CheckBox id="ignoreHolidays" selected="{ignoreHolidays}" select="_validateSaveEnablement"/>
+				</f:SimpleForm>
+				<Table id="shiftPartsList" width="auto" items="{path: 'shiftParts', parameters: {expand: 'timeType'}, sorter: {path: 'startTimeHrs'}}"
+					updateFinished=".onShiftPartsListUpdateFinished" includeItemInSelection="true" noDataText="{i18n>shiftPartsNoDataText}"
+					busyIndicatorDelay="{shiftPartsView>/delay}" visible="{= ${shiftsView>/mode} === 'Create' ? false : true}">
+					<headerToolbar>
+						<Toolbar>
+							<Title id="shiftPartsTitle" text="{shiftsView>/shiftPartsListTitle}" titleStyle="H3" level="H3"/>
+							<ToolbarSpacer/>
+							<Button icon="sap-icon://add" type="Ghost" tooltip="{i18n>addShiftPartsTooltip}"
+								enabled="{= ${shiftsView>/enableSave} === true ? false : true}" press=".onAddShiftPart"/>
+						</Toolbar>
+					</headerToolbar>
+					<columns>
+						<Column width="20%">
+							<Text text="{i18n>tableShiftPartsStart}"/>
+						</Column>
+						<Column width="20%">
+							<Text text="{i18n>tableShiftPartsEnd}"/>
+						</Column>
+						<Column minScreenWidth="Tablet" demandPopin="true">
+							<Text text="{i18n>tableShiftPartsTimeType}"/>
+						</Column>
+						<Column width="10%" minScreenWidth="Tablet" demandPopin="true">
+							<Text text="Edit"/>
+						</Column>
+						<Column width="10%" minScreenWidth="Tablet" demandPopin="true">
+							<Text text="Delete"/>
+						</Column>
+					</columns>
+					<items>
+						<ColumnListItem>
+							<cells>
+								<TimePicker id="TP1" value="{parts: [{path: 'startTimeHrs'}, {path: 'startTimeMins'}], formatter: '.formatter.timeFormatter'}"
+									enabled="false" valueFormat="HH:mm" displayFormat="HH:mm" change="handleShiftPartsChange"/>
+								<TimePicker id="TP2" value="{parts: [{path: 'endTimeHrs'}, {path: 'endTimeMins'}], formatter: '.formatter.timeFormatter'}" enabled="false"
+									valueFormat="HH:mm" displayFormat="HH:mm" change="handleShiftPartsChange"/>
+								<Select id="timeType" selectedKey="{timeType_ID}" forceSelection="true" enabled="false" change="handleShiftPartsChange"
+									items="{ path: 'timeTypesModel>/timeTypesArray', templateShareable: false }">
+									<core:Item key="{timeTypesModel>ID}" text="{timeTypesModel>code}"/>
+								</Select>
+								<Button icon="sap-icon://edit" press=".onEditShiftPart"/>
+								<Button icon="sap-icon://delete" press=".onDeleteShiftPart"/>
+							</cells>
+						</ColumnListItem>
+					</items>
+				</Table>
+			</VBox>
+		</semantic:content>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{shiftsView>/enableSave}" text="{i18n>saveButtonText}" press=".onSaveShift"/>
+		</semantic:titleMainAction>
+		<semantic:deleteAction>
+			<semantic:DeleteAction id="deleteProject" enabled="{= ${shiftsView>/mode} === 'Create' ? false : true}" press=".onDeleteShift"/>
+		</semantic:deleteAction>
+		<semantic:titleCustomTextActions>
+			<Button id="cancelButton" text="{i18n>cancelButtonText}" enabled="{shiftsView>/enableSave}" press=".onCancel"/>
+		</semantic:titleCustomTextActions>
+		<!--Semantic ShareMenu Buttons-->
+		<semantic:sendEmailAction>
+			<semantic:SendEmailAction id="shareEmail" press=".onSendEmailPress"/>
+		</semantic:sendEmailAction>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCancel"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

@@ -1,0 +1,24 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m">
+	<TableSelectDialog items="{path: '/Disciplines', sorter: { path: 'code', type:'sap.ui.model.type.String', descending: false}}"
+		title="{i18n>selectDisciplinesTitle}" noDataText="{i18n>noData}" id="disciplineSelectList" busy="{createCompanyView>/busy}"
+		busyIndicatorDelay="{createCompanyView>/delay}" confirm="handleFragClose" cancel="handleFragCancel" multiSelect="true">
+		<ColumnListItem id="item0">
+			<cells>
+				<Text text="{code}" id="text1"/>
+				<Text text="{description}" id="text2"/>
+			</cells>
+		</ColumnListItem>
+		<columns>
+			<Column id="column0" hAlign="Center">
+				<header>
+					<Label text="{i18n>headerDisciplineCode}" id="label0"/>
+				</header>
+			</Column>
+			<Column id="column1">
+				<header>
+					<Label text="{i18n>haderDisciplineDescription}" id="label1"/>
+				</header>
+			</Column>
+		</columns>
+	</TableSelectDialog>
+</core:FragmentDefinition>

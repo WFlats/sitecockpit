@@ -1,0 +1,54 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:f="sap.ui.layout.form">
+	<l:VerticalLayout>
+		<l:content>
+			<Toolbar>
+				<ToolbarSpacer/>
+				<ToggleButton pressed="{appView>/pullMode}" press="pullTogglePressed" text="{= ${appView>/pullMode} ? 'Pull' : 'Push'}"
+					tooltip="{i18n>pullPushTooltip}"/>
+			</Toolbar>
+			<f:SimpleForm id="taskBaseForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="4" labelSpanS="6"
+				adjustLabelSpan="false" emptySpanXL="-1" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+				singleContainerFullSize="false">
+				<Label text="{i18n>taskQuantity} [{UoM/code}]" labelFor="quantity"/>
+				<Input id="quantity" type="Number" liveChange="handlePlannedQuantityChange" enableSuggestionsHighlighting="false" width="60%"
+					showTableSuggestionValueHelp="false" required="true" valueLiveUpdate="true"/>
+				<Label id="startLabel" text="{i18n>taskStartDate}" labelFor="startDate"/>
+				<DateTimePicker id="startDate" displayFormat="short" required="true" width="60%" change="handleStartDateChange"/>
+				<Label id="endLabel" text="{i18n>taskEndDate}" labelFor="endDate"/>
+				<DateTimePicker id="endDate" displayFormat="short" required="true" width="60%" change="handleEndDateChange"/>
+				<Label id="waitingLabel" text="{i18n>waitingDuration}" labelFor="waitingTimeDays"/>
+				<Input id="waitingTimeDays" type="Number" valueLiveUpdate="true" liveChange="_onWaitChange">
+					<layoutData>
+						<l:GridData span="XL1 L1 M1 S2"/>
+					</layoutData>
+				</Input>
+				<Input id="waitingTimeHours" type="Number" valueLiveUpdate="true" liveChange="_onWaitChange">
+					<layoutData>
+						<l:GridData span="XL1 L1 M1 S2"/>
+					</layoutData>
+				</Input>
+				<Input id="waitingTimeMinutes" type="Number" valueLiveUpdate="true" liveChange="_onWaitChange">
+					<layoutData>
+						<l:GridData span="XL1 L1 M1 S2"/>
+					</layoutData>
+				</Input>
+				<Label id="endIncWaitLabel" text="{i18n>taskEndIncWaitDate}" labelFor="endIncWaitDate"/>
+				<DateTimePicker id="endIncWaitDate" displayFormat="short" required="true" width="60%" change="handleEndDateIncWaitChange"/>
+				<Label text="{i18n>taskProductivity} [{UoM/code}{i18n>UoMperHr}]" labelFor="productivity"/>
+				<Input id="productivity" type="Number" width="50%" change="handleProductivityChange" enableSuggestionsHighlighting="false"
+					showTableSuggestionValueHelp="false" required="true" valueLiveUpdate="true" liveChange="handleProductivityChange"/>
+				<Label text="{i18n>taskProductivityFactor}" labelFor="productivityFactor"/>
+				<Input id="productivityFactor" type="Number" change="handleProductivityFactorChange" enableSuggestionsHighlighting="false"
+					showTableSuggestionValueHelp="false" width="40%" required="false" valueLiveUpdate="true" liveChange="handleProductivityFactorChange"/>
+				<Label text="{i18n>taskNetDuration} [{i18n>hoursMinutes}]" labelFor="netDuration"/>
+				<Input id="netDuration" liveChange="handleNetDurationChange" enableSuggestionsHighlighting="false" showTableSuggestionValueHelp="false"
+					width="40%" required="false" valueLiveUpdate="true"/>
+				<Label text="{i18n>taskShiftSelect}" required="true" labelFor="shiftSelect"/>
+				<!-- Select id="shiftSelect" forceSelection="true" change="handleShiftChange" width="100%"
+					items="{ path: 'workTimeModel>/shifts' , sorter: { path: 'defaultShift', descending: true } }">
+					<core:Item key="{ID}" text="{workTimeModel>code}"/> -->
+				<Select id="shiftSelect" forceSelection="true" change="handleShiftChange" width="80%"></Select>
+			</f:SimpleForm>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

@@ -1,0 +1,17 @@
+applications:
+- name: SiteCockpit_appRouter
+  stack: cflinuxfs3
+  buildpacks:
+    - 'https://github.com/cloudfoundry/nodejs-buildpack/releases/download/v1.6.39/nodejs-buildpack-cflinuxfs3-v1.6.39.zip'
+  memory: 256M
+  env:
+    SESSION_TIMEOUT: 120
+    destinations: >
+      [
+        {
+         "name":"SiteCockpit-srv",
+          "url":"https://project-first-ug-project-first-mainspace-sitecockpit-srv.cfapps.eu10.hana.ondemand.com",
+          "forwardAuthToken": true,
+          "timeout": 120000
+        }
+      ]

@@ -1,0 +1,303 @@
+<mvc:View controllerName="project.data.ProjectData.controller.Detail" xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:core="sap.ui.core"
+	xmlns:footerbar="sap.ushell.ui.footerbar" xmlns:mvc="sap.ui.core.mvc" xmlns:layout="sap.ui.layout" xmlns:dnd="sap.ui.core.dnd">
+	<semantic:SemanticPage id="detailPage" busy="{detailView>/busy}" busyIndicatorDelay="{detailView>/delay}">
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction text="{path: 'status', formatter: '.formatter.statusButtonText'}"
+				visible="{= ${status} === 0 || ${status} === 1 ? true : false}" press=".onProjectStatePress"
+				tooltip="{path: 'status', formatter: '.formatter.statusButtonTooltip'}"/>
+		</semantic:titleMainAction>
+		<semantic:headerContent>
+			<ObjectHeader title="{code} - {description}" showTitleSelector="false"
+				number="{parts:[{path:'plannedCost'}, {path:'currency_code'}], type: 'sap.ui.model.type.Currency', formatOptions: {showMeasure: false}}"
+				numberUnit="{currency_code}">
+				<ObjectAttribute id="startAttr" title="{i18n>labelStartDate}"
+					text="{path: 'plannedStartDate', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"/>
+				<ObjectAttribute id="endAttr" title="{i18n>labelEndDate}"
+					text="{path:'plannedEndDate', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"/>
+				<ObjectAttribute title="{i18n>addressTitle}" text="{address/street} {address/houseNumber}, {address/town}, {address/country_code}"/>
+				<statuses>
+					<ObjectStatus title="{i18n>productivityTitle}" text="{ path: 'productivityFactor', formatter: '.formatter.currencyValue' }"/>
+					<ObjectStatus class="sapMObjectStatusLarge" text="{path: 'status', formatter: '.formatter.statusTextFormatter'}"
+						state="{path: 'status', formatter: '.formatter.stateFormatter'}"/>
+				</statuses>
+			</ObjectHeader>
+		</semantic:headerContent>
+		<semantic:content>
+			<IconTabBar id="projectIconTabBar" visible="true" expandable="true" expanded="true" applyContentPadding="true" backgroundDesign="Solid"
+				headerBackgroundDesign="Solid" enableTabReordering="true" headerMode="Inline" select=".onTabSelect">
+				<items>
+					<IconTabFilter id="projectIconTabFilterCompanies" text="{i18n>iconTabCompaniesTitle}" count="{detailView>/countCompanies}" showAll="false"
+						iconColor="Default" iconDensityAware="true" visible="true" design="Vertical">
+						<Table id="companyList" width="auto"
+							items="{path: 'companies', parameters: {expand: 'company, company/address, discipline'}, sorter:{path: 'discipline/code', group: '.getDiscipline'}, groupHeaderFactory: '.createGroupHeader'}"
+							mode="MultiSelect" updateFinished=".onCompanyListUpdateFinished" selectionChange=".onCompanySelectionChange" includeItemInSelection="true"
+							noDataText="{i18n>detailLineItemTableNoDataText}" busyIndicatorDelay="{detailView>/delay}">
+							<headerToolbar>
+								<Toolbar>
+									<Title id="lineItemsTitle" text="{detailView>/companyListTitle}" titleStyle="H3" level="H3"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Ghost" tooltip="" press="onEditCompanies"/>
+									<Button icon="sap-icon://negative" type="Ghost" enabled="{detailView>/companySelected}" tooltip="{i18n>removeSelectedCompaniesTooltip}"
+										press="onRemoveCompany"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Text text="{i18n>name}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>detailLineItemTableCompanyTypeColumn}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>companyTown}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>companyStreet}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{company/companyName}"/>
+										<Text text="{company/class}"/>
+										<Text text="{company/address/zip} {company/address/town}"/>
+										<Text text="{company/address/street} {company/address/houseNumber}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<dragDropConfig>
+								<dnd:DragInfo id="dragCompanyID" groupName="assignedToAvailable" sourceAggregation="items"/>
+								<dnd:DropInfo id="dropCompanyID" groupName="availableToAssigned" drop="onAddCompany"/>
+							</dragDropConfig>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="iconTabFilterWorkers" text="{i18n>iconTabWorkersTitle}" count="{detailView>/countWorkers}" showAll="false"
+						iconDensityAware="true" visible="true" design="Vertical">
+						<Table id="workersList" items="{path: '/Persons', parameters: {expand: 'profession, experience, memberOfCrew, company, deployment'} }"
+							updateFinished=".onWorkersListUpdateFinished" selectionChange=".onDeployedWorkerSelectionChange" includeItemInSelection="true"
+							mode="MultiSelect" noDataText="{i18n>workersNoDataText}" busyIndicatorDelay="{detailView>/delay}" rememberSelections="false">
+							<headerToolbar>
+								<OverflowToolbar>
+									<Title id="workersTitle" text="{detailView>/workersListTitle}" titleStyle="H3" level="H3"/>
+									<ToolbarSpacer/>
+									<SearchField id="searchField" showRefreshButton="true" tooltip="{i18n>workerSearchByLastNameTooltip}"
+										placeholder="{i18n>placeholderSearchByLastName}" search=".onSearchWorker" width="auto">
+										<layoutData>
+											<OverflowToolbarLayoutData minWidth="150px" maxWidth="240px" shrinkable="true" priority="NeverOverflow"/>
+										</layoutData>
+									</SearchField>
+									<ToolbarSeparator/>
+									<Button icon="sap-icon://add" tooltip="{i18n>editDeployedWorkersTooltip}" press=".onEditWorkers"/>
+									<Button icon="sap-icon://negative" enabled="{detailView>/workerSelected}" tooltip="{i18n>removeWorkerTooltip}" press="onRemoveWorker"/>
+								</OverflowToolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Text text="{i18n>name}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>profession}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>crewName}"/>
+								</Column>
+								<Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>deploymentStart}"/>
+								</Column>
+								<Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>deploymentEnd}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<ObjectIdentifier title="{lastName}" text="{firstName}"/>
+										<Text text="{profession/description} {experience/code}"/>
+										<Text text="{memberOfCrew/crewName} ({memberOfCrew/crewNumber})"/>
+										<Text text="{path: 'deployment/deploymentStart', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"/>
+										<Text text="{path: 'deployment/deploymentEnd', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<dragDropConfig>
+								<dnd:DragInfo id="dragWorkerID" groupName="deployedToAvailable" sourceAggregation="items"/>
+								<dnd:DropInfo id="dropWorkerID" groupName="availableToDeployed" drop="onAddWorker"/>
+							</dragDropConfig>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="iconTabFilterCrews" text="{i18n>iconTabCrewsTitle}" count="{detailView>/countCrews}" showAll="false"
+						iconDensityAware="true" visible="true" design="Vertical">
+						<Table id="crewsList" width="auto" items="{path: 'crews', parameters: {expand: 'crewMembers, chargeHand'}, sorter: {path: 'crewName'}}"
+							updateFinished=".onCrewsListUpdateFinished" includeItemInSelection="true" noDataText="{i18n>crewsNoDataText}"
+							busyIndicatorDelay="{detailView>/delay}">
+							<headerToolbar>
+								<Toolbar>
+									<Title id="crewsTitle" text="{detailView>/crewsListTitle}" titleStyle="H3" level="H3"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Ghost" tooltip="{i18n>addCrewsTooltip}" press=".onAddCrew"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Text text="{i18n>crewName}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>crewChargeHandName}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press=".onEditCrew">
+									<cells>
+										<Text text="{crewName} ({crewNumber})"/>
+									</cells>
+									<cells>
+										<Text text="{chargeHand/lastName} {chargeHand/firstName}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="iconTabFilterShifts" text="{i18n>iconTabShiftsTitle}" count="{detailView>/countShifts}" showAll="false"
+						iconDensityAware="true" visible="true" design="Vertical">
+						<Table id="shiftsList" width="auto" items="{path: 'shifts', parameters: {expand: 'shiftParts'}, sorter: {path: 'code'}}"
+							updateFinished=".onShiftsListUpdateFinished" includeItemInSelection="true" noDataText="{i18n>shiftsNoDataText}"
+							busyIndicatorDelay="{detailView>/delay}">
+							<headerToolbar>
+								<Toolbar>
+									<Title id="shiftsTitle" text="{detailView>/shiftsListTitle}" titleStyle="H3" level="H3"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Ghost" tooltip="{i18n>addShiftsTooltip}" press=".onAddShift"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Text text="{i18n>tableShiftsNameColumn}" width="55%"/>
+								</Column>
+								<Column hAlign="End" minScreenWidth="Tablet" demandPopin="true" width="15%">
+									<Text text="{i18n>tableShiftsWeekendColumn}"/>
+								</Column>
+								<Column hAlign="End" minScreenWidth="Tablet" demandPopin="true" width="15%">
+									<Text text="{i18n>tableShiftsHolidayColumn}"/>
+								</Column>
+								<Column hAlign="End" minScreenWidth="Tablet" demandPopin="true" width="15%">
+									<Text text="{i18n>tableShiftsDefaultColumn}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press=".onEditShift">
+									<cells>
+										<Text text="{code}"/>
+										<CheckBox selected="{ignoreWeekends}" editable="false"/>
+										<CheckBox selected="{ignoreHolidays}" editable="false"/>
+										<CheckBox selected="{defaultShift}" editable="false"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="iconTabFilterTimeTypes" text="{i18n>iconTabTimeTypesTitle}" count="{detailView>/countTimeTypes}" showAll="false"
+						iconDensityAware="true" visible="true" design="Vertical">
+						<Table id="timeTypesList" width="auto" items="{path: 'timeTypes', sorter: {path: 'code'}}" updateFinished=".onTimeTypesListUpdateFinished"
+							includeItemInSelection="true" noDataText="{i18n>timeTypesNoDataText}" busyIndicatorDelay="{detailView>/delay}">
+							<headerToolbar>
+								<Toolbar>
+									<Title id="timeTypesTitle" text="{detailView>/timeTypesListTitle}" titleStyle="H3" level="H3"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Ghost" tooltip="{i18n>addTimeTypeTooltip}" press=".onAddTimeType"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column width="50%">
+									<Text text="{i18n>tableTimeTypesNameColumn}"/>
+								</Column>
+								<Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>tableTimeTypesWageIncreaseColumn}"/>
+								</Column>
+								<Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>tableTimeTypesBreakColumn}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press=".onEditTimeType">
+									<cells>
+										<Text text="{code}"/>
+										<Text text="{wageIncrease}"/>
+										<CheckBox selected="{breakTime}" editable="false"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="iconTabFilterSpecialDates" text="{i18n>iconTabSpecialDatesTitle}" count="{detailView>/countSpecialDates}" showAll="false"
+						iconDensityAware="true" visible="true" design="Vertical">
+						<VBox class="sapUiContentPadding">
+							<Label text="{i18n>labelWeekendDays}"/>
+							<MultiComboBox id="weekdaySelection" selectionFinish="onWeekendSelectionFinish" width="50%" items="{Weekdays>/days}">
+								<core:Item key="{Weekdays>number}" text="{Weekdays>name}"/>
+							</MultiComboBox>
+						</VBox>
+						<Table id="specialDatesList" width="auto" items="{path: 'specialDates', sorter: {path: 'specialDate', type:'sap.ui.model.type.Date'}}"
+							updateFinished=".onSpecialDatesListUpdateFinished" includeItemInSelection="true" noDataText="{i18n>specialDatesNoDataText}"
+							busyIndicatorDelay="{detailView>/delay}">
+							<headerToolbar>
+								<Toolbar>
+									<Title id="specialDatesTitle" text="{detailView>/specialDatesListTitle}" titleStyle="H3" level="H3"/>
+									<ToolbarSpacer/>
+									<Button icon="sap-icon://add" type="Ghost" tooltip="{i18n>addSpecialDateTooltip}" press=".onAddSpecialDate"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Text text="{i18n>tableSpecialDatesDateColumn}"/>
+								</Column>
+								<Column minScreenWidth="Tablet" demandPopin="true">
+									<Text text="{i18n>tableSpecialDatesDescriptionColumn}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem type="Active" press=".onEditSpecialDate">
+									<cells>
+										<Text text="{path:'specialDate', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"/>
+										<Text text="{description}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+				</items>
+			</IconTabBar>
+		</semantic:content>
+		<semantic:editAction>
+			<semantic:EditAction id="editProject" press=".onEditProject"/>
+		</semantic:editAction>
+		<!--
+		<semantic:addAction>
+			<semantic:AddAction id="addProject" press=".onAddProject"/>
+		</semantic:addAction>
+		-->
+		<semantic:deleteAction>
+			<semantic:DeleteAction id="deleteProject" enabled="true" press=".onDeleteProject"/>
+		</semantic:deleteAction>
+		<!--Semantic ShareMenu Buttons-->
+		<semantic:sendEmailAction>
+			<semantic:SendEmailAction id="shareEmail" press=".onSendEmailPress"/>
+		</semantic:sendEmailAction>
+		<semantic:shareInJamAction>
+			<semantic:ShareInJamAction id="shareInJam" visible="{FLP>/isShareInJamActive}" press=".onShareInJamPress"/>
+		</semantic:shareInJamAction>
+		<semantic:saveAsTileAction>
+			<footerbar:AddBookmarkButton id="shareTile" title="{detailView>/saveAsTileTitle}"/>
+		</semantic:saveAsTileAction>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

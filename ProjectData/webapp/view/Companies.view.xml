@@ -1,0 +1,66 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:dnd="sap.ui.core.dnd"
+	controllerName="project.data.ProjectData.controller.Companies" xmlns:html="http://www.w3.org/1999/xhtml">
+	<semantic:SemanticPage id="companiesPage" busy="{companiesView>/busy}" busyIndicatorDelay="{companiesView>/delay}">
+		<semantic:titleHeading>
+			<Title id="companiesListTitleId" text="{companiesView>/availableCompaniesListTitle}" titleStyle="H3" level="H3"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<Table id="companiesList" width="auto"
+				items="{path: '/DisciplinesOfCompanies', parameters: {expand: 'company, company/address, discipline'}, sorter:{path: 'discipline/code', group: '.getDiscipline'}, groupHeaderFactory: '.createGroupHeader'}"
+				mode="MultiSelect" updateFinished=".onCompanyListUpdateFinished" selectionChange=".onCompanySelectionChange" includeItemInSelection="true"
+				noDataText="{i18n>noDataInCompanyList}" busyIndicatorDelay="{companiesView>/delay}" rememberSelections="false">
+				<headerToolbar>
+					<OverflowToolbar id="headerToolbarId">
+						<ToolbarSpacer id="spacerId"/>
+						<SearchField id="searchField" showRefreshButton="true" search=".onSearch" width="auto">
+							<layoutData>
+								<OverflowToolbarLayoutData minWidth="150px" maxWidth="240px" shrinkable="true" priority="NeverOverflow"/>
+							</layoutData>
+						</SearchField>
+						<Button id="addCompaniesButton" icon="sap-icon://add" press="onAssignCompanies" enabled="{companiesView>/selected}"
+							tooltip="{i18n>assignCompaniesTooltip}"/>
+					</OverflowToolbar>
+				</headerToolbar>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<Text text="{company/companyName}"/>
+							<Text text="{company/class}"/>
+							<Text text="{company/address/zip} {company/address/town}"/>
+							<Text text="{company/address/street} {company/address/houseNumber}"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+				<columns>
+					<Column>
+						<Text text="{i18n>name}"/>
+					</Column>
+					<Column >
+						<Text text="{i18n>detailLineItemTableCompanyTypeColumn}"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="{i18n>companyTown}"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="{i18n>companyStreet}"/>
+					</Column>
+				</columns>
+				<dragDropConfig>
+					<dnd:DragInfo id="dragCompanyID" groupName="availableToAssigned" sourceAggregation="items"/>
+					<dnd:DropInfo id="dropCompanyID" groupName="assignedToAvailable" drop="onRemoveCompany"/>
+				</dragDropConfig>
+			</Table>
+		</semantic:content>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeButton" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

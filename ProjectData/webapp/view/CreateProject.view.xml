@@ -1,0 +1,112 @@
+<mvc:View xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form"
+	xmlns:unified="sap.ui.unified" xmlns:layout="sap.ui.layout" xmlns:core="sap.ui.core"
+	controllerName="project.data.ProjectData.controller.CreateProject">
+	<semantic:SemanticPage id="createPage" busy="{appView>/busy}" busyIndicatorDelay="{appView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{createProjectView>/viewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<VBox id="vBox" class="sapUiSmallMargin">
+				<f:SimpleForm id="projectForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+					adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="true">
+					<Label id="codeLabel" text="{i18n>projectCode}" required="true" labelFor="code"/>
+					<Input id="code" type="Text" value="{code}" showSuggestion="true" showValueHelp="false" valueHelpRequest="handleValueHelp"
+						liveChange="_validateSaveEnablement" suggestionItems="{/Projects}">
+						<suggestionItems>
+							<core:Item id="suggestionItemID" text="{code}"/>
+						</suggestionItems>
+					</Input>
+					<Label id="descriptionLabel" text="{i18n>projectDescriptionLabel}" required="false" labelFor="description"/>
+					<TextArea id="description" value="{description}" required="false" width="100%" rows="10" maxLength="500" showExceededText="true"
+						wrapping="None" liveChange="_validateSaveEnablement"></TextArea>
+					<Label id="addressLabel" text="{i18n>projectAddressLabel}" labelFor="address" required="false"/>
+					<Select id="address" forceSelection="false" items="{ path: '/Addresses' , sorter: { path: 'town' } }" selectedKey="{address_ID}"
+						change="_validateSaveEnablement">
+						<core:Item id="selectAddressItem" key="{ID}" text="{country_code} {town}, {street} {houseNumber}"/>
+					</Select>
+					<Label id="plannedCostLabel" text="{i18n>projectPlannedCostLabel}" labelFor="plannedCost" required="false"/>
+					<Input id="plannedCost" type="Number" width="50%" value="{path: 'plannedCost', type:'sap.ui.model.type.Number'}"
+						liveChange="_validateSaveEnablement"/>
+					<Label id="currencyLabel" text="{i18n>projectCurrencyLabel}" labelFor="currency" required="false"/>
+					<Input id="currency" value="{currency_code}" maxLength="3" liveChange="_validateSaveEnablement" width="50%" showSuggestion="true"
+						suggestionItems="{/Currencies}">
+						<suggestionItems>
+							<core:Item id="suggestionItemID2" text="{code} - {name}"/>
+						</suggestionItems>
+					</Input>
+					<Label id="productivityLabel" text="{i18n>projectProductivityFactorLabel}" labelFor="productivity" required="true"/>
+					<Input id="productivity" type="Number"
+						value="{path: 'productivityFactor', type:'sap.ui.model.type.Float', formatter: '.formatter.threeDecimals'}"
+						liveChange="_validateSaveEnablement" width="25%"/>
+					<!--
+					<Label id="currencyLabel" text="{i18n>projectCurrencyLabel}" labelFor="currency" required="true"/>
+					<Select id="currency" forceSelection="true" items="{ path: '/Currencies' , sorter: { path: 'code' } }" selectedKey="{}"
+						change="_onCurrencyChange">
+						<core:Item id="selectCurrencyItem" key="{ID}" text="{code} {description}"/>
+					</Select -->
+					<Label id="datesLabel" text="{i18n>plannedDates}" labelFor="dates1" required="false"/>
+					<DatePicker id="DPPS" dateValue="{path: 'plannedStartDate', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"
+						change="_validateSaveEnablement" enabled="{= ${status} === 0 ? true : false}">
+						<layoutData>
+							<l:GridData span="XL3 L3 M3 S6"/>
+						</layoutData>
+					</DatePicker>
+					<DatePicker id="DPPE" dateValue="{path: 'plannedEndDate', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"
+						change="_validateSaveEnablement" enabled="{= ${status} === 0 ? true : false}">
+						<layoutData>
+							<l:GridData span="XL3 L3 M3 S6"/>
+						</layoutData>
+					</DatePicker>
+					<Label id="datesLabel2" text="{i18n>estimatedDates}" labelFor="dates2" required="false"/>
+					<DatePicker id="DPES" enabled="false"
+						dateValue="{path: 'estimatedStartDate', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"
+						change="_validateSaveEnablement">
+						<layoutData>
+							<l:GridData span="XL3 L3 M3 S6"/>
+						</layoutData>
+					</DatePicker>
+					<DatePicker id="DPEE" enabled="false"
+						dateValue="{path: 'estimatedEndDate', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"
+						change="_validateSaveEnablement">
+						<layoutData>
+							<l:GridData span="XL3 L3 M3 S6"/>
+						</layoutData>
+					</DatePicker>
+					<Label id="datesLabel3" text="{i18n>actualDates}" labelFor="dates3" required="false"/>
+					<DatePicker id="DPAS" enabled="false"
+						dateValue="{path: 'actualStartDate', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"
+						change="_validateSaveEnablement">
+						<layoutData>
+							<l:GridData span="XL3 L3 M3 S6"/>
+						</layoutData>
+					</DatePicker>
+					<DatePicker id="DPAE" enabled="false"
+						dateValue="{path: 'actualEndDate', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}" change="_validateSaveEnablement">
+						<layoutData>
+							<l:GridData span="XL3 L3 M3 S6"/>
+						</layoutData>
+					</DatePicker>
+				</f:SimpleForm>
+			</VBox>
+		</semantic:content>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{createProjectView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:titleCustomTextActions>
+			<Button id="cancelButton" text="{i18n>cancelButtonText}" press=".onCancel"/>
+		</semantic:titleCustomTextActions>
+		<!--Semantic ShareMenu Buttons-->
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress" visible="{= !${appView>/mode} === 'Create'}"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

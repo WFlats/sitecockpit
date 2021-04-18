@@ -1,0 +1,69 @@
+<mvc:View controllerName="recipe.RecipeEditor.controller.Skills" xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc"
+	xmlns:layout="sap.ui.layout" xmlns:dnd="sap.ui.core.dnd">
+	<semantic:SemanticPage id="skillPage" busy="{skillModel>/busy}" busyIndicatorDelay="{skillModel>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{i18n>skillsViewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<Table id="skillItemsList" width="auto"
+				items="{path: '/Skills', parameters: {expand: 'profession, profession/discipline, experience'}, sorter: [{path: 'profession/discipline/code', group: '.getDiscipline'}, {path: 'profession/description'}], groupHeaderFactory: '.createGroupHeader' }"
+				updateFinished=".onSkillListUpdateFinished" noDataText="{i18n>detailSkillItemTableNoDataText}" includeItemInSelection="true"
+				busyIndicatorDelay="{skillModel>/lineItemTableDelay}" busy="{skillModel>/busy}" mode="MultiSelect" selectionChange="onSelectionChange">
+				<headerToolbar>
+					<Toolbar id="headerToolbarId">
+						<Title id="skillListTitleId" text="{skillModel>/skillListTitle}" titleStyle="H3" level="H3"/>
+						<ToolbarSpacer id="spacerId"/>
+						<ToggleButton id="filterButton" icon="sap-icon://filter" tooltip="{i18n>filterSkillsByDisciplineToltip}" press="onFilterSkill"/>
+					</Toolbar>
+				</headerToolbar>
+				<columns>
+					<Column id="professionColumnId">
+						<Text id="professionTextId" text="{i18n>detailLineItemTableProfessionColumn}"/>
+					</Column>
+					<Column id="experienceColumnId" minScreenWidth="Tablet" demandPopin="true" hAlign="End">
+						<Text id="experienceTextId" text="{i18n>detailLineItemTableExperienceColumn}"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem id="columnListItemId" type="Detail" detailPress="onEditSkill">
+						<cells>
+							<Text id="professionDataId" text="{profession/description}"/>
+							<Text id="experienceDataId" text="{experience/code}"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+				<dragDropConfig>
+					<dnd:DragInfo id="dragID" groupName="availableToRequired" sourceAggregation="items"/>
+					<dnd:DropInfo id="dropID" groupName="requiredToAvailable" drop="onRemoveSkill"/>
+				</dragDropConfig>
+			</Table>
+		</semantic:content>
+		<semantic:addAction>
+			<semantic:AddAction enabled="{skillModel>/selected}" press="onAddSkill" tooltip="{i18n>pressSkillToAddTooltip}"/>
+		</semantic:addAction>
+		<semantic:deleteAction>
+			<semantic:DeleteAction enabled="{skillModel>/selected}" press="onDeleteSkill"/>
+		</semantic:deleteAction>
+		<semantic:copyAction>
+			<semantic:CopyAction enabled="{= ${skillModel>/multiSelect} ? false : ${skillModel>/selected} ? true : false}" press="onCopySkill"/>
+		</semantic:copyAction>
+		<semantic:editAction>
+			<semantic:EditAction enabled="{= ${skillModel>/multiSelect} ? false : ${skillModel>/selected} ? true : false}" press="onEditSkill"/>
+		</semantic:editAction>
+		<!--Semantic ShareMenu Buttons-->
+		<semantic:sendEmailAction>
+			<semantic:SendEmailAction id="shareEmail" press=".onSendEmailPress"/>
+		</semantic:sendEmailAction>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

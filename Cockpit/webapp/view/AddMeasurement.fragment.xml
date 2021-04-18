@@ -1,0 +1,21 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m">
+	<l:VerticalLayout class="sapUiContentPadding" width="100%">
+		<l:content>
+			<Label text="{i18n>createdBy}" labelFor="createdBy"/>
+			<Input id="createdBy" editable="false"/>
+			<Label text="{i18n>modifiedBy}" labelFor="modifiedBy"/>
+			<Input id="modifiedBy" editable="false"/>
+			<Label text="{i18n>taskMeasurementDate}" labelFor="date"/>
+			<DateTimePicker id="date" displayFormat="short" editable="false"/>
+			<Label text="{i18n>measurementDialogQuantityLabel}" labelFor="quantity"/>
+			<Input id="quantity" change="handleQuantityChange" valueLiveUpdate="true" liveChange="handleQuantityChange"
+				enableSuggestionsHighlighting="false" showTableSuggestionValueHelp="false" required="true"/>
+			<Slider id="PoCSlider" min="0" max="100" enableTickmarks="true" step="5" class="sapUiSmallMarginBottom" width="100%"
+				liveChange="handleSliderChange">
+				<ResponsiveScale tickmarksBetweenLabels="25"/>
+			</Slider>
+			<Label text="{i18n>measurementDialogDurationLabel}" labelFor="duration"/>
+			<Input id="duration" editable="false"/>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

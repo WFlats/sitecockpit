@@ -1,0 +1,75 @@
+<mvc:View controllerName="cockpit.Cockpit.controller.Detail" xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc"
+	xmlns:unified="sap.ui.unified" xmlns:core="sap.ui.core" xmlns:dnd="sap.ui.core.dnd">
+	<semantic:SemanticPage id="detailPage">
+		<semantic:titleHeading>
+			<Title id="title" text="{i18n>titlePlanningBoard}"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<PlanningCalendar id="planningBoard"
+				rows="{path: '/Locations', parameters: {expand: 'tasks, tasks/UoM, tasks/shift'}, filters: {path: 'nodeID', operator: 'EQ', value1: -1}}"
+				singleSelection="false" showIntervalHeaders="false" appointmentsVisualization="Filled" showEmptyIntervalHeaders="false" viewKey="Day"
+				appointmentSelect="handleAppointmentSelect" intervalSelect="handleIntervalSelect" rowHeaderClick="handleRowHeaderClick"
+				rowSelectionChange="handleRowSelectionChange" stickyHeader="true" busy="{stateModel>/busy}" busyIndicatorDelay="{stateModel>/delay}"
+				specialDates="{path: 'workTimeModel>/specialDates', templateShareable: true}">
+				<toolbarContent>
+					<Text text="{i18n>labelNoOfSelectedTasks} ({stateModel>/noOfSelectedTasks})"
+						visible="{= ${stateModel>/noOfSelectedTasks} > 0 ? true : false}"/>
+					<ToolbarSeparator visible="{= ${stateModel>/mode} === 'Copy' ? true : false}"/>
+					<Text text="{i18n>pasteAtToolbar} {appView>/activeRowCode}" visible="{= ${stateModel>/mode} === 'Copy' ? true : false}"/>
+					<DateTimePicker id="activeStart" width="150px"
+						value="{path:'appView>/activeStartDate', type:'sap.ui.model.type.DateTime', formatOptions: { style: 'short', strictParsing: true}}"
+						visible="{= ${stateModel>/mode} === 'Copy' ? true : false}"/>
+					<ToolbarSeparator visible="{= ${stateModel>/noOfSelectedTasks} > 0 ? true : false}"/>
+					<Button id="addButton" icon="sap-icon://add" press=".onAddTask" visible="true" enabled="false" tooltip="{i18n>addTaskButtonTooltip}"/>
+					<ToolbarSeparator/>
+					<ToggleButton pressed="{appView>/pullMode}" text="{= ${appView>/pullMode} ? 'Pull' : 'Push'}" tooltip="{i18n>pullPushTooltip}"/>
+					<ToggleButton pressed="{appView>/incWait}" press="onWaitPressed" icon="sap-icon://lateness" tooltip="{i18n>switchDisplayWaitTimeTooltip}"/>
+					<ToolbarSeparator/>
+					<Button id="filterButton" icon="sap-icon://filter" press=".onOpenViewSettings"/>
+					<Button id="clearFiltersButton" icon="sap-icon://clear-filter" press=".onClearFilters" enabled="false" tooltip="{i18n>tooltipClearFilters}"/>
+					<ToolbarSeparator/>
+					<Button id="refreshButton" icon="sap-icon://refresh" press=".onRefresh" visible="true" enabled="true" tooltip="{i18n>tooltipRefresh}"/>
+					<ToolbarSeparator/>
+					<Button id="menuButton" icon="sap-icon://menu" enabled="true" tooltip="{i18n>menuButtonTooltip}" press="onMainMenu"/>
+				</toolbarContent>
+				<rows>
+					<PlanningCalendarRow id="PCRow"
+						appointments="{path: 'tasks', parameters: {expand: 'recipe, measurements, location, discipline, UoM, company, crews, crews/crew, crews/crew/crewMembers, crews/crew/crewMembers/wageClass, workers, workers/worker, workers/worker/wageClass, supervisor, timeSheetEntries'}, templateShareable: false}"
+						title="{code}" text="{description}" enableAppointmentsCreate="true" enableAppointmentsDragAndDrop="true" enableAppointmentsResize="true"
+						appointmentDragEnter="handleAppointmentDragEnter" appointmentDrop="handleAppointmentDrop" appointmentResize="handleAppointmentResize"
+						nonWorkingDays="{workTimeModel>/weekendDays}">
+						<appointments>
+							<!-- appointment must not have a local ID -->
+							<unified:CalendarAppointment
+								startDate="{parts: [{path: 'status'}, {path: 'plannedStart'}, {path: 'actualStart'}], formatter: '.formatter.startDate'}"
+								endDate="{parts: [{path: 'status'}, {path: 'plannedEnd'}, {path: 'estimatedEnd'}, {path: 'waitDuration'}], formatter: '.formatter.endDate'}"
+								title="{taskName} ({number})" icon="{path: 'status', formatter: '.formatter.taskIconFormatter'}" text="{quantity} {UoM/code}"
+								color="{colour}" tentative="{= ${status} === 0}"
+								tooltip="{path: 'status', formatter: '.formatter.statusTextFormatter'} &#013;{parts: [{path: 'status'}, {path: 'plannedStart'}, {path: 'actualStart'}, {path: 'estimatedEnd'}, {path: 'waitDuration'}], formatter: '.formatter.taskTooltipFormatter'}{shortText} {quantity} {UoM/code}&#013;{i18n>netDuration} {parts: [{path: 'quantity'}, {path: 'currentProductivity'}], formatter: '.formatter.currentNetDuration'}, KPI: {KPI}"/>
+						</appointments>
+						<dragDropConfig>
+							<dnd:DropInfo targetAggregation="_intervalPlaceholders" dropPosition="On" drop="onDropRecipe"/>
+						</dragDropConfig>
+					</PlanningCalendarRow>
+				</rows>
+				<specialDates>
+					<unified:DateTypeRange startDate="{workTimeModel>startDate}" tooltip="{workTimeModel>description}" type="Type07"/>
+				</specialDates>
+			</PlanningCalendar>
+		</semantic:content>
+		<semantic:titleCustomIconActions>
+			<OverflowToolbarButton icon="sap-icon://database" press="onOpenBIM" visible="false" tooltip="Open BIM viewer"/>
+		</semantic:titleCustomIconActions>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

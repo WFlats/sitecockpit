@@ -1,0 +1,45 @@
+<mvc:View controllerName="project.data.ProjectData.controller.SpecialDates" xmlns="sap.m" xmlns:semantic="sap.f.semantic"
+	xmlns:mvc="sap.ui.core.mvc" xmlns:layout="sap.ui.layout" xmlns:f="sap.ui.layout.form">
+	<semantic:SemanticPage id="userPage" busy="{specialDatesView>/busy}" busyIndicatorDelay="{specialDatesView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{specialDatesView>/specialDatesTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<VBox id="vBox" class="sapUiSmallMargin">
+				<f:SimpleForm id="specialDatesForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3"
+					labelSpanS="12" adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="true">
+					<Label id="datesLabel" text="{i18n>specialDatesDateLabel}" labelFor="DP" required="true"/>
+					<DatePicker id="DP" dateValue="{path: 'specialDate', type:'sap.ui.model.type.Date', formatOptions: {displayFormat: 'Date'}}"
+						change="_validateSaveEnablement"/>
+					<Label id="descriptionLabel" text="{i18n>specialDatesDescriptionLabel}" labelFor="description" required="false"/>
+					<Input id="description" value="{description}" liveChange="_validateSaveEnablement" maxLength="50"/>
+				</f:SimpleForm>
+			</VBox>
+		</semantic:content>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{specialDatesView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:deleteAction>
+			<semantic:DeleteAction id="deleteProject" enabled="{= ${appView>/mode} === 'Edit' ? true : false}" press=".onDeleteSpecialDate"/>
+		</semantic:deleteAction>
+		<semantic:titleCustomTextActions>
+			<Button id="cancelButton" text="{i18n>cancelButtonText}" press=".onCancel"/>
+		</semantic:titleCustomTextActions>
+		<!--Semantic ShareMenu Buttons-->
+		<semantic:sendEmailAction>
+			<semantic:SendEmailAction id="shareEmail" press=".onSendEmailPress"/>
+		</semantic:sendEmailAction>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

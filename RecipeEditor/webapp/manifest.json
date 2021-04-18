@@ -1,0 +1,175 @@
+{
+	"_version": "1.12.0",
+	"sap.app": {
+		"id": "recipe.RecipeEditor",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"resources": "resources.json",
+		"dataSources": {
+			"mainService": {
+				"uri": "/srv_api/odata/v2/scService/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0",
+					"localUri": "localService/metadata.xml"
+				}
+			}
+		},
+		"sourceTemplate": {
+			"id": "sap.ui.ui5-template-plugin.2masterdetailmodule",
+			"version": "1.70.0"
+		},
+		"crossNavigation": {
+			"inbounds": {
+				"intent1": {
+					"signature": {
+						"parameters": {},
+						"additionalParameters": "allowed"
+					},
+					"semanticObject": "recipe",
+					"action": "display",
+					"subTitle": "{{appDescription}}",
+					"title": "{{appTitle}}",
+					"icon": "sap-icon://receipt"
+				}
+			}
+		}
+	},
+	"sap.platform.cf": {
+		"oAuthScopes": [
+			"$XSAPPNAME.Recipe_Manager"
+		]
+	},
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "sap-icon://detail-view",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+	"sap.ui5": {
+		"rootView": {
+			"viewName": "recipe.RecipeEditor.view.App",
+			"type": "XML",
+			"async": true,
+			"id": "app"
+		},
+		"dependencies": {
+			"minUI5Version": "1.84.4",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {},
+				"sap.f": {},
+				"sap.ushell": {},
+				"sap.collaboration": {
+					"lazy": true
+				}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "recipe.RecipeEditor.i18n.i18n"
+				}
+			},
+			"": {
+				"dataSource": "mainService",
+				"preload": true
+			}
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.f.routing.Router",
+				"viewType": "XML",
+				"viewPath": "recipe.RecipeEditor.view",
+				"controlId": "layout",
+				"controlAggregation": "beginColumnPages",
+				"bypassed": {
+					"target": "notFound"
+				},
+				"async": true
+			},
+			"routes": [{
+				"pattern": "",
+				"name": "master",
+				"target": "master"
+			}, {
+				"pattern": "Recipes/{objectId}",
+				"name": "object",
+				"target": ["master", "object"]
+			}, {
+				"pattern": "Recipes/{objectId}",
+				"name": "create",
+				"target": ["master", "object", "create"]
+			}, {
+				"name": "skills",
+				"pattern": "Skills",
+				"target": ["master", "object", "skills"]
+			}, {
+				"name": "CreateSkill",
+				"pattern": "Skills",
+				"target": ["master", "object", "createSkill"]
+			}],
+			"targets": {
+				"master": {
+					"viewName": "Master",
+					"viewLevel": 1,
+					"viewId": "master"
+				},
+				"object": {
+					"viewName": "Detail",
+					"viewId": "detail",
+					"viewLevel": 1,
+					"controlAggregation": "midColumnPages"
+				},
+				"create": {
+					"viewName": "CreateRecipe",
+					"viewId": "create",
+					"controlAggregation": "midColumnPages",
+					"viewLevel": 2
+				},
+				"skills": {
+					"viewName": "Skills",
+					"viewId": "skills",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages"
+				},
+				"detailObjectNotFound": {
+					"viewName": "DetailObjectNotFound",
+					"viewId": "detailObjectNotFound",
+					"controlAggregation": "midColumnPages"
+				},
+				"notFound": {
+					"viewName": "NotFound",
+					"viewId": "notFound"
+				},
+				"CreateSkill": {
+					"viewId": "createSkill",
+					"viewName": "CreateSkill",
+					"viewLevel": 2,
+					"controlAggregation": "endColumnPages"
+				}
+			}
+		},
+		"flexEnabled": true
+	}
+}

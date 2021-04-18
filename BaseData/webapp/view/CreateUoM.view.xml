@@ -1,0 +1,55 @@
+<mvc:View xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core"
+	controllerName="base.data.BaseData.controller.CreateUoM">
+	<semantic:SemanticPage id="createPage" busy="{createUoMView>/busy}" busyIndicatorDelay="{createUoMView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{createUoMView>/viewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<VBox id="vBox" class="sapUiSmallMargin">
+				<f:SimpleForm id="UoMForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+					adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="false">
+					<Label id="codeLabel" text="{i18n>labelUoMCode}" required="true" labelFor="code"/>
+					<Input id="code" value="{code}" width="25%" maxLength="8" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+						suggestionItems="{/UoMs}">
+						<suggestionItems>
+							<core:Item id="suggestionItemID" text="{code}"/>
+						</suggestionItems>
+					</Input>
+					<Label id="descriptionLabel" text="{i18n>labelUoMDescription}" required="true" labelFor="description"/>
+					<TextArea id="description" value="{description}" required="true" width="100%" rows="1" maxLength="20" showExceededText="true"
+						wrapping="None" liveChange="_validateSaveEnablement"></TextArea>
+					<Label id="dimensionLabel" text="{i18n>dimensionLabel}" required="true" labelFor="dimension"/>
+					<Select id="dimension" width="50%" change="_validateSaveEnablement" selectedKey="{dimension}">
+						<items>
+							<core:Item key="0" text="0 - {i18n>dimension0}"/>
+							<core:Item key="1" text="1 - {i18n>dimension1}"/>
+							<core:Item key="2" text="2 - {i18n>dimension2}"/>
+							<core:Item key="3" text="3 - {i18n>dimension3}"/>
+						</items>
+					</Select>
+					<Label id="imperialLabel" text="{i18n>imperialLabel}" labelFor="imperial"/>
+					<CheckBox id="imperial" selected="{imperial}"/>
+					<Label id="baseUnitLabel" text="{i18n>baseUnitLabel}" labelFor="baseUnit"/>
+					<Select id="baseUnit" width="50%" items="{ path: '/UoMs', sorter: { path: 'code' } }" forceSelection="false"
+						change="_validateSaveEnablement" selectedKey="{baseUnit_ID}">
+						<items>
+							<core:Item key="{ID}" text="{code} - {description}"/>
+						</items>
+					</Select>
+					<Label id="factorLabel" text="{i18n>factorLabel}" labelFor="factor"/>
+					<Input id="factor" width="25%" value="{conversionFactor}" type="Number" liveChange="_validateSaveEnablement"/>
+				</f:SimpleForm>
+			</VBox>
+		</semantic:content>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{createUoMView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:deleteAction>
+			<semantic:DeleteAction enabled="{= ${createUoMView>/mode} === 'Edit' ? true : false}" press=".onDelete"/>
+		</semantic:deleteAction>
+		<semantic:closeAction>
+			<semantic:CloseAction press=".onCancel"/>
+		</semantic:closeAction>
+	</semantic:SemanticPage>
+</mvc:View>

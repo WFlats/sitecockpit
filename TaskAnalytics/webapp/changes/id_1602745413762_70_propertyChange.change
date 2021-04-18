@@ -1,0 +1,41 @@
+{
+	"fileName": "id_1602745413762_70_propertyChange",
+	"fileType": "change",
+	"changeType": "propertyChange",
+	"moduleName": "",
+	"reference": "task.analytics.taskanalytics.Component",
+	"packageName": "$TMP",
+	"content": {
+		"property": "visible",
+		"newValue": false
+	},
+	"selector": {
+		"id": "task.analytics.taskanalytics::sap.suite.ui.generic.template.ListReport.view.ListReport::Tasks--deleteEntry",
+		"type": "sap.m.Button",
+		"idIsLocal": false
+	},
+	"layer": "CUSTOMER_BASE",
+	"texts": {},
+	"namespace": "apps/task.analytics.taskanalytics/changes/",
+	"projectId": "task.analytics.taskanalytics",
+	"creation": "2020-10-15T07:06:51.571Z",
+	"originalLanguage": "EN",
+	"support": {
+		"generator": "Change.createInitialFileContent",
+		"service": "",
+		"user": "",
+		"sapui5Version": "1.82.1",
+		"sourceChangeFileName": "",
+		"compositeCommand": ""
+	},
+	"oDataInformation": {},
+	"dependentSelector": {},
+	"validAppVersions": {
+		"creation": "1.0.0",
+		"from": "1.0.0",
+		"to": "1.0.0"
+	},
+	"jsOnly": false,
+	"variantReference": "",
+	"appDescriptorChange": false
+}

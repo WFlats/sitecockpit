@@ -1,0 +1,376 @@
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+	<edmx:Reference Uri="/srv_api/odata/v2/scService/$metadata">
+		<edmx:Include Alias="Metadata" Namespace="scService"/>
+	</edmx:Reference>
+	<edmx:Reference Uri="https://wiki.scn.sap.com/wiki/download/attachments/448470968/UI.xml?api=v2">
+		<edmx:Include Alias="UI" Namespace="com.sap.vocabularies.UI.v1"/>
+	</edmx:Reference>
+	<edmx:Reference Uri="https://wiki.scn.sap.com/wiki/download/attachments/448470974/Common.xml?api=v2">
+		<edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+	</edmx:Reference>
+	<edmx:DataServices>
+		<Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="SiteCockpit.TaskAnalytics.annotations.annotation.scService">
+			<Annotations Target="Metadata.Tasks">
+				<Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+			        <Record>
+            			<PropertyValue Property="Updatable" Bool="false"/>
+        			</Record>
+			    </Annotation>
+			    <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+			        <Record>
+            			<PropertyValue Property="Deletable" Bool="false"/>
+        			</Record>
+			    </Annotation>
+				<Annotation Term="UI.PresentationVariant">
+					<Record Type="UI.PresentationVariantType">
+						<PropertyValue Property="SortOrder">
+							<Collection>
+								<Record Type="Common.SortOrderType">
+									<PropertyValue Property="Property" PropertyPath="discipline/code"/>
+								</Record>
+								<Record Type="Common.SortOrderType">
+									<PropertyValue Property="Property" PropertyPath="taskName"/>
+								</Record>
+							</Collection>
+						</PropertyValue>
+						<PropertyValue Property="GroupBy">
+							<Collection>
+								<PropertyPath>discipline/code</PropertyPath>
+							</Collection>
+						</PropertyValue>
+						<PropertyValue Property="Visualizations">
+							<Collection>
+								<AnnotationPath>@UI.LineItem</AnnotationPath>
+							</Collection>
+						</PropertyValue>
+						<PropertyValue Property="RequestAtLeast">
+							<Collection>
+								<PropertyPath>discipline/code</PropertyPath>
+								<PropertyPath>taskName</PropertyPath>
+							</Collection>
+						</PropertyValue>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.FieldGroup" Qualifier="crews">
+					<Record Type="UI.FieldGroupType">
+						<PropertyValue Property="Data" Path="crews/@UI.LineItem"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.FieldGroup" Qualifier="Workers">
+					<Record Type="UI.FieldGroupType">
+						<PropertyValue Property="Data" Path="workers/@UI.LineItem"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.FieldGroup" Qualifier="problems">
+					<Record Type="UI.FieldGroupType">
+						<PropertyValue Property="Data" Path="problems/@UI.LineItem"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.FieldGroup" Qualifier="measurements">
+					<Record Type="UI.FieldGroupType">
+						<PropertyValue Property="Data" Path="measurements/@UI.LineItem"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.FieldGroup" Qualifier="WBS">
+					<Record Type="UI.FieldGroupType">
+						<PropertyValue Property="Data">
+							<Collection>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="location/code"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;CODE}"/>
+								</Record>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="location/description"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;DESCRIPTION}"/>
+								</Record>
+							</Collection>
+						</PropertyValue>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.FieldGroup" Qualifier="dates">
+					<Record Type="UI.FieldGroupType">
+						<PropertyValue Property="Data">
+							<Collection>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="plannedStart"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;PLANNED_START}"/>
+								</Record>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="plannedEnd"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;PLANNED_END}"/>
+								</Record>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="estimatedEnd"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;ESTIMATED_END}"/>
+								</Record>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="actualStart"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;ACTUAL_START}"/>
+								</Record>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="actualEnd"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;ACTUAL_END}"/>
+								</Record>
+							</Collection>
+						</PropertyValue>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.FieldGroup" Qualifier="company">
+					<Record Type="UI.FieldGroupType">
+						<PropertyValue Property="Data">
+							<Collection >
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="company/company/companyName"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;COMPANY}"/>
+								</Record>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="company/company/address/town"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;CITY}"/>
+								</Record>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="company/company/address/country_code"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;COUNTRY}"/>
+								</Record>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="price"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;PRICE_PER_UOM}"/>
+								</Record>
+								<Record Type="UI.DataField">
+									<PropertyValue Property="Value" Path="lumpSum"/>
+									<PropertyValue Property="Label" String="{@i18n&gt;LUMP_SUM}"/>
+								</Record>
+							</Collection>
+						</PropertyValue>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.Facets">
+					<Collection>
+						<Record Type="UI.ReferenceFacet">
+							<PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#dates"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;DATES}"/>
+						</Record>
+						<Record Type="UI.ReferenceFacet">
+							<PropertyValue Property="Target" AnnotationPath="measurements/@UI.LineItem"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;MEASUREMENTS}"/>
+						</Record>
+						<Record Type="UI.ReferenceFacet">
+							<PropertyValue Property="Target" AnnotationPath="problems/@UI.LineItem"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;CARDS}"/>
+						</Record>
+						<Record Type="UI.ReferenceFacet">
+							<PropertyValue Property="Target" AnnotationPath="crews/@UI.LineItem"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;CREWS}"/>
+						</Record>
+						<Record Type="UI.ReferenceFacet">
+							<PropertyValue Property="Target" AnnotationPath="workers/@UI.LineItem"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;WORKERS}"/>
+						</Record>
+						<Record Type="UI.ReferenceFacet">
+							<PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#company"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;COMPANY}"/>
+						</Record>
+					</Collection>
+				</Annotation>
+				<Annotation Term="UI.DataPoint" Qualifier="number">
+					<Record Type="UI.DataPointType">
+						<PropertyValue Property="Value" Path="number"/>
+						<PropertyValue Property="Title" String="{@i18n&gt;NO.}"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.DataPoint" Qualifier="WBSCode">
+					<Record Type="UI.DataPointType">
+						<PropertyValue Property="Value" Path="location/code"/>
+						<PropertyValue Property="Title" String="{@i18n&gt;WBS_CODE}"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.DataPoint" Qualifier="WBSDescription">
+					<Record Type="UI.DataPointType">
+						<PropertyValue Property="Value" Path="location/description"/>
+						<PropertyValue Property="Title" String="{@i18n&gt;WBS_DESCRIPTION}"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.DataPoint" Qualifier="Quantity">
+					<Record Type="UI.DataPointType">
+						<PropertyValue Property="Value" Path="quantity"/>
+						<PropertyValue Property="Title" String="{@i18n&gt;QUANTITY}"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.DataPoint" Qualifier="UoM">
+					<Record Type="UI.DataPointType">
+						<PropertyValue Property="Value" Path="UoM/code"/>
+						<PropertyValue Property="Title" String="{@i18n&gt;UOM}"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.DataPoint" Qualifier="status">
+					<Record Type="UI.DataPointType">
+						<PropertyValue Property="Value" Path="status"/>
+						<PropertyValue Property="Title" String="{@i18n&gt;STAGE}"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.DataPoint" Qualifier="KPI">
+					<Record Type="UI.DataPointType">
+						<PropertyValue Property="Value" Path="KPI"/>
+						<PropertyValue Property="Title" String="{@i18n&gt;KPI}"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.DataPoint">
+					<Record Type="UI.DataPointType">
+						<PropertyValue Property="Value" Path="supervisor/lastName"/>
+						<PropertyValue Property="Title" String="{@i18n&gt;FOREMAN}"/>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.HeaderInfo">
+					<Record Type="UI.HeaderInfoType">
+						<PropertyValue Property="TypeName" String="{@i18n&gt;TASK}"/>
+						<PropertyValue Property="TypeNamePlural" String="{@i18n&gt;TASKS}"/>
+						<PropertyValue Property="Title">
+							<Record Type="UI.DataField">
+								<PropertyValue Property="Value" Path="taskName"/>
+							</Record>
+						</PropertyValue>
+						<PropertyValue Property="Description">
+							<Record Type="UI.DataField">
+								<PropertyValue Property="Value" Path="shortText"/>
+							</Record>
+						</PropertyValue>
+					</Record>
+				</Annotation>
+				<Annotation Term="UI.SelectionFields">
+					<Collection>
+						<PropertyPath>project/code</PropertyPath>
+						<PropertyPath>status</PropertyPath>
+						<PropertyPath>KPI</PropertyPath>
+						<PropertyPath>supervisor/lastName</PropertyPath>
+						<PropertyPath>discipline/code</PropertyPath>
+						<PropertyPath>project/address/country_code</PropertyPath>
+						<PropertyPath >actualStart</PropertyPath>
+					</Collection>
+				</Annotation>
+				<Annotation Term="UI.LineItem">
+					<Collection>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="taskName"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;TASK}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="number"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;NO.}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="shortText"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;DESCRIPTION}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="KPI"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;KPI}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="quantity"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;QUANTITY}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="UoM/code"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;UOM}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="currentProductivity"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;PRODUCTIVITY/HR}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="status"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;STAGE}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="project/code"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;PROJECT}"/>
+						</Record>
+					</Collection>
+				</Annotation>
+			</Annotations>
+			<Annotations Target="Metadata.Measurements">
+				<Annotation Term="UI.LineItem">
+					<Collection>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="measurementDateTime"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;TIME}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="measurementQuantity"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;QUANTITY_(CUM.)}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="netDuration"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;DURATION_(HRS)}"/>
+						</Record>
+					</Collection>
+				</Annotation>
+			</Annotations>
+			<Annotations Target="Metadata.ProblemCards">
+				<Annotation Term="UI.LineItem">
+					<Collection>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="isProblem"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;PROBLEM}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="isQuality"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;QUALITY}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="isHnS"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;EH&amp;S}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="shortText"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;DESCRIPTION}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="severity/description"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;SEVERITY}"/>
+						</Record>
+					</Collection>
+				</Annotation>
+			</Annotations>
+			<Annotations Target="Metadata.CrewsForTask">
+				<Annotation Term="UI.LineItem">
+					<Collection>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="crew/crewName"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;NAME}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="crew/crewNumber"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;NO.}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="crew/chargeHand/lastName"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;CHARGE_HAND}"/>
+						</Record>
+					</Collection>
+				</Annotation>
+			</Annotations>
+			<Annotations Target="Metadata.WorkersForTask">
+				<Annotation Term="UI.LineItem">
+					<Collection>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="worker/lastName"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;LAST_NAME}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="worker/firstName"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;FIRST_NAME}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="worker/profession/description"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;PROFESSION}"/>
+						</Record>
+						<Record Type="UI.DataField">
+							<PropertyValue Property="Value" Path="worker/experience/code"/>
+							<PropertyValue Property="Label" String="{@i18n&gt;EXPERIENCE}"/>
+						</Record>
+					</Collection>
+				</Annotation>
+			</Annotations>
+		</Schema>
+	</edmx:DataServices>
+</edmx:Edmx>

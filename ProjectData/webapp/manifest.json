@@ -1,0 +1,249 @@
+{
+	"_version": "1.12.0",
+	"sap.app": {
+		"id": "project.data.ProjectData",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"resources": "resources.json",
+		"dataSources": {
+			"mainService": {
+				"uri": "/srv_api/odata/v2/scService/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0",
+					"localUri": "localService/metadata.xml"
+				}
+			}
+		},
+		"sourceTemplate": {
+			"id": "sap.ui.ui5-template-plugin.2masterdetailmodule",
+			"version": "1.65.9"
+		},
+		"crossNavigation": {
+			"inbounds": {
+				"intent1": {
+					"signature": {
+						"parameters": {},
+						"additionalParameters": "allowed"
+					},
+					"semanticObject": "ProjectData",
+					"action": "display",
+					"title": "{{appTitle}}",
+					"subTitle": "{{appDescription}}",
+					"icon": "sap-icon://project-definition-triangle"
+				}
+			}
+		}
+	},
+	"sap.platform.cf": {
+		"oAuthScopes": ["$XSAPPNAME.Admin", "$XSAPPNAME.Project_User"]
+	},
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "sap-icon://detail-view",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+	"sap.ui5": {
+		"rootView": {
+			"viewName": "project.data.ProjectData.view.App",
+			"type": "XML",
+			"async": true,
+			"id": "app"
+		},
+		"dependencies": {
+			"minUI5Version": "1.84.4",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {},
+				"sap.f": {},
+				"sap.ushell": {},
+				"sap.collaboration": {
+					"lazy": true
+				}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "project.data.ProjectData.i18n.i18n"
+				}
+			},
+			"": {
+				"dataSource": "mainService",
+				"preload": true
+			}
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.f.routing.Router",
+				"viewType": "XML",
+				"viewPath": "project.data.ProjectData.view",
+				"controlId": "layout",
+				"controlAggregation": "beginColumnPages",
+				"bypassed": {
+					"target": "notFound"
+				},
+				"async": true
+			},
+			"routes": [{
+				"pattern": "",
+				"name": "master",
+				"target": "master"
+			}, {
+				"pattern": "Projects/{objectId}",
+				"name": "object",
+				"target": ["master", "object"]
+			}, {
+				"name": "CreateProject",
+				"pattern": "Projects/{objectId}",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "CreateProject"]
+			}, {
+				"name": "Users",
+				"pattern": "Persons",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "Users"]
+			}, {
+				"name": "SpecialDates",
+				"pattern": "SpecialDates/{objectId}",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "SpecialDates"]
+			}, {
+				"name": "TimeTypes",
+				"pattern": "TimeTypes/{objectId}",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "TimeTypes"]
+			}, {
+				"name": "Shifts",
+				"pattern": "Shifts/{objectId}",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "Shifts"]
+			}, {
+				"name": "Crews",
+				"pattern": "Crews/{objectId}",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "Crews"]
+			}, {
+				"name": "Workers",
+				"pattern": "People",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "Workers"]
+			}, {
+				"name": "Companies",
+				"pattern": "Companies",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "Companies"]
+			}],
+			"targets": {
+				"master": {
+					"viewName": "Master",
+					"viewLevel": 1,
+					"viewId": "master"
+				},
+				"object": {
+					"viewName": "Detail",
+					"viewId": "detail",
+					"viewLevel": 1,
+					"controlAggregation": "midColumnPages"
+				},
+				"detailObjectNotFound": {
+					"viewName": "DetailObjectNotFound",
+					"viewId": "detailObjectNotFound",
+					"controlAggregation": "midColumnPages"
+				},
+				"notFound": {
+					"viewName": "NotFound",
+					"viewId": "notFound"
+				},
+				"Users": {
+					"viewType": "XML",
+					"viewName": "Users",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages",
+					"viewId": "Users"
+				},
+				"CreateProject": {
+					"viewType": "XML",
+					"viewName": "CreateProject",
+					"viewId": "create",
+					"viewLevel": 2,
+					"controlAggregation": "midColumnPages"
+				},
+				"SpecialDates": {
+					"viewType": "XML",
+					"viewName": "SpecialDates",
+					"viewId": "specialDates",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages"
+				},
+				"TimeTypes": {
+					"viewType": "XML",
+					"viewName": "TimeTypes",
+					"viewId": "timeTypes",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages"
+				},
+				"Shifts": {
+					"viewType": "XML",
+					"viewName": "Shifts",
+					"viewId": "shifts",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages"
+				},
+				"Crews": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewName": "Crews",
+					"viewId": "Crews",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages"
+				},
+				"Workers": {
+					"viewType": "XML",
+					"viewName": "Workers",
+					"viewId": "Workers",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages"
+				},
+				"Companies": {
+					"viewType": "XML",
+					"viewName": "Companies",
+					"viewId": "Companies",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages"
+				}
+			}
+		},
+		"flexEnabled": true
+	}
+}

@@ -1,0 +1,50 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="master.data.MasterData.controller.Companies"
+	xmlns:html="http://www.w3.org/1999/xhtml">
+	<App>
+		<pages>
+			<Page title="{i18n>viewTitleCompanies}" showNavButton="true" navButtonPress="onNavBack">
+				<content>
+					<Table
+						items="{path: '/Companies', parameters: {expand: 'disciplines, address'}, sorter: { path: 'companyName', type:'sap.ui.model.type.String', descending: false}}"
+						noDataText="{i18n>noData}" id="companyList" busy="{companyView>/busy}" busyIndicatorDelay="{companyView>/delay}"
+						updateFinished="onCompanyListUpdateFinished">
+						<headerToolbar>
+							<Toolbar>
+								<Title text="{companyView>/listTitle}"/>
+								<ToolbarSpacer/>
+								<SearchField id="searchField" showRefreshButton="true" tooltip="{i18n>searchCompanyTooltip}" search=".onSearch" width="auto"></SearchField>
+								<Button id="button1" icon="sap-icon://add" type="Default" tooltip="{i18n>addCompanyButtonTooltip}" press="onAddCompany"/>
+							</Toolbar>
+						</headerToolbar>
+						<items>
+							<ColumnListItem type="Active" id="item0" press="onEditCompany">
+								<cells>
+									<Text text="{companyName}" id="text2"/>
+									<Text text="{class}" id="text3"/>
+									<Text text="{address/street}, {address/town}, {address/country_code}" id="text4"/>
+								</cells>
+							</ColumnListItem>
+						</items>
+						<columns>
+							<Column id="column0">
+								<header>
+									<Label text="{i18n>headerCompanyName}" id="label0"/>
+								</header>
+							</Column>
+							<Column id="column1">
+								<header>
+									<Label text="{i18n>headerCompanyRole}" id="label1"/>
+								</header>
+							</Column>
+							<Column id="column2">
+								<header>
+									<Label text="{i18n>headerCompanyAddress}" id="label2"/>
+								</header>
+							</Column>
+						</columns>
+					</Table>
+				</content>
+			</Page>
+		</pages>
+	</App>
+</mvc:View>

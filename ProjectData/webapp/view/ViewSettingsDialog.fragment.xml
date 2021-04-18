@@ -1,0 +1,24 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<ViewSettingsDialog id="viewSettingsDialog" confirm=".onConfirmViewSettingsDialog" resetFilters=".onResetFilters">
+		<sortItems>
+			<ViewSettingsItem id="sort1" text="{i18n>masterSort1}" key="code" selected="true"/>
+			<ViewSettingsItem id="sort2" text="{i18n>masterSort2}" key="status"/>
+			<ViewSettingsItem id="sort3" text="{i18n>masterSort3}" key="plannedStartDate"/>
+		</sortItems>
+		<filterItems>
+			<ViewSettingsCustomItem id="idCustomFilterItem1" text="{i18n>masterFilterName}" key="costFilter1">
+				<customControl>
+					<Input id="minCost" width="50%" class="sapUiSmallMargin"/>
+				</customControl>
+			</ViewSettingsCustomItem>
+			<ViewSettingsCustomItem id="idCustomFilterItem2" text="{i18n>masterFilterName2}" key="costFilter2">
+				<customControl>
+					<Input id="maxCost" width="50%" class="sapUiSmallMargin"/>
+				</customControl>
+			</ViewSettingsCustomItem>
+		</filterItems>
+		<groupItems>
+			<ViewSettingsItem text="{i18n>masterGroup1}" key="status"/>
+		</groupItems>
+	</ViewSettingsDialog>
+</core:FragmentDefinition>

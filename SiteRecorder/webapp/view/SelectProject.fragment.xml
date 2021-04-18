@@ -1,0 +1,35 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m">
+	<l:VerticalLayout class="sapUiContentPadding" width="auto">
+		<l:content>
+			<VBox>
+				<Table id="projectsTable" width="auto" items="{path: '/Projects', parameters: {expand: 'address'}, sorter: {path: 'code'}}"
+					mode="SingleSelectMaster" selectionChange="onProjectSelected" noDataText="{i18n>noProjects}" alternateRowColors="true"
+					updateFinished="onProjectListUpdateFinished">
+					<headerToolbar>
+						<Toolbar>
+							<content>
+								<Title text="{masterView>/selectProjectTitle}"/>
+							</content>
+						</Toolbar>
+					</headerToolbar>
+					<columns>
+						<Column width="25%">
+							<Label text="{i18n>projectCode}"/>
+						</Column>
+						<Column>
+							<Label text="{i18n>projectDesription}"/>
+						</Column>
+					</columns>
+					<items>
+						<ColumnListItem type="Active">
+							<cells>
+								<Text text="{code}"/>
+								<Text text="{description}"/>
+							</cells>
+						</ColumnListItem>
+					</items>
+				</Table>
+			</VBox>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

@@ -1,0 +1,78 @@
+<mvc:View xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core"
+	controllerName="master.data.MasterData.controller.CreateCompany">
+	<semantic:SemanticPage id="createPage" busy="{createCompanyView>/busy}" busyIndicatorDelay="{createCompanyView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{createCompanyView>/viewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{createCompanyView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:deleteAction>
+			<semantic:DeleteAction enabled="{= ${createCompanyView>/mode} === 'Edit' ? true : false}" press=".onDelete"/>
+		</semantic:deleteAction>
+		<semantic:closeAction>
+			<semantic:CloseAction press=".onCancel"/>
+		</semantic:closeAction>
+		<semantic:content>
+			<VBox displayInline="true">
+				<f:SimpleForm id="companyForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+					adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="false">
+					<Label id="companyNameLabel" text="{i18n>labelCompanyName}" required="true" labelFor="companyName"/>
+					<Input id="companyName" value="{companyName}" maxLength="200" showSuggestion="true" showValueHelp="false"
+						liveChange="_validateSaveEnablement" suggestionItems="{/Companies}">
+						<suggestionItems>
+							<core:Item id="suggestionItemID" text="{companyName}"/>
+						</suggestionItems>
+					</Input>
+					<Label id="companyRoleLabel" text="{i18n>labelCompanyRole}" required="false" labelFor="companyRole"/>
+					<Input id="companyRole" value="{class}" maxLength="20" showSuggestion="true" showValueHelp="false" liveChange="_validateSaveEnablement"
+						suggestionItems="{/Companies}">
+						<suggestionItems>
+							<core:Item id="roleItemID" text="{class}"/>
+						</suggestionItems>
+					</Input>
+					<Label id="addressLabel" text="{i18n>labelAddress}" required="false" labelFor="address"/>
+					<Select id="address" forceSelection="false" showSecondaryValues="false" items="{ path: '/Addresses' , sorter: { path: 'country_code' } }"
+						selectedKey="{address_ID}" change="_validateSaveEnablement">
+						<core:ListItem id="selectAddressItemID" key="{ID}" text="{country_code} {town} {street}"/>
+					</Select>
+				</f:SimpleForm>
+				<Table visible="{= ${createCompanyView>/mode} === 'Edit' ? true : false}"
+					items="{path: '/DisciplinesOfCompanies', parameters: {expand: 'discipline'}}" noDataText="{i18n>noData}" id="disciplineList"
+					busy="{createCompanyView>/busy}" busyIndicatorDelay="{createCompanyView>/delay}" mode="MultiSelect"
+					updateFinished="onDisciplineListUpdateFinished" selectionChange="onSelectionChange">
+					<headerToolbar>
+						<Toolbar>
+							<Title text="{createCompanyView>/listTitle}"/>
+							<ToolbarSpacer/>
+							<Button id="addButton" icon="sap-icon://add" type="Default" tooltip="{i18n>addDisciplineButtonTooltip}" press="onAddDiscipline"/>
+							<Button id="deleteButton" icon="sap-icon://delete" type="Default" enabled="false" tooltip="{i18n>deleteDisciplineButtonTooltip}"
+								press="onDeleteDiscipline"/>
+						</Toolbar>
+					</headerToolbar>
+					<items>
+						<ColumnListItem id="item0">
+							<cells>
+								<Text text="{discipline/code}" id="text1"/>
+								<Text text="{discipline/description}" id="text2"/>
+							</cells>
+						</ColumnListItem>
+					</items>
+					<columns>
+						<Column id="column0">
+							<header>
+								<Label text="{i18n>headerDisciplineCode}" id="label0"/>
+							</header>
+						</Column>
+						<Column id="column1">
+							<header>
+								<Label text="{i18n>haderDisciplineDescription}" id="label1"/>
+							</header>
+						</Column>
+					</columns>
+				</Table>
+			</VBox>
+		</semantic:content>
+	</semantic:SemanticPage>
+</mvc:View>

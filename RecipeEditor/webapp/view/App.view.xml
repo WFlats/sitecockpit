@@ -1,0 +1,20 @@
+<mvc:View controllerName="recipe.RecipeEditor.controller.App" displayBlock="true" height="100%" xmlns="sap.m" xmlns:f="sap.f"
+	xmlns:mvc="sap.ui.core.mvc">
+	<App id="app" busy="{appView>/busy}" busyIndicatorDelay="{appView>/delay}">
+		<pages>
+			<Page id="page" showHeader="false">
+				<!--
+				<customHeader>
+					<f:ShellBar title="{i18n>appTitle}" showMenuButton="false" homeIcon="./resources/sap/ui/documentation/sdk/images/logo_ui5.png"
+						showCopilot="false" showNotifications="true" menuButtonPressed="onMenuButtonPress" showProductSwitcher="false" notificationsNumber="2">
+						<f:profile>
+							<f:Avatar initials="WF"/>
+						</f:profile>
+					</f:ShellBar>
+				</customHeader>
+				-->
+				<f:FlexibleColumnLayout id="layout" layout="{appView>/layout}" backgroundDesign="Translucent"></f:FlexibleColumnLayout>
+			</Page>
+		</pages>
+	</App>
+</mvc:View>

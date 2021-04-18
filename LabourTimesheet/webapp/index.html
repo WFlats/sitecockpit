@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta charset="UTF-8">
+
+		<title>Labour Timesheets</title>
+
+		<script id="sap-ui-bootstrap"
+			src="https://sapui5.hana.ondemand.com/1.84.8/resources/sap-ui-core.js"
+			data-sap-ui-libs="sap.m"
+			data-sap-ui-logLevel = "debug"
+			data-sap-ui-theme="sap_belize"
+			data-sap-ui-compatVersion="edge"
+			data-sap-ui-appCacheBuster="./"
+			data-sap-ui-resourceroots='{"labour.timesheet.LabourTimesheet": "./"}'>
+		</script>
+
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+
+		<script>
+			sap.ui.getCore().attachInit(function() {
+				new sap.m.Shell({
+					homeIcon: {
+						favicon: "img/P1__Ico16x16.ico"
+					},
+					app: new sap.ui.core.ComponentContainer({
+						height : "100%",
+						name : "labour.timesheet.LabourTimesheet"
+					})
+				}).placeAt("content");
+			});
+		</script>
+	</head>
+
+	<body class="sapUiBody" id="content">
+	</body>
+
+</html>

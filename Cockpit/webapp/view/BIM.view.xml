@@ -1,0 +1,42 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:u="sap.ui.unified"
+	controllerName="cockpit.Cockpit.controller.BIM" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:vk="sap.ui.vk" displayBlock="true">
+	<semantic:SemanticPage id="BIMPage">
+		<semantic:titleHeading>
+			<Title id="title" text="BIM View"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<VBox height="100%">
+				<HBox id="loaderBox" visible="{path: 'BIMModel>/loaderBoxVisible'}" width="100%">
+					<u:FileUploader id="fileUploader" fileType="vds" placeholder="File name" width="100%" change="onFileSelected"/>
+				</HBox>
+				<HBox>
+					<layoutData>
+						<FlexItemData growFactor="1"/>
+					</layoutData>
+					<items>
+						<vk:Viewer id="viewer" toolbarTitle="" height="100%" nodeClicked="onNodeClicked">
+							<vk:layoutData>
+								<FlexItemData growFactor="1"/>
+							</vk:layoutData>
+						</vk:Viewer>
+					</items>
+				</HBox>
+			</VBox>
+		</semantic:content>
+		<semantic:titleCustomIconActions>
+			<OverflowToolbarToggleButton icon="sap-icon://upload-to-cloud" pressed="{path: 'BIMModel>/loaderBoxVisible'}"
+				tooltip="{i18n>buttonImportModelTooltip}"/>
+		</semantic:titleCustomIconActions>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseBIMPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

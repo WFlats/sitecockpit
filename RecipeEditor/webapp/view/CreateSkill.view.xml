@@ -1,0 +1,44 @@
+<mvc:View xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form"
+	xmlns:layout="sap.ui.layout" xmlns:core="sap.ui.core" controllerName="recipe.RecipeEditor.controller.CreateSkill">
+	<semantic:SemanticPage id="createSkillPage" busy="{detailView>/busy}" busyIndicatorDelay="{detailView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{createSkillView>/viewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<VBox id="vBox" class="sapUiSmallMargin">
+				<f:SimpleForm id="skillForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+					adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="false">
+					<Label id="UoMLabel" text="{i18n>editSkillSelectProfessionLabel}" labelFor="profession" required="true"/>
+					<Select id="profession" forceSelection="true" items="{ path: '/Professions' , sorter: { path: 'code' } }" selectedKey="{profession_ID}"
+						change="_validateSaveEnablement">
+						<core:Item id="selectProfessionItem" key="{ID}" text="{code} - {description}"/>
+					</Select>
+					<Label id="experienceLabel" text="{i18n>editSkillExperienceLabel}" labelFor="experience" required="true"/>
+					<Select id="experience" forceSelection="true" items="{ path: '/Experiences' , sorter: { path: 'code' } }" selectedKey="{experience_ID}"
+						change="_validateSaveEnablement">
+						<core:Item id="selectExperienceItem" key="{ID}" text="{code} - {description}"/>
+					</Select>
+				</f:SimpleForm>
+			</VBox>
+		</semantic:content>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{createSkillView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:titleCustomTextActions>
+			<Button id="cancelButton" text="{i18n>cancelButtonText}" press=".onCancel"/>
+		</semantic:titleCustomTextActions>
+		<!--Semantic ShareMenu Buttons-->
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

@@ -1,0 +1,64 @@
+<mvc:View controllerName="project.data.ProjectData.controller.Users" xmlns="sap.m" xmlns:semantic="sap.f.semantic"
+	xmlns:mvc="sap.ui.core.mvc" xmlns:layout="sap.ui.layout" xmlns:dnd="sap.ui.core.dnd">
+	<semantic:SemanticPage id="userPage" busy="{userModel>/busy}" busyIndicatorDelay="{userModel>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{i18n>userViewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<Table id="userList" width="auto" items="{path: '/Persons', parameters: {expand: 'profession, company'}}"
+				updateFinished=".onUserListUpdateFinished" noDataText="{i18n>noUsers}" busyIndicatorDelay="{userModel>/lineItemTableDelay}"
+				mode="MultiSelect" selectionChange="onSelectionChange">
+				<headerToolbar>
+					<Toolbar id="headerToolbarId">
+						<Title id="userListTitleId" text="{userModel>/userListTitle}" titleStyle="H3" level="H3"/>
+						<ToolbarSpacer id="spacerId"/>
+						<Button id="addUserButton" icon="sap-icon://add" press="onAddUser" enabled="{userModel>/selected}" tooltip="{i18n>addUsers}"/>
+					</Toolbar>
+				</headerToolbar>
+				<columns>
+					<Column id="lastNameColumnId">
+						<Text id="lastNameTextId" text="{i18n>lastName}"/>
+					</Column>
+					<Column id="firstNameColumnId">
+						<Text id="firstNameTextId" text="{i18n>firstName}"/>
+					</Column>
+					<Column id="professionColumnId">
+						<Text id="professionTextId" text="{i18n>profession}"/>
+					</Column>
+					<Column id="companyColumnId" minScreenWidth="Tablet" demandPopin="true">
+						<Text id="companyTextId" text="{i18n>company}"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem id="columnListItemId" type="Active">
+						<cells>
+							<Text id="lastNameDataId" text="{lastName}"/>
+							<Text id="firstNameDataId" text="{firstName}"/>
+							<Text id="professionDataId" text="{profession/description}"/>
+							<Text id="companyDataId" text="{company/companyName}"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+				<dragDropConfig>
+					<dnd:DragInfo id="dragID" groupName="availableToAssigned" sourceAggregation="items"/>
+					<dnd:DropInfo id="dropID" groupName="assignedToAvailable" drop="onRemoveUser"/>
+				</dragDropConfig>
+			</Table>
+		</semantic:content>
+		<!--Semantic ShareMenu Buttons-->
+		<semantic:sendEmailAction>
+			<semantic:SendEmailAction id="shareEmail" press=".onSendEmailPress"/>
+		</semantic:sendEmailAction>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

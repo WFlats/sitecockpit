@@ -1,0 +1,17 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m">
+	<l:VerticalLayout class="sapUiContentPadding" width="100%">
+		<l:content>
+			<Label text="{i18n>qualityDescription2}" labelFor="shortText"/>
+			<TextArea id="shortText" visible="true" enabled="true" valueState="None" editable="true" required="true" width="100%" rows="4"
+				maxLength="100" showExceededText="true" wrapping="None" liveChange="handleQualityChange"></TextArea>
+			<Label text="{i18n>qualityTypeDescription}" labelFor="qualityType" required="true"/>
+			<Select id="qualityType" forceSelection="true" change="handleQualityChange" items="{ path: '/QualityTypes' , sorter: { path: 'number' } }">
+				<core:Item key="{ID}" text="{description}"/>
+			</Select>
+			<Label text="{i18n>qualitySeverity}" labelFor="severityType" required="true"/>
+			<Select id="severityType" forceSelection="true" change="handleQualityChange" items="{ path: '/SeverityTypes' , sorter: { path: 'number' } }">
+				<core:Item key="{ID}" text="{description}"/>
+			</Select>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

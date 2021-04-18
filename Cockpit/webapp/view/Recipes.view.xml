@@ -1,0 +1,82 @@
+<mvc:View controllerName="cockpit.Cockpit.controller.Recipes" xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core" xmlns:layout="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:dnd="sap.ui.core.dnd">
+	<semantic:SemanticPage id="recipePage" busy="{recipeModel>/busy}" busyIndicatorDelay="{recipeModel>/delay}">
+		<semantic:titleHeading>
+			<Title text="{i18n>recipeSelectTitle}"/>
+		</semantic:titleHeading>
+		<semantic:titleCustomTextActions>
+			<ToggleButton pressed="{appView>/pullMode}" text="{= ${appView>/pullMode} ? 'Pull' : 'Push'}" press="onPullPushButtonPressed"
+				tooltip="{i18n>pullPushTooltip}"/>
+		</semantic:titleCustomTextActions>
+		<semantic:headerContent>
+			<ObjectIdentifier title="{appView>/activeRowText}" text="{i18n>createTaskExplanation}"/>
+			<HBox width="100%" class="sapUiTinyMargin">
+				<VBox class="sapUiSmallMargin">
+					<Label text="{= ${appView>/pullMode} ? 'End' : 'Start' }" required="true"/>
+					<DateTimePicker id="DTP"
+						value="{path:'appView>/activeStartDate', type:'sap.ui.model.type.DateTime', formatOptions: { style: 'short', strictParsing: true}}"
+						change=".onStartDateChanged"/>
+					<Label text=" {i18n>labelQuantity}" required="true"/>
+					<Input id="quantity" value="{path:'appView>/activeQuantity'}" type="Number" liveChange="checkQuantity"/>
+				</VBox>
+				<VBox class="sapUiSmallMargin">
+					<Label text="{i18n>labelShift}" required="true"/>
+					<Select id="shiftSelect" autoAdjustWidth="true" forceSelection="true" change="handleShiftChange"
+						items="{ path: 'workTimeModel>/shifts' , sorter: { path: 'defaultShift', descending: true } }">
+						<core:Item key="{ID}" text="{code}"/>
+					</Select>
+					<Label text="{i18n>projectProductivityFactor}" required="true"/>
+					<Input id="projectProdFactor" value="1.000" type="Number" width="33%" liveChange="handleProjectProdFactor"/>
+					<!-- took out crew selection as workforce management has now too many options
+					<Label text="{i18n>labelCrew}"/>
+					<Select id="crewSelect" autoAdjustWidth="true" forceSelection="false" change="handleCrewChange"
+						items="{ path: '/Crews' , sorter: { path: 'crewName', descending: false } }">
+						<core:Item key="{ID}" text="{crewName} ({crewNumber})"/>
+					</Select>
+					-->
+				</VBox>
+			</HBox>
+		</semantic:headerContent>
+		<semantic:content>
+			<List id="recipeList" noDataText="{recipeModel>/noRecipeDataText}" busy="{recipeModel>/busy}" busyIndicatorDelay="{recipeModel>/delay}"
+				items="{ path: '/Recipes', parameters: {expand: 'UoM, discipline, requiredSkills'}, sorter: [{ path: 'discipline/code', type:'sap.ui.model.type.String', descending: false, group: '.getDiscipline' }, {path: 'code', type:'sap.ui.model.type.String', descending: false}], groupHeaderFactory: '.createGroupHeader' }"
+				includeItemInSelection="true" mode="SingleSelectMaster" updateFinished="onRecipeListUpdateFinished" itemPress=".onRecipePick">
+				<headerToolbar>
+					<Toolbar>
+						<Text text="{path: 'recipeModel>/recipeTitle'}"/>
+						<ToolbarSpacer/>
+						<SearchField id="recipeSearchField" placeholder="{i18n>recipeSearchHint}" enableSuggestions="true" search="onRecipeSearch"
+							suggest="onSuggest" suggestionItems="{ path: '/Recipes', sorter: { path: 'code' } }" width="50%">
+							<suggestionItems>
+								<SuggestionItem text="{code}" description="{path:'shortText'} {path:'UoM/code'}" key="{ID}"/>
+							</suggestionItems>
+						</SearchField>
+					</Toolbar>
+				</headerToolbar>
+				<items>
+					<ObjectListItem title="{shortText}" intro="{code}" type="Active" number="{productivity}" numberUnit="{UoM/code}{i18n>UoMperHr}"
+						press=".onRecipePick">
+						<firstStatus>
+							<ObjectStatus text="{path: 'waitDuration', formatter: '.formatter.dhmFromMsAsStringOrNull'}"/>
+						</firstStatus>
+					</ObjectListItem>
+				</items>
+				<dragDropConfig>
+					<dnd:DragDropInfo sourceAggregation="items" targetElement="planningBoard-Table" targetAggregation="_intervalPlaceholders"
+						dragStart=".onRecipeDragStart"/>
+				</dragDropConfig>
+			</List>
+		</semantic:content>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseRecipePress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

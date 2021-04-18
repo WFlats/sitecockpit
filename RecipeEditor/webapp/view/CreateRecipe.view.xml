@@ -1,0 +1,76 @@
+<mvc:View xmlns="sap.m" xmlns:semantic="sap.f.semantic" xmlns:mvc="sap.ui.core.mvc" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form"
+	xmlns:unified="sap.ui.unified" xmlns:layout="sap.ui.layout" xmlns:core="sap.ui.core"
+	controllerName="recipe.RecipeEditor.controller.CreateRecipe">
+	<semantic:SemanticPage id="createPage" busy="{detailView>/busy}" busyIndicatorDelay="{detailView>/delay}">
+		<semantic:titleHeading>
+			<Title id="titleId" text="{createRecipeView>/viewTitle}" level="H2"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<VBox id="vBox" class="sapUiSmallMargin">
+				<f:SimpleForm id="recipeForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+					adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+					singleContainerFullSize="false">
+					<Label id="codeLabel" text="{i18n>recipeCode}" required="true" labelFor="code"/>
+					<Input id="code" type="Text" value="{code}" showSuggestion="true" showValueHelp="false" valueHelpRequest="handleValueHelp"
+						suggestionItems="{/Recipes}" liveChange="_validateSaveEnablement">
+						<suggestionItems>
+							<core:Item id="suggestionItemID" text="{code}"/>
+						</suggestionItems>
+					</Input>
+					<Label id="shortTextLabel" text="{i18n>recipeShortText}" required="true" labelFor="shortText"/>
+					<TextArea id="shortText" value="{shortText}" required="true" width="100%" rows="4" maxLength="50" showExceededText="true" wrapping="None"
+						liveChange="_validateSaveEnablement"></TextArea>
+					<Label id="UoMLabel" text="{i18n>recipeUoM}" labelFor="UoM" required="true"/>
+					<Select id="UoM" width="50%" forceSelection="true" items="{ path: '/UoMs' , sorter: { path: 'code' } }" selectedKey="{UoM_ID}"
+						change="_validateSaveEnablement">
+						<core:Item id="selectUoMItem" key="{ID}" text="{code}"/>
+					</Select>
+					<Label id="productivityLabel" text="{i18n>recipeProductivity} ({i18n>masterListPerHour})" labelFor="productivity" required="true"/>
+					<Input id="productivity" type="Number" width="30%"
+						value="{path: 'productivity', type:'sap.ui.model.type.Float', formatter: '.formatter.threeDecimals'}" liveChange="_validateSaveEnablement"/>
+					<Label id="waitingLabel" text="{i18n>waitingDuration}" labelFor="waitingTimeDays"/>
+					<Input id="waitingTimeDays" type="Number" change="_onWaitChange">
+						<layoutData>
+							<l:GridData span="XL1 L1 M1 S2"/>
+						</layoutData>
+					</Input>
+					<Input id="waitingTimeHours" type="Number" change="_onWaitChange">
+						<layoutData>
+							<l:GridData span="XL1 L1 M1 S2"/>
+						</layoutData>
+					</Input>
+					<Input id="waitingTimeMinutes" type="Number" change="_onWaitChange">
+						<layoutData>
+							<l:GridData span="XL1 L1 M1 S2"/>
+						</layoutData>
+					</Input>
+					<Label id="disciplineLabel" text="{i18n>recipeDiscipline}" labelFor="discipline" required="true"/>
+					<Select id="discipline" forceSelection="true" items="{ path: '/Disciplines' , sorter: { path: 'code' } }" selectedKey="{discipline_ID}"
+						change="_onDisciplineChange">
+						<core:Item id="selectDisciplineItem" key="{ID}" text="{code} {description}"/>
+					</Select>
+					<Label id="colorLabel" text="{i18n>recipeColor}" labelFor="cp"/>
+					<unified:ColorPicker id="cp" mode="HSL" colorString="{colour}" change="colorPicked"/>
+				</f:SimpleForm>
+			</VBox>
+		</semantic:content>
+		<semantic:titleMainAction>
+			<semantic:TitleMainAction enabled="{createRecipeView>/enableSave}" text="{i18n>saveButtonText}" press=".onSave"/>
+		</semantic:titleMainAction>
+		<semantic:titleCustomTextActions>
+			<Button id="cancelButton" text="{i18n>cancelButtonText}" press=".onCancel"/>
+		</semantic:titleCustomTextActions>
+		<!--Semantic ShareMenu Buttons-->
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

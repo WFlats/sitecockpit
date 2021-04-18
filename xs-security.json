@@ -1,0 +1,69 @@
+{
+	"xsappname": "SiteCockpit-MainSpace",
+	"tenant-mode": "dedicated",
+	"description": "Security profile of called application",
+	"scopes": [{
+		"name": "uaa.user",
+		"description": "UAA"
+	}, {
+		"name": "$XSAPPNAME.Admin",
+		"description": "Edit base, master data, create projects"
+	}, {
+		"name": "$XSAPPNAME.Project_User",
+		"description": "edit project"
+	}, {
+		"name": "$XSAPPNAME.Recipe_Manager",
+		"description": "edit recipes"
+	}, {
+		"name": "$XSAPPNAME.Foreman",
+		"description": "add data to tasks"
+	}, {
+		"name": "$XSAPPNAME.Operations_Manager",
+		"description": "analyse projects"
+	}],
+	"attributes": [{
+		"name": "Project_Code",
+		"description": "Project Code",
+		"valueType": "string",
+		"valueRequired": true
+	}],
+	"role-templates": [{
+		"name": "Token_Exchange",
+		"description": "UAA",
+		"scope-references": [
+			"uaa.user"
+		]
+	}, {
+		"name": "Admin",
+		"description": "Access to base, master data; create projects",
+		"scope-references": [
+			"$XSAPPNAME.Admin"
+		]
+	}, {
+		"name": "Project_User",
+		"description": "Allowed to edit data of project",
+		"scope-references": [
+			"$XSAPPNAME.Project_User"
+		],
+		"attribute-references": ["Project_Code"]
+	}, {
+		"name": "Foreman",
+		"description": "Allowed to add data to tasks",
+		"scope-references": [
+			"$XSAPPNAME.Foreman"
+		],
+		"attribute-references": ["Project_Code"]
+	}, {
+		"name": "Recipe_Manager",
+		"description": "Allowed to edit recipes",
+		"scope-references": [
+			"$XSAPPNAME.Recipe_Manager"
+		]
+	}, {
+		"name": "Operations_Manager",
+		"description": "Allowed to analyse projects",
+		"scope-references": [
+			"$XSAPPNAME.Operations_Manager"
+		]
+	}]
+}
