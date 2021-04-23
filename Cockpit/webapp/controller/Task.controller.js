@@ -1225,7 +1225,30 @@ sap.ui.define([
 									initialFocus: MessageBox.Action.CANCEL,
 									onClose: function (sAction) {
 										if (sAction === "OK") {
-											oModel.remove(sObjectPath);
+											// save quantity, duration of previous measurement if last measurement was deleted
+											// aItems will change shortly after remove
+											var aItems = that.getView().byId("measurementList").getItems(),
+												bLastMeasurement = sObjectPath === aItems[aItems.length - 1].getBindingContext().getPath();
+											if (bLastMeasurement) {
+												if (aItems.length > 1) { // there is a previous measurement
+													sQuantity = aItems[aItems.length - 2].getBindingContext().getProperty("measurementQuantity");
+													sDuration = aItems[aItems.length - 2].getBindingContext().getProperty("netDuration");
+												} else {
+													sQuantity = 0;
+													sDuration = 0;
+												}
+											}
+											oModel.remove(sObjectPath, {
+												success: function () {
+													// update performance values if the last measurement was deleted
+													if (bLastMeasurement) { // there is a previous measurement
+														that._updateTaskAfterNewMeasurement(sTaskID, sQuantity, sDuration);
+													}
+												},
+												error: function (oError) {
+													Log.error("Error deleting measurement");
+												}
+											});
 										}
 									}
 								}
@@ -1408,6 +1431,7 @@ sap.ui.define([
 		},
 
 		_updateTaskAfterNewMeasurement: function (sTaskID, quantity, duration) {
+			// quantity, duratio are from last measurement (=actual)
 			var oModel = this.getModel(),
 				sPath = "/" + oModel.createKey("Tasks", {
 					ID: sTaskID
@@ -1417,7 +1441,7 @@ sap.ui.define([
 				}),
 				oShift = this.getShiftFromID(oTask.shift_ID),
 				mRemainingQuantity;
-			oTask.currentProductivity = parseFloat(quantity / duration).toFixed(3);
+			oTask.currentProductivity = (quantity === 0) ? oTask.plannedProductivity : parseFloat(quantity / duration).toFixed(3);
 			oTask.KPI = parseFloat(oTask.currentProductivity / (oTask.plannedProductivity * oTask.productivityFactor)).toFixed(3);
 			// calculate duration and end date based on remaining quantity and current productivity
 			mRemainingQuantity = oTask.quantity - quantity;
@@ -1430,6 +1454,11 @@ sap.ui.define([
 				} else {
 					oTask.estimatedEnd = oNow;
 				}
+			}
+			// update actualQuantity and subby total actual cost if not lump sum
+			oTask.actualQuantity = parseFloat(quantity).toFixed(3);
+			if (oTask.price && !oTask.lumpsum) { // unit rate contract
+				oTask.actualTotalPrice = parseFloat(oTask.actualQuantity * oTask.price).toFixed(3);
 			}
 			oModel.update(sPath, oTask);
 		},
