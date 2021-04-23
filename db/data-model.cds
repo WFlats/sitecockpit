@@ -332,7 +332,7 @@ entity BIMLocations : managed {
 entity Pics : managed {
 	key ID			: UUID;
 		project     : association[1] to Projects;
-		pic			: LargeBinary @Core.MediaType : 'image/png'; /added annotation
+		pic			: LargeBinary @Core.MediaType : 'image/png'; //added annotation
 		measurement	: association to Measurements;
 		problem		: association to ProblemCards;
 }
@@ -365,7 +365,10 @@ entity Tasks : managed {
         UoM                  : association[1]    to UoMs;
         shift				 : association to Shifts;
         quantity             : Decimal(10, 3);
+        actualQuantity		 : Decimal(10, 3); // = cumulative measurement
         price				 : Decimal(10, 3); // in case of subcontracted
+        plannedTotalPrice	 : Decimal(10, 3);
+        actualTotalPrice	 : Decimal(10, 3); // if not lump sum it can differ from plannedTotalPrice
         lumpSum				 : Boolean; // if true the total doesn't increase even if cumulative quants are higher
         plannedProductivity  : Decimal(10, 3);
         productivityFactor   : Decimal(5, 3); // a task specific factor
@@ -395,7 +398,7 @@ entity Tasks : managed {
 							        approved = 5;
 								};
         buffer				 : Boolean; // e.g. drying time
-        // pinned				: Boolean; // must not be moved
+        pinned				 : Boolean; // must not be moved
 		company				 : association to CompaniesForProjects;
         measurements         : composition of many Measurements     on measurements.task=$self;
         problems             : composition of many ProblemCards    on problems.task=$self;

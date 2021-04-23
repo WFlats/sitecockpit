@@ -70,7 +70,6 @@ sap.ui.define([
 					plannedLabourCost: String(0.00),
 					actualLabourCost: String(0.00),
 					currency: "",
-					subcontractEditMode: false,
 					crewClashTitle: "",
 					workerClashTitle: ""
 				});
@@ -118,6 +117,7 @@ sap.ui.define([
 				sCurrencyCode = oModel.createBindingContext(sProjectPath).getProperty("currency_code"),
 				oCrewsList = this.byId("taskCrewsList"),
 				oWorkersList = this.byId("taskWorkersList"),
+				aSubFilter,
 				oWorkforceClashModel = this.getModel("workforceClashModel"),
 				that = this;
 
@@ -2880,35 +2880,37 @@ sap.ui.define([
 
 		/////////////////////////////////////////////////////////////////SUBCONTRACT////////////////////////////////////
 
-		editSaveSubby: function () {
-			var oModel = this.getModel(),
-				sPrice = parseFloat(this.byId("priceInput").getValue()).toFixed(3) || parseFloat("0").toFixed(3),
-				bLumpSum = this.byId("lsCheckBox").getSelected(),
-				sCompanyID = this.byId("selectSubby").getSelectedKey(),
+		editSubby: function () {
+			var oFrag = sap.ui.core.Fragment,
 				sProjectID = this.getView().getBindingContext().getProperty("project_ID"),
 				sDisciplineID = this.getView().getBindingContext().getProperty("discipline_ID"),
 				aSubFilter;
 
-			if (this.getModel("taskView").getProperty("/subcontractEditMode")) { // leave edit mode, i.e. save
-				this.getModel("taskView").setProperty("/subcontractEditMode", false);
-				this.byId("saveSubby").setTooltip(this.getResourceBundle().getText("edit"));
-				sPrice = formatter.numberUnit(sPrice);
-				oModel.setProperty("price", sPrice, this.getView().getBindingContext());
-				oModel.setProperty("lumpSum", bLumpSum, this.getView().getBindingContext());
-				oModel.setProperty("company_ID", sCompanyID, this.getView().getBindingContext());
-				oModel.submitChanges();
+			this._createSubbyEditDialog();
+			// filter company list
+			aSubFilter = [new Filter({
+				filters: [
+					new Filter("project_ID", sap.ui.model.FilterOperator.EQ, sProjectID),
+					new Filter("discipline_ID", sap.ui.model.FilterOperator.EQ, sDisciplineID)
+				],
+				and: true
+			})];
+			oFrag.byId("mySubbyFrag", "selectSubby").getBinding("items").filter(aSubFilter);
+			oFrag.byId("mySubbyFrag", "selectSubby").setSelectedKey(this.getView().getBindingContext().getProperty("company_ID"));
+			this.oSubbyEditDialog.getButtons()[0].setEnabled(false);
+			// when re-opening the dialog it happens that both fields are enabled
+			if (this.getView().getBindingContext().getProperty("lumpSum")) {
+				oFrag.byId("mySubbyFrag", "unitRate").setEnabled(false);
+				oFrag.byId("mySubbyFrag", "plannedCost").setEnabled(true);
 			} else {
-				aSubFilter = [new Filter({
-					filters: [
-						new Filter("project_ID", sap.ui.model.FilterOperator.EQ, sProjectID),
-						new Filter("discipline_ID", sap.ui.model.FilterOperator.EQ, sDisciplineID)
-					],
-					and: true
-				})];
-				this.byId("selectSubby").getBinding("items").filter(aSubFilter);
-				this.getModel("taskView").setProperty("/subcontractEditMode", true);
-				this.byId("saveSubby").setTooltip(this.getResourceBundle().getText("save"));
+				oFrag.byId("mySubbyFrag", "unitRate").setEnabled(true);
+				oFrag.byId("mySubbyFrag", "plannedCost").setEnabled(false);
 			}
+			this.oSubbyEditDialog.open();
+		},
+
+		handleSubbyChange: function () {
+			this._checkSubbySaveEnablement();
 		},
 
 		deleteSubby: function () {
@@ -2917,44 +2919,138 @@ sap.ui.define([
 
 			oModel.setProperty("price", null, oBC);
 			oModel.setProperty("company_ID", null, oBC);
+			oModel.setProperty("plannedTotalPrice", null, oBC);
+			oModel.setProperty("actualTotalPrice", null, oBC);
 			oModel.setProperty("lumpSum", null, oBC);
-			oModel.submitChanges();
-		},
-
-		onPriceEdit: function (oEvent) {
-			var sPrice = oEvent.getParameter("value");
-
-			if (isNaN(sPrice)) {
-				this.byId("priceInput").setValueState("Error");
-				this.byId("priceInput").setValueStateText(this.getResourceBundle().getText("errorPriceInput"));
-			} else {
-				this.byId("priceInput").setValueState("None");
-				this.byId("priceInput").setValueStateText("");
-			}
+			oModel.submitChanges({
+				error: function (oError) {
+					Log.error("Error deleting subcontractor prices");
+				}
+			});
+			this.byId("deleteSubby").setEnabled(false);
 		},
 
 		onPriceChange: function (oEvent) {
-			var sPrice = oEvent.getParameters().value,
-				sPlannedCost = formatter.numberProduct(sPrice, this.getView().getBindingContext().getProperty("quantity"));
-
-			this.byId("plannedSubCost").setText(sPlannedCost);
-			this.onLumpSumChanged();
+			var oFrag = sap.ui.core.Fragment,
+				sPrice = oEvent.getParameter("value"),
+				sPlannedQuantity = oFrag.byId("mySubbyFrag", "plannedQuantity").getValue(),
+				sActualQuantity = oFrag.byId("mySubbyFrag", "actualQuantity").getValue();
+			// cannot be lump sum
+			if (isNaN(sPrice) || Number(sPrice) < 0) {
+				oFrag.byId("mySubbyFrag", "unitRate").setValueState("Error");
+				oFrag.byId("mySubbyFrag", "unitRate").setValueStateText(this.getResourceBundle().getText("errorPriceInput"));
+			} else {
+				oFrag.byId("mySubbyFrag", "unitRate").setValueState("None");
+				oFrag.byId("mySubbyFrag", "unitRate").setValueStateText("");
+				oFrag.byId("mySubbyFrag", "plannedCost").setValue(parseFloat(sPlannedQuantity * sPrice).toFixed(2));
+				oFrag.byId("mySubbyFrag", "actualCost").setValue(parseFloat(sActualQuantity * sPrice).toFixed(2));
+			}
+			this._checkSubbySaveEnablement();
 		},
 
-		onLumpSumChanged: function () { // sets the actual cost
-			var bLumpSum = this.byId("lsCheckBox").getSelected(),
-				sActualCost,
-				sPrice,
-				sQuantity;
+		onPlannedTotalPriceChange: function (oEvent) {
+			var oFrag = sap.ui.core.Fragment,
+				sTotalPrice = oEvent.getParameter("value"),
+				sPlannedQuantity = oFrag.byId("mySubbyFrag", "plannedQuantity").getValue();
+			// must be lump sum
+			if (isNaN(sTotalPrice) || Number(sTotalPrice) < 0) {
+				oFrag.byId("mySubbyFrag", "plannedCost").setValueState("Error");
+				oFrag.byId("mySubbyFrag", "plannedCost").setValueStateText(this.getResourceBundle().getText("errorTotalPriceInput"));
+			} else {
+				oFrag.byId("mySubbyFrag", "plannedCost").setValueState("None");
+				oFrag.byId("mySubbyFrag", "plannedCost").setValueStateText("");
+				oFrag.byId("mySubbyFrag", "unitRate").setValue(parseFloat(sTotalPrice / sPlannedQuantity).toFixed(2));
+				oFrag.byId("mySubbyFrag", "actualCost").setValue(parseFloat(sTotalPrice).toFixed(2));
+			}
+			this._checkSubbySaveEnablement();
+		},
+
+		onLumpSumChanged: function () { // also sets the actual cost
+			var oFrag = sap.ui.core.Fragment,
+				sActualQuantity = oFrag.byId("mySubbyFrag", "actualQuantity").getValue(),
+				sPrice = oFrag.byId("mySubbyFrag", "unitRate").getValue(),
+				sPlannedTotalPrice = oFrag.byId("mySubbyFrag", "plannedCost").getValue(),
+				bLumpSum = oFrag.byId("mySubbyFrag", "lumpSum").getSelected();
 
 			if (bLumpSum) {
-				this.byId("actualSubCost").setText(this.byId("plannedSubCost").getText());
+				oFrag.byId("mySubbyFrag", "actualCost").setValue(parseFloat(sPlannedTotalPrice).toFixed(2));
+				oFrag.byId("mySubbyFrag", "unitRate").setEnabled(false);
+				oFrag.byId("mySubbyFrag", "plannedCost").setEnabled(true);
 			} else {
-				sPrice = this.byId("priceInput").getValue();
-				sQuantity = this.getModel("taskView").getProperty("/cumulativeQuantity");
+				oFrag.byId("mySubbyFrag", "actualCost").setValue(parseFloat(sActualQuantity * sPrice).toFixed(2));
+				oFrag.byId("mySubbyFrag", "unitRate").setEnabled(true);
+				oFrag.byId("mySubbyFrag", "plannedCost").setEnabled(false);
+			}
+			this._checkSubbySaveEnablement();
+		},
 
-				sActualCost = parseFloat(sPrice * sQuantity).toFixed(3);
-				this.byId("actualSubCost").setText(sActualCost);
+		_checkSubbySaveEnablement: function () {
+			var oFrag = sap.ui.core.Fragment,
+				oBC = this.getView().getBindingContext();
+
+			// check for error states and that subby is selected
+			if (!oFrag.byId("mySubbyFrag", "selectSubby").getSelectedKey() ||
+				oFrag.byId("mySubbyFrag", "unitRate").getValueState() === "Error" ||
+				oFrag.byId("mySubbyFrag", "plannedCost").getValueState() === "Error") {
+				this.oSubbyEditDialog.getButtons()[0].setEnabled(false);
+				return;
+			}
+			// check if values are changed
+			if (oBC.getProperty("company_ID") === oFrag.byId("mySubbyFrag", "selectSubby").getSelectedKey() &&
+				oBC.getProperty("price") === parseFloat(oFrag.byId("mySubbyFrag", "unitRate").getValue()).toFixed(3) &&
+				oBC.getProperty("plannedTotalPrice") === parseFloat(oFrag.byId("mySubbyFrag", "plannedCost").getValue()).toFixed(3) &&
+				oBC.getProperty("lumpSum") === oFrag.byId("mySubbyFrag", "lumpSum").getSelected()) {
+				this.oSubbyEditDialog.getButtons()[0].setEnabled(false);
+				return;
+			}
+			this.oSubbyEditDialog.getButtons()[0].setEnabled(true);
+		},
+
+		_createSubbyEditDialog: function () {
+			var oFrag = sap.ui.core.Fragment,
+				that = this,
+				oModel = this.getModel(),
+				oBC = this.getView().getBindingContext(),
+				sTitle = this.getResourceBundle().getText("taskSubbyEditTitle"),
+				sCancel = this.getResourceBundle().getText("measurementDialogCancelButtonText"),
+				sSave = this.getResourceBundle().getText("measurementDialogSaveButtonText");
+
+			if (!that.oSubbyEditDialog) {
+
+				that.oSubbyEditDialog = new Dialog({
+					title: sTitle,
+					contentWidth: "35%",
+					resizable: true,
+					draggable: true,
+					content: [
+						sap.ui.xmlfragment("mySubbyFrag", "cockpit.Cockpit.view.EditSubby", this)
+					],
+					buttons: [{
+						text: sSave,
+						enabled: false,
+						press: function () {
+							oModel.setProperty("company_ID", oFrag.byId("mySubbyFrag", "selectSubby").getSelectedKey(), oBC);
+							oModel.setProperty("price", parseFloat(oFrag.byId("mySubbyFrag", "unitRate").getValue()).toFixed(3), oBC);
+							oModel.setProperty("plannedTotalPrice", parseFloat(oFrag.byId("mySubbyFrag", "plannedCost").getValue()).toFixed(3), oBC);
+							oModel.setProperty("actualTotalPrice", parseFloat(oFrag.byId("mySubbyFrag", "actualCost").getValue()).toFixed(3), oBC);
+							oModel.setProperty("lumpSum", oFrag.byId("mySubbyFrag", "lumpSum").getSelected(), oBC);
+							oModel.submitChanges({
+								error: function (oError) {
+									Log.error("Error updating subcontractor prices");
+								}
+							});
+							that.oSubbyEditDialog.close();
+						}
+					}, {
+						text: sCancel,
+						enabled: true,
+						press: function () {
+							that.oSubbyEditDialog.close();
+						}
+					}]
+				});
+				that.oSubbyEditDialog.addStyleClass("sapUiContentPadding");
+				that.getView().addDependent(that.oSubbyEditDialog);
 			}
 		},
 

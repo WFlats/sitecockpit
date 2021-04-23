@@ -324,10 +324,8 @@
 									<content>
 										<Title text="{i18n>toolbarTitleSubby} [{taskView>/currency}]"/>
 										<ToolbarSpacer/>
-										<Button id="deleteSubby" type="Default" icon="sap-icon://delete" press="deleteSubby" tooltip="{i18n>delete}"
-											enabled="{= ${taskView>/subcontractEditMode} ? false : true}"/>
-										<Button id="saveSubby" type="Default" icon="{= ${taskView>/subcontractEditMode} ? 'sap-icon://save' : 'sap-icon://edit'}"
-											press="editSaveSubby" tooltip="{i18n>edit}"/>
+										<Button id="deleteSubby" type="Default" icon="sap-icon://delete" press="deleteSubby" enabled="{= ${company_ID} ? true : false}"/>
+										<Button id="editSubby" type="Default" icon="sap-icon://edit" press="editSubby" tooltip="{i18n>edit}"/>
 									</content>
 								</Toolbar>
 							</headerToolbar>
@@ -335,33 +333,43 @@
 								<Column>
 									<Label text="{i18n>company}"/>
 								</Column>
-								<Column hAlign="Right" width="15%" minScreenWidth="Tablet" demandPopin="true">
+								<Column hAlign="Right" width="10%" minScreenWidth="Tablet" demandPopin="true">
+									<Label text="{i18n>actualQuantity}"/>
+								</Column>
+								<Column hAlign="Right" width="10%" minScreenWidth="Tablet" demandPopin="true">
 									<Label text="{i18n>unitRate}"/>
 								</Column>
-								<Column hAlign="Right" width="20%" minScreenWidth="Tablet" demandPopin="true">
+								<Column hAlign="Right" width="15%" minScreenWidth="Tablet" demandPopin="true">
 									<Label text="{i18n>plannedCost}"/>
 								</Column>
-								<Column hAlign="Right" width="20%" minScreenWidth="Tablet" demandPopin="true">
+								<Column hAlign="Right" width="15%" minScreenWidth="Tablet" demandPopin="true">
 									<Label text="{i18n>actualCost}"/>
 								</Column>
-								<Column hAlign="Right" width="15%" minScreenWidth="Tablet" demandPopin="true">
+								<Column hAlign="Right" width="10%" minScreenWidth="Tablet" demandPopin="true">
 									<Label text="{i18n>lumpSum}"/>
 								</Column>
 							</columns>
 							<items>
 								<ColumnListItem>
 									<cells>
-										<Select id="selectSubby" forceSelection="true" change="handleSubbyChange"
-											items="{ path: '/CompaniesForProjects' , parameters: {expand: 'discipline, company'}, sorter: { path: 'discipline/code' } }"
-											selectedKey="{company_ID}" enabled="{taskView>/subcontractEditMode}">
+										<!--
+										<Select id="selectSubby" forceSelection="false" change="handleSubbyChange"
+											items="{ path: '/CompaniesForProjects' , parameters: {expand: 'discipline, company'}, sorter: { path: 'discipline/code' } }" enabled="false">
 											<core:Item key="{ID}" text="{discipline/code} {company/companyName}"/>
 										</Select>
 										<Input id="priceInput" value="{ path:'price', type:'sap.ui.model.type.Float', formatOptions: { decimals: 3 } }" type="Number"
-											enabled="{taskView>/subcontractEditMode}" textAlign="End" change="onPriceChange" liveChange="onPriceEdit"/>
-										<Text id="plannedSubCost" text="{parts: [{path: 'price' }, {path: 'quantity' }], formatter: '.formatter.numberProduct' }"/>
+											enabled="false" textAlign="End" liveChange="onPriceEdit"/>
+										<Input id="plannedSubCost" value="" type="Number" enabled="false" liveChange="onPriceEdit"/>
 										<Text id="actualSubCost"
 											text="{parts: [{path: 'price' }, {path: 'taskView>/cumulativeQuantity' }, {path: 'quantity'}, {path: 'lumpSum'}], formatter: '.formatter.numberProductForActualSubCost' }"/>
-										<CheckBox id="lsCheckBox" selected="{lumpSum}" enabled="{taskView>/subcontractEditMode}" select="onLumpSumChanged"/>
+										<CheckBox id="lsCheckBox" selected="{lumpSum}" enabled="false" select="onLumpSumChanged"/>
+										-->
+										<Text text="{company/company/companyName}"/>
+										<Text text="{path: 'actualQuantity', formatter: '.formatter.numberUnit'}"/>
+										<Text text="{path: 'price', formatter: '.formatter.numberUnit'}"/>
+										<Text text="{path: 'plannedTotalPrice', formatter: '.formatter.currencyValue'}"/>
+										<Text text="{path: 'actualTotalPrice', formatter: '.formatter.currencyValue'}"/>
+										<CheckBox selected="{lumpSum}" enabled="false"/>
 									</cells>
 								</ColumnListItem>
 							</items>

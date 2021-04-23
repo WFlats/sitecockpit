@@ -1,0 +1,30 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:f="sap.ui.layout.form">
+	<l:VerticalLayout>
+		<l:content>
+			<f:SimpleForm id="subbyEditForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="4" labelSpanS="6"
+				adjustLabelSpan="false" emptySpanXL="-1" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+				singleContainerFullSize="false">
+				<Label text="{i18n>company}" required="true" labelFor="selectSubby"/>
+				<Select id="selectSubby" forceSelection="false" change="handleSubbyChange"
+					items="{ path: '/CompaniesForProjects' , parameters: {expand: 'discipline, company'}, sorter: { path: 'discipline/code' } }" enabled="true"
+					selectedKey="{company_ID}">
+					<core:Item key="{ID}" text="{discipline/code} {company/companyName}"/>
+				</Select>
+				<Label text="{i18n>taskQuantity} [{UoM/code}]" labelFor="quantity"/>
+				<Input id="plannedQuantity" type="Number" required="true" value="{path: 'quantity'}" enabled="false"/>
+				<Label text="{i18n>taskActualQuantity} [{UoM/code}]" labelFor="actualQuantity"/>
+				<Input id="actualQuantity" type="Number" required="true" value="{path: 'actualQuantity'}" enabled="false"/>
+				<Label id="unitRateLabel" text="{i18n>unitRate}" required="true" labelFor="unitRate"/>
+				<Input id="unitRate" value="{path: 'price'}" type="Number" valueLiveUpdate="true" liveChange="onPriceChange"
+					enabled="{= ${lumpSum} ? false : true}"/>
+				<Label id="plannedCostLabel" text="{i18n>plannedCost}" required="true" labelFor="plannedCost"/>
+				<Input id="plannedCost" value="{path: 'plannedTotalPrice'}" type="Number" valueLiveUpdate="true" liveChange="onPlannedTotalPriceChange"
+					enabled="{lumpSum}"/>
+				<Label id="actualCostLabel" text="{i18n>actualCost}" required="false" labelFor="actualCost"/>
+				<Input id="actualCost" value="{path: 'actualTotalPrice'}" enabled="false"/>
+				<Label id="lumpSumLabel" text="{i18n>lumpSum2}" required="false" labelFor="lumpSum"/>
+				<CheckBox id="lumpSum" selected="{lumpSum}" select="onLumpSumChanged"/>
+			</f:SimpleForm>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>
