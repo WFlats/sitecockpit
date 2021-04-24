@@ -17,7 +17,7 @@
 		</semantic:titleCustomTextActions>
 		<semantic:headerContent>
 			<ObjectHeader title="{path: 'shortText'}" showTitleSelector="false"
-				number="{parts: [{path: 'taskView>/cumulativeQuantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}, {path: 'i18n>ofTotal' }, {path: 'quantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}]} "
+				number="{parts: [{path: 'actualQuantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}, {path: 'i18n>ofTotal' }, {path: 'quantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}]} "
 				numberUnit="{path: 'UoM/code' }">
 				<ObjectAttribute title="{i18n>taskLocation}" text="{location/code} {location/description}"/>
 				<ObjectAttribute title="{i18n>taskDiscipline}" text="{discipline/code} {discipline/description}"/>
@@ -25,8 +25,8 @@
 				<statuses>
 					<ObjectStatus title="{i18n>taskIconTabPerformanceTitle}" text="{KPI}" state="{path: 'KPI', formatter: '.formatter.stateFormatter'}"
 						icon="{path: 'KPI', formatter: '.formatter.iconFormatter'}" visible="{= ${status} > 1 ? true : false}"/>
-					<ProgressIndicator class="sapUiNoMarginBottom" width="50%" percentValue="{= ${taskView>/cumulativeQuantity} / ${quantity} * 100}"
-						displayValue="{parts: [{path: 'taskView>/cumulativeQuantity'}, {path: 'quantity'}], formatter: '.formatter.progress'} %" showValue="true"
+					<ProgressIndicator class="sapUiNoMarginBottom" width="50%" percentValue="{= ${actualQuantity} / ${quantity} * 100}"
+						displayValue="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}], formatter: '.formatter.progress'} %" showValue="true"
 						state="{path: 'KPI', formatter: '.formatter.stateFormatter'}" visible="{= ${status} > 1 ? true : false}" displayOnly="true"/>
 					<ObjectStatus class="sapMObjectStatusLarge" text="{path: 'status', formatter: '.formatter.statusTextFormatter'}"
 						state="{= ${status} === 3 ? 'Error': ${status} === 5 ? 'Success' : 'None'}"
@@ -133,44 +133,6 @@
 									</cells>
 								</ColumnListItem>
 							</items>
-							<!-- items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{i18n>taskLabourHours} [{i18n>hoursMinutes}]"/>
-										<Text text="{path: 'taskView>/plannedLabourHours', formatter: '.formatter.hoursToHoursMinutes'}"/>
-										<Text text="{path: 'taskView>/actualLabourHours', formatter: '.formatter.hoursToHoursMinutes'}"/>
-									</cells>
-								</ColumnListItem>
-							</items>
-							<items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{i18n>taskLabourHoursPerUoM} {path: 'UoM/code'}"/>
-										<Text text="{parts: [{path: 'taskView>/plannedLabourHours'}, {path: 'quantity'}], formatter: '.formatter.labourHoursPerUoM'}"/>
-										<Text
-											text="{parts: [{path: 'taskView>/actualLabourHours'}, {path: 'taskView>/cumulativeQuantity'}], formatter: '.formatter.labourHoursPerUoM'}"/>
-									</cells>
-								</ColumnListItem>
-							</items>
-							<items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{i18n>taskLabourCost} [{taskView>/currency}]"/>
-										<Text text="{taskView>/plannedLabourCost}"/>
-										<Text text="{taskView>/actualLabourCost}"/>
-									</cells>
-								</ColumnListItem>
-							</items>
-							<items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{i18n>taskLabourCostPerUoM} {path: 'UoM/code'}"/>
-										<Text text="{parts: [{path: 'taskView>/plannedLabourCost'}, {path: 'quantity'}], formatter: '.formatter.labourCostPerUoM'}"/>
-										<Text
-											text="{parts: [{path: 'taskView>/actualLabourCost'}, {path: 'taskView>/cumulativeQuantity'}], formatter: '.formatter.labourCostPerUoM'}"/>
-									</cells>
-								</ColumnListItem>
-							</items -->
 						</Table>
 					</IconTabFilter>
 					<IconTabFilter text="{i18n>taskIconTabMeasurementsTitle}" count="{taskView>/countMeasurements}" icon="sap-icon://measurement-document">
@@ -352,18 +314,6 @@
 							<items>
 								<ColumnListItem>
 									<cells>
-										<!--
-										<Select id="selectSubby" forceSelection="false" change="handleSubbyChange"
-											items="{ path: '/CompaniesForProjects' , parameters: {expand: 'discipline, company'}, sorter: { path: 'discipline/code' } }" enabled="false">
-											<core:Item key="{ID}" text="{discipline/code} {company/companyName}"/>
-										</Select>
-										<Input id="priceInput" value="{ path:'price', type:'sap.ui.model.type.Float', formatOptions: { decimals: 3 } }" type="Number"
-											enabled="false" textAlign="End" liveChange="onPriceEdit"/>
-										<Input id="plannedSubCost" value="" type="Number" enabled="false" liveChange="onPriceEdit"/>
-										<Text id="actualSubCost"
-											text="{parts: [{path: 'price' }, {path: 'taskView>/cumulativeQuantity' }, {path: 'quantity'}, {path: 'lumpSum'}], formatter: '.formatter.numberProductForActualSubCost' }"/>
-										<CheckBox id="lsCheckBox" selected="{lumpSum}" enabled="false" select="onLumpSumChanged"/>
-										-->
 										<Text text="{company/company/companyName}"/>
 										<Text text="{path: 'actualQuantity', formatter: '.formatter.numberUnit'}"/>
 										<Text text="{path: 'price', formatter: '.formatter.numberUnit'}"/>
