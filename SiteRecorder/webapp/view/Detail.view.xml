@@ -16,7 +16,7 @@
 		</semantic:titleCustomTextActions>
 		<semantic:headerContent>
 			<ObjectHeader title=" {shortText}"
-				number=" {parts: [{path: 'detailView>/cumulativeQuantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}, {path: 'i18n>ofTotal' }, {path: 'quantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}]} "
+				number=" {parts: [{path: 'actualQuantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}, {path: 'i18n>ofTotal' }, {path: 'quantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}]} "
 				numberUnit=" {path: 'UoM/code' }">
 				<ObjectAttribute title="{i18n>actualStart}"
 					text="{path: 'actualStart', type:'sap.ui.model.type.DateTime', formatOptions: {format: 'yMdhm'}}"/>
@@ -27,8 +27,8 @@
 				<statuses>
 					<ObjectStatus title="{i18n>KPI}" text="{KPI}" state="{path: 'KPI', formatter: '.formatter.stateFormatter'}"
 						icon="{path: 'KPI', formatter: '.formatter.iconFormatter'}" visible="{= ${status} > 1 ? true : false}"/>
-					<ProgressIndicator class="sapUiNoMarginBottom" width="50%" percentValue="{= ${detailView>/cumulativeQuantity} / ${quantity} * 100}"
-						displayValue="{parts: [{path: 'detailView>/cumulativeQuantity'}, {path: 'quantity'}], formatter: '.formatter.progress'} %" showValue="true"
+					<ProgressIndicator class="sapUiNoMarginBottom" width="50%" percentValue="{= ${actualQuantity} / ${quantity} * 100}"
+						displayValue="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}], formatter: '.formatter.progress'} %" showValue="true"
 						state="{path: 'KPI', formatter: '.formatter.stateFormatter'}" visible="{= ${status} > 1 ? true : false}" displayOnly="true"/>
 					<ObjectStatus title="{i18n>foreman}" text="{supervisor/lastName} {supervisor/firstName}"/>
 					<!--

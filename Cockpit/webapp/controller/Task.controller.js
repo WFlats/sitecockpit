@@ -1460,7 +1460,11 @@ sap.ui.define([
 			if (oTask.price && !oTask.lumpsum) { // unit rate contract
 				oTask.actualTotalPrice = parseFloat(oTask.actualQuantity * oTask.price).toFixed(3);
 			}
-			oModel.update(sPath, oTask);
+			oModel.update(sPath, oTask, {
+				error: function (oError) {
+					Log.error("Error updating task after measurement change");
+				}
+			});
 		},
 
 		/////////////////////////////////////////////////////////////////FOREMAN////////////////////////////////////
