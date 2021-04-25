@@ -924,6 +924,7 @@ sap.ui.define([
 
 		onAddMeasurement: function () {
 			var oFrag = sap.ui.core.Fragment,
+				that = this,
 				oCreatedBy,
 				oModifiedBy,
 				oDate,
@@ -940,17 +941,8 @@ sap.ui.define([
 				sOldQuantity = "",
 				sOldDuration = "",
 				oViewModel = this.getModel("taskView"),
-				sTitle = this.getResourceBundle().getText("measurementDialogCreateTitle");
-
-			if (aItems.length > 0) { // get cumulative values from last array item
-				oObject = aItems[aItems.length - 1].getBindingContext().getObject();
-				sQuantity = oObject.measurementQuantity;
-				sDuration = oObject.netDuration;
-				sOldQuantity = sQuantity;
-				sOldDuration = sDuration;
-			}
-			// set duration as net duration since start, deduct stop times
-			var oModel = this.getModel(),
+				sTitle = this.getResourceBundle().getText("measurementDialogCreateTitle"),
+				oModel = this.getModel(),
 				sTaskID = this.getModel("taskView").getProperty("/taskID"),
 				sTaskPath = "/" + oModel.createKey("Tasks", {
 					ID: sTaskID
@@ -959,53 +951,77 @@ sap.ui.define([
 					select: "*"
 				}),
 				oShift = this.getShiftFromID(oTask.shift_ID),
-				fPoC = Number(sQuantity) / oTask.quantity * 100;
+				fPoC,
+				fRepeatCode = function () {
+					sDuration = that.getNetDurationHoursFromDates(oTask.actualStart, oNow, oShift);
+					sDuration -= oTask.stopDuration / 3600000; // oTask.stopDuration is working hours in ms
+					sDuration = parseFloat(sDuration).toFixed(3);
+					oViewModel.setProperty("/currentQuantity", sQuantity);
+					oViewModel.setProperty("/nextQuantity", "");
+					oViewModel.setProperty("/previousQuantity", sQuantity);
+					oViewModel.setProperty("/currentDuration", sDuration);
+					oViewModel.setProperty("/nextDuration", "");
+					oViewModel.setProperty("/previousDuration", sDuration);
+					oViewModel.setProperty("/mode", "Create");
+					// addMeasurement Button is only enabled if task.status=2 (started)
+					that._createMeasurementDialog(true);
+
+					oCreatedBy = oFrag.byId("myFrag", "createdBy");
+					oModifiedBy = oFrag.byId("myFrag", "modifiedBy");
+					oDate = oFrag.byId("myFrag", "date");
+					oQuantity = oFrag.byId("myFrag", "quantity");
+					oPoC = oFrag.byId("myFrag", "PoCSlider");
+					oDuration = oFrag.byId("myFrag", "duration");
+					sDuration = formatter.hoursToHoursMinutes(sDuration);
+					aButtons = that.oNewMeasurementDialog.getButtons();
+					oCreatedBy.setValue(oTask.createdBy);
+					oModifiedBy.setValue(oTask.modifiedBy);
+					oDate.setDateValue(oNow);
+					oQuantity.setValue(sQuantity);
+					fPoC = Number(sQuantity) / oTask.quantity * 100;
+					oPoC.setValue(fPoC);
+					oDuration.setValue(sDuration);
+					oQuantity.setValueState("None");
+					oDuration.setValueState("None");
+
+					for (var i = 0; i < aButtons.length; i++) {
+						aButtons[i].setVisible(false);
+					}
+					if (!sDuration || sDuration === "00:00") {
+						return;
+					}
+					that._validateEditMeasurement(Number(sQuantity), Number(sDuration));
+					that.updateButtonEnabledState(sQuantity, sDuration, sOldQuantity, sOldDuration, aButtons, true);
+					that.oNewMeasurementDialog.setTitle(sTitle);
+					that.oNewMeasurementDialog.open();
+				};
+			// ---------------------------------------------------------------------
+			if (aItems.length > 0) { // get cumulative values from last array item
+				oObject = aItems[aItems.length - 1].getBindingContext().getObject();
+				sQuantity = oObject.measurementQuantity;
+				sDuration = oObject.netDuration;
+				sOldQuantity = sQuantity;
+				sOldDuration = sDuration;
+			}
 
 			// if measurement is taken outside of a shift, adjust to end of shift
 			if (!this.inShift(oNow, oShift)) {
-				oNow = this.getShiftEnd(oNow, oShift);
+				oNow = this.getPreviousShiftEnd(oNow, oShift);
+				MessageBox.alert(
+					this.getResourceBundle().getText("warningMeasurementOutOfShift"), {
+						icon: MessageBox.Icon.WARNING,
+						title: this.getResourceBundle().getText("titleMeasurementOutOfShift"),
+						actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+						initialFocus: MessageBox.Action.CANCEL,
+						onClose: function (oAction) {
+							if (oAction === "OK") {
+								fRepeatCode();
+							}
+						}
+					});
+			} else {
+				fRepeatCode();
 			}
-			sDuration = this.getNetDurationHoursFromDates(oTask.actualStart, oNow, oShift);
-			sDuration -= oTask.stopDuration / 3600000; // oTask.stopDuration is working hours in ms
-			sDuration = parseFloat(sDuration).toFixed(3);
-			oViewModel.setProperty("/currentQuantity", sQuantity);
-			oViewModel.setProperty("/nextQuantity", "");
-			oViewModel.setProperty("/previousQuantity", sQuantity);
-			oViewModel.setProperty("/currentDuration", sDuration);
-			oViewModel.setProperty("/nextDuration", "");
-			oViewModel.setProperty("/previousDuration", sDuration);
-			oViewModel.setProperty("/mode", "Create");
-			// addMeasurement Button is only enabled if task.status=2 (started)
-			this._createMeasurementDialog(true);
-
-			oCreatedBy = oFrag.byId("myFrag", "createdBy");
-			oModifiedBy = oFrag.byId("myFrag", "modifiedBy");
-			oDate = oFrag.byId("myFrag", "date");
-			oQuantity = oFrag.byId("myFrag", "quantity");
-			oPoC = oFrag.byId("myFrag", "PoCSlider");
-			oDuration = oFrag.byId("myFrag", "duration");
-			sDuration = formatter.hoursToHoursMinutes(sDuration);
-			aButtons = this.oNewMeasurementDialog.getButtons();
-			oCreatedBy.setValue(oTask.createdBy);
-			oModifiedBy.setValue(oTask.modifiedBy);
-			oDate.setDateValue(oNow);
-			oQuantity.setValue(sQuantity);
-			oPoC.setValue(fPoC);
-			oDuration.setValue(sDuration);
-			oQuantity.setValueState("None");
-			oDuration.setValueState("None");
-
-			for (var i = 0; i < aButtons.length; i++) {
-				aButtons[i].setVisible(false);
-			}
-			if (!sDuration || sDuration === "00:00") {
-				return;
-			}
-			this._validateEditMeasurement(Number(sQuantity), Number(sDuration));
-			//revisit: is sDuration now a 11:11 string?
-			this.updateButtonEnabledState(sQuantity, sDuration, sOldQuantity, sOldDuration, aButtons, true);
-			this.oNewMeasurementDialog.setTitle(sTitle);
-			this.oNewMeasurementDialog.open();
 		},
 
 		onPressMeasurement: function (oEvent) {
@@ -1161,7 +1177,7 @@ sap.ui.define([
 						enabled: false,
 						visible: bCreate,
 						press: function () {
-							oDate = new Date();
+							oDate = oFrag.byId("myFrag", "date").getDateValue();
 							sTaskID = oViewModel.getProperty("/taskID");
 							sQuantity = oFrag.byId("myFrag", "quantity").getValue();
 							sDuration = oFrag.byId("myFrag", "duration").getValue();
@@ -1176,8 +1192,14 @@ sap.ui.define([
 									netDuration: sDuration
 								}
 							});
-							oModel.submitChanges();
-							that._updateTaskAfterNewMeasurement(sTaskID, sQuantity, sDuration);
+							oModel.submitChanges({
+								success: function () {
+									that._updateTaskAfterNewMeasurement(sTaskID, sQuantity, sDuration);
+								},
+								error: function (oError) {
+									Log.error("Error creating measurement");
+								}
+							});
 							that.oNewMeasurementDialog.close();
 						}
 					}, {
@@ -1196,18 +1218,21 @@ sap.ui.define([
 							});
 							oMeasurement.measurementQuantity = sQuantity;
 							oMeasurement.netDuration = sDuration;
-							oModel.update(sObjectPath, oMeasurement);
-
-							// update performance values if the last measurement was edited
 							var oList = that.getView().byId("measurementList"),
 								aItems = oList.getItems(),
-								sLastMeasurementID;
-							if (aItems.length > 0) {
-								sLastMeasurementID = aItems[aItems.length - 1].getBindingContext().getObject().ID;
-								if (sLastMeasurementID === oMeasurement.ID) {
-									that._updateTaskAfterNewMeasurement(sTaskID, sQuantity, sDuration);
+								bLastMeasurement = aItems[aItems.length - 1].getBindingContext().getObject().ID === oMeasurement.ID;
+							oModel.update(sObjectPath, oMeasurement, {
+								success: function () {
+									// update performance values if the last measurement was edited
+									if (bLastMeasurement) {
+										that._updateTaskAfterNewMeasurement(sTaskID, sQuantity, sDuration);
+									}
+								},
+								error: function (oError) {
+									Log.error("Error updating measurement");
 								}
-							}
+							});
+
 							that.oNewMeasurementDialog.close();
 						}
 					}, {
