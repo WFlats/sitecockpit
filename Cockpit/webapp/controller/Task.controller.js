@@ -256,11 +256,11 @@ sap.ui.define([
 								}
 								// checkAutoCompleteMeasurements creates final measurement, saves results to recipe and updates oTask
 								that.checkAutoCompleteMeasurements(oTask);
-								//that.createWorkerTimeSheets(oTask); // now i timesheet app
+								//that.createWorkerTimeSheets(oTask); // now in timesheet app
 								that.onRefresh();
 								return;
 							} else if (oTask.status === 5) { // approved; no shift to working hours
-								oTask.actualEnd = new Date();
+								oTask.actualEnd = (that.inShift(new Date(), oShift)) ? new Date() : that.getPreviousShiftEnd(new Date(), oShift);
 							}
 							oModel.update(sPath, oTask);
 						}
@@ -1864,6 +1864,7 @@ sap.ui.define([
 				oModel.remove(sPath, {
 					success: function (oData) {
 						that.getModel("taskView").setProperty("/crewSelected", false);
+						that._updateTaskAndModelWithLaborValues();
 					},
 					error: function (oError) {
 						Log.error("Error removing crew: " + JSON.stringify(oError));
@@ -1888,6 +1889,7 @@ sap.ui.define([
 				oModel.remove(sPath, {
 					success: function (oData) {
 						that.getModel("taskView").setProperty("/workerSelected", false);
+						that._updateTaskAndModelWithLaborValues();
 					},
 					error: function (oError) {
 						Log.error("Error removing worker: " + JSON.stringify(oError));
@@ -1917,6 +1919,21 @@ sap.ui.define([
 				oViewModel.setProperty("/actualLabourHours", oActualLabourValues.hours);
 				oViewModel.setProperty("/actualLabourCost", oActualLabourValues.cost);
 			}
+		},
+
+		_updateTaskAndModelWithLaborValues: function () {
+			var oModel = this.getModel(),
+				oViewModel = this.getModel("taskView"),
+				oTaskBC = this.getView().getBindingContext();
+			this._setLaborModel();
+			// only planned values are stored; actual value changes come from timesheet changes
+			oModel.setProperty("costLaborPlanned", parseFloat(oViewModel.getProperty("/plannedLabourCost")).toFixed(3), oTaskBC);
+			oModel.setProperty("hoursLaborPlanned", parseFloat(oViewModel.getProperty("/plannedLabourHours")).toFixed(3), oTaskBC);
+			oModel.submitChanges({
+				error: function (oError) {
+					Log.error("Error uppdating planned labor values of task");
+				}
+			});
 		},
 
 		crewMembersFormatter: function (aCrewMembers) {
@@ -2420,6 +2437,7 @@ sap.ui.define([
 							oModel.submitChanges({
 								success: function (oData) {
 									Log.info("CrewsForTask create success:" + JSON.stringify(oData));
+									that._updateTaskAndModelWithLaborValues();
 								},
 								error: function (oError) {
 									Log.error("crewsForTask create error:" + JSON.stringify(oError));
@@ -2702,6 +2720,7 @@ sap.ui.define([
 							oModel.submitChanges({
 								success: function (oData) {
 									Log.info("WorkersForTask Creation:" + JSON.stringify(oData.results));
+									that._updateTaskAndModelWithLaborValues();
 								},
 								error: function (oError) {
 									Log.error("WorkersForTask Creation:" + JSON.stringify(oError));

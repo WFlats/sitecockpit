@@ -143,6 +143,10 @@ sap.ui.define(["./BaseController",
 				oNow = new Date(),
 				oPreviousTask;
 
+			if (!sLocationID) {
+				MessageBox.error(this.getResourceBundle().getText("noLocationSelected"));
+				return;
+			}
 			if ((bPull && oPlannedEnd < oNow) || (!bPull && oPlannedStart < oNow)) {
 				MessageBox.error(this.getResourceBundle().getText("taskInPast"));
 				return;

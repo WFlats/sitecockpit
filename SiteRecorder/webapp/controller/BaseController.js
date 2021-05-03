@@ -928,6 +928,10 @@ sap.ui.define([
 							oTask.currentProductivity = parseFloat(oTask.quantity / oMeasurement.netDuration).toFixed(3);
 							oTask.KPI = parseFloat(
 								oTask.currentProductivity / (oTask.plannedProductivity * oTask.productivityFactor)).toFixed(3);
+							oTask.actualQuantity = oTask.quantity;
+							if (oTask.price) { // if subcontracted totals are equal as planned/actual quants are equal
+								oTask.actualTotalPrice = oTask.plannedTotalPrice;
+							}
 							sPath = "/" + oModel.createKey(
 								"Tasks", {
 									ID: oTask.ID

@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
-  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Capabilities.V1.xml" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-    <edmx:Include Alias="Capabilities" Namespace="Org.OData.Capabilities.V1"/>
-  </edmx:Reference>
   <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
     <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
   </edmx:Reference>
@@ -445,10 +442,6 @@
         <AssociationSet Name="Tasks_recipe" Association="scService.Tasks_recipe">
           <End Role="Tasks" EntitySet="Tasks"/>
           <End Role="Recipes" EntitySet="Recipes"/>
-        </AssociationSet>
-        <AssociationSet Name="Tasks_pulseStep" Association="scService.Tasks_pulseStep">
-          <End Role="Tasks" EntitySet="Tasks"/>
-          <End Role="PulseSteps" EntitySet="PulseSteps"/>
         </AssociationSet>
         <AssociationSet Name="Tasks_UoM" Association="scService.Tasks_UoM">
           <End Role="Tasks" EntitySet="Tasks"/>
@@ -942,7 +935,7 @@
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <Property Name="gender" Type="Edm.String" MaxLength="20"/>
       </EntityType>
-      <EntityType Name="Pics">
+      <EntityType Name="Pics" m:HasStream="true">
         <Key>
           <PropertyRef Name="ID"/>
         </Key>
@@ -952,7 +945,6 @@
         <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <NavigationProperty Name="project" Relationship="scService.Pics_project" FromRole="Pics" ToRole="Projects"/>
-        <Property Name="pic" Type="Edm.Binary"/>
         <NavigationProperty Name="measurement" Relationship="scService.Pics_measurement" FromRole="Pics" ToRole="Measurements"/>
         <NavigationProperty Name="problem" Relationship="scService.Pics_problem" FromRole="Pics" ToRole="ProblemCards"/>
         <Property Name="project_ID" Type="Edm.Guid"/>
@@ -1359,11 +1351,13 @@
         <Property Name="shortText" Type="Edm.String" MaxLength="50" Nullable="false"/>
         <Property Name="description" Type="Edm.String"/>
         <NavigationProperty Name="recipe" Relationship="scService.Tasks_recipe" FromRole="Tasks" ToRole="Recipes"/>
-        <NavigationProperty Name="pulseStep" Relationship="scService.Tasks_pulseStep" FromRole="Tasks" ToRole="PulseSteps"/>
         <NavigationProperty Name="UoM" Relationship="scService.Tasks_UoM" FromRole="Tasks" ToRole="UoMs"/>
         <NavigationProperty Name="shift" Relationship="scService.Tasks_shift" FromRole="Tasks" ToRole="Shifts"/>
         <Property Name="quantity" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="actualQuantity" Type="Edm.Decimal" Scale="3" Precision="10"/>
         <Property Name="price" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="plannedTotalPrice" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="actualTotalPrice" Type="Edm.Decimal" Scale="3" Precision="10"/>
         <Property Name="lumpSum" Type="Edm.Boolean"/>
         <Property Name="plannedProductivity" Type="Edm.Decimal" Scale="3" Precision="10"/>
         <Property Name="productivityFactor" Type="Edm.Decimal" Scale="3" Precision="5"/>
@@ -1385,16 +1379,27 @@
         <Property Name="stopDuration" Type="Edm.Int32"/>
         <Property Name="waitDuration" Type="Edm.Int32"/>
         <Property Name="status" Type="Edm.Int32"/>
-        <Property Name="buffer" Type="Edm.Boolean"/>
+        <Property Name="pinned" Type="Edm.Boolean"/>
         <NavigationProperty Name="company" Relationship="scService.Tasks_company" FromRole="Tasks" ToRole="CompaniesForProjects"/>
         <NavigationProperty Name="measurements" Relationship="scService.Measurements_task" FromRole="Tasks" ToRole="Measurements"/>
         <NavigationProperty Name="problems" Relationship="scService.ProblemCards_task" FromRole="Tasks" ToRole="ProblemCards"/>
         <NavigationProperty Name="timeSheetEntries" Relationship="scService.TimeSheetEntries_task" FromRole="Tasks" ToRole="TimeSheetEntries"/>
+        <Property Name="costPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costLaborPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costLaborActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursLaborPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursLaborActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costMaterialPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costMaterialActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costEquipmentPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costEquipmentActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursEquipmentPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursEquipmentActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
         <NavigationProperty Name="texts" Relationship="scService.Tasks_texts_1" FromRole="Tasks" ToRole="Tasks_texts"/>
         <NavigationProperty Name="localized" Relationship="scService.Tasks_localized" FromRole="Tasks" ToRole="Tasks_texts"/>
         <Property Name="project_ID" Type="Edm.Guid"/>
         <Property Name="recipe_ID" Type="Edm.Guid"/>
-        <Property Name="pulseStep_ID" Type="Edm.Guid"/>
         <Property Name="UoM_ID" Type="Edm.Guid"/>
         <Property Name="shift_ID" Type="Edm.Guid"/>
         <Property Name="discipline_ID" Type="Edm.Guid"/>
@@ -2575,18 +2580,6 @@
           </Principal>
           <Dependent Role="Tasks">
             <PropertyRef Name="recipe_ID"/>
-          </Dependent>
-        </ReferentialConstraint>
-      </Association>
-      <Association Name="Tasks_pulseStep">
-        <End Role="Tasks" Type="scService.Tasks" Multiplicity="*"/>
-        <End Role="PulseSteps" Type="scService.PulseSteps" Multiplicity="0..1"/>
-        <ReferentialConstraint>
-          <Principal Role="PulseSteps">
-            <PropertyRef Name="ID"/>
-          </Principal>
-          <Dependent Role="Tasks">
-            <PropertyRef Name="pulseStep_ID"/>
           </Dependent>
         </ReferentialConstraint>
       </Association>
@@ -3793,13 +3786,6 @@
         <Annotation Term="Core.Computed" Bool="true"/>
         <Annotation Term="Core.Description" String="A user's unique ID"/>
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
-      </Annotations>
-      <Annotations Target="scService.EntityContainer/Tasks" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Capabilities.SearchRestrictions">
-          <Record Type="Capabilities.SearchRestrictionsType">
-            <PropertyValue Property="Searchable" Bool="true"/>
-          </Record>
-        </Annotation>
       </Annotations>
       <Annotations Target="scService.Tasks/createdAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Common.Label" String="Created On"/>

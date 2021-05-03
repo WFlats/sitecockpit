@@ -361,13 +361,13 @@ entity Tasks : managed {
         shortText            : localized String(50) not null;
         description          : localized String;
         recipe               : association       to Recipes;         // the recipe the task is based on
-        pulseStep			 : association		 to PulseSteps;
+        //pulseStep			 : association		 to PulseSteps;
         UoM                  : association[1]    to UoMs;
         shift				 : association to Shifts;
         quantity             : Decimal(10, 3);
         actualQuantity		 : Decimal(10, 3); // = cumulative measurement
         price				 : Decimal(10, 3); // in case of subcontracted
-        plannedTotalPrice	 : Decimal(10, 3);
+        plannedTotalPrice	 : Decimal(10, 3); // sub contract only
         actualTotalPrice	 : Decimal(10, 3); // if not lump sum it can differ from plannedTotalPrice
         lumpSum				 : Boolean; // if true the total doesn't increase even if cumulative quants are higher
         plannedProductivity  : Decimal(10, 3);
@@ -397,12 +397,24 @@ entity Tasks : managed {
 							        completed = 4; 
 							        approved = 5;
 								};
-        buffer				 : Boolean; // e.g. drying time
+        //buffer				 : Boolean; // e.g. drying time
         pinned				 : Boolean; // must not be moved
 		company				 : association to CompaniesForProjects;
         measurements         : composition of many Measurements     on measurements.task=$self;
         problems             : composition of many ProblemCards    on problems.task=$self;
         timeSheetEntries	 : composition of many TimeSheetEntries on timeSheetEntries.task=$self;
+        costPlanned			 : Decimal(10, 3); // subcontract see above (price)
+        costActual			 : Decimal(10, 3);
+        costLaborPlanned	 : Decimal(10, 3);
+        costLaborActual		 : Decimal(10, 3);
+        hoursLaborPlanned	 : Decimal(10, 3);
+        hoursLaborActual	 : Decimal(10, 3);
+        costMaterialPlanned	 : Decimal(10, 3);
+        costMaterialActual	 : Decimal(10, 3);
+        costEquipmentPlanned : Decimal(10, 3);
+        costEquipmentActual  : Decimal(10, 3);
+        hoursEquipmentPlanned: Decimal(10, 3);
+        hoursEquipmentActual : Decimal(10, 3);
 }
 
 entity Measurements : managed {

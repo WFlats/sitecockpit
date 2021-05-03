@@ -322,6 +322,7 @@ sap.ui.define([
 					that._refreshCrewList();
 					that.getModel("workForceView").setProperty("/crewSelected", false);
 					that.getModel("workForceView").setProperty("/busy", false);
+					that.updatePlannedLaborCostOfTasks(aSelectedTaskIDs);
 				},
 				error: function (oError) {
 					Log.error("Error creating CrewsForTask: " + JSON.stringify(oError));
@@ -345,7 +346,7 @@ sap.ui.define([
 				}
 			}
 			if (aExistingCrewFilters && aExistingCrewFilters.length > 0) {
-				for (var i = 0; i < aExistingCrewFilters.length; i++) {
+				for (i = 0; i < aExistingCrewFilters.length; i++) {
 					aFilters.push(aExistingCrewFilters[i]);
 				}
 			}
@@ -615,6 +616,7 @@ sap.ui.define([
 					that._refreshWorkerList();
 					that.getModel("workForceView").setProperty("/workerSelected", false);
 					that.getModel("workForceView").setProperty("/busy", false);
+					that.updatePlannedLaborCostOfTasks(aSelectedTaskIDs);
 				},
 				error: function (oError) {
 					Log.error("Error creating WorkersForTask :" + JSON.stringify(oError));

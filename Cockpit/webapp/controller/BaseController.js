@@ -1056,26 +1056,30 @@ sap.ui.define([
 			if (aWorkersPaths) {
 				for (i = 0; i < aWorkersPaths.length; i++) {
 					oWorkerBC = oModel.createBindingContext("/" + aWorkersPaths[i]); // is /WorkersForTask
-					sWorkerID = oWorkerBC.getProperty("worker_ID");
-					mRate = oWorkerBC.getProperty("worker/wageClass/rate");
-					aAllWorkerValues.push({
-						ID: sWorkerID,
-						rate: mRate
-					});
+					if (oWorkerBC) { // if it doesn't exist it was just deleted but the local model wasn't updated yet
+						sWorkerID = oWorkerBC.getProperty("worker_ID");
+						mRate = oWorkerBC.getProperty("worker/wageClass/rate");
+						aAllWorkerValues.push({
+							ID: sWorkerID,
+							rate: mRate
+						});
+					}
 				}
 			}
 			if (aCrewsPaths) {
 				for (i = 0; i < aCrewsPaths.length; i++) {
 					oCrewBC = oModel.createBindingContext("/" + aCrewsPaths[i]);
-					aCrewMemberPaths = oCrewBC.getProperty("crew/crewMembers");
-					for (j = 0; j < aCrewMemberPaths.length; j++) {
-						oWorkerBC = oModel.createBindingContext("/" + aCrewMemberPaths[j]); // is /Persons
-						sWorkerID = oWorkerBC.getProperty("ID");
-						mRate = oWorkerBC.getProperty("wageClass/rate");
-						aAllWorkerValues.push({
-							ID: sWorkerID,
-							rate: mRate
-						});
+					if (oCrewBC) { // if it doesn't exist it was just deleted but the local model wasn't updated until now
+						aCrewMemberPaths = oCrewBC.getProperty("crew/crewMembers");
+						for (j = 0; j < aCrewMemberPaths.length; j++) {
+							oWorkerBC = oModel.createBindingContext("/" + aCrewMemberPaths[j]); // is /Persons
+							sWorkerID = oWorkerBC.getProperty("ID");
+							mRate = oWorkerBC.getProperty("wageClass/rate");
+							aAllWorkerValues.push({
+								ID: sWorkerID,
+								rate: mRate
+							});
+						}
 					}
 				}
 			}
@@ -1148,58 +1152,58 @@ sap.ui.define([
 			}
 			return aShiftPartsWithValues;
 		},
-
-		createWorkerTimeSheets: function (oTask) {
-			// all person related data is loaded already
-			var oModel = this.getModel(),
-				sProjectID = this.getModel("appView").getProperty("/selectedProjectID"),
-				sMsgSucc = "",
-				sMsgErr = this.getResourceBundle().getText("errorCreatingTimeSheets"),
-				that = this;
-			// get workers for task
-			var aAllWorkers = this.getWorkersOfTask(oTask);
-			if (aAllWorkers.length === 0) {
-				return;
-			}
-			sMsgSucc = this.getResourceBundle().getText("successCreatingTimeSheet", [aAllWorkers.length]);
-			// get shiftParts worked
-			var aShiftPartsWorked = this.getShiftPartsAndValues(oTask, false);
-			if (aShiftPartsWorked.length === 0) {
-				return;
-			}
-			// create time sheet entries
-			aAllWorkers.reduce(function (p, oWorker, j, aWorkersArray) {
-				aShiftPartsWorked.reduce(function (q, oShiftPart, k, aShiftPartsArray) {
-					new Promise(function (resolve) {
-						var oTimeSheetEntry = {};
-						oTimeSheetEntry.project_ID = sProjectID;
-						oTimeSheetEntry.person_ID = oWorker.ID;
-						oTimeSheetEntry.task_ID = oTask.ID;
-						oTimeSheetEntry.shiftPart_ID = oShiftPart.shiftPartID;
-						oTimeSheetEntry.workingDate = oShiftPart.date;
-						oTimeSheetEntry.startTimeHrs = oShiftPart.startTimeHours;
-						oTimeSheetEntry.startTimeMins = oShiftPart.startTimeMinutes;
-						oTimeSheetEntry.endTimeHrs = oShiftPart.endTimeHours;
-						oTimeSheetEntry.endTimeMins = oShiftPart.endTimeMinutes;
-						oTimeSheetEntry.hoursWorked = parseFloat(that.getDecimalHours(oShiftPart.endTimeHours, oShiftPart.endTimeMinutes) -
-							that.getDecimalHours(oShiftPart.startTimeHours, oShiftPart.startTimeMinutes)).toFixed(3);
-						oTimeSheetEntry.rate = parseFloat(oWorker.rate * (1 + oShiftPart.wageIncrease * 0.01)).toFixed(3);
-						oTimeSheetEntry.calculatedCost = parseFloat(oTimeSheetEntry.hoursWorked * oTimeSheetEntry.rate).toFixed(3);
-						oModel.create("/TimeSheetEntries", oTimeSheetEntry, {
-							success: function (oData) {
-								if (j === (aWorkersArray.length - 1)) {
-									MessageToast.show(sMsgSucc);
-								}
-							},
-							error: function (oError) {
-								MessageToast.show(sMsgErr);
-							}
-						});
-					});
-				}, Promise.resolve());
-			}, Promise.resolve());
-		},
-
+		/* now in timesheet app
+				createWorkerTimeSheets: function (oTask) {
+					// all person related data is loaded already
+					var oModel = this.getModel(),
+						sProjectID = this.getModel("appView").getProperty("/selectedProjectID"),
+						sMsgSucc = "",
+						sMsgErr = this.getResourceBundle().getText("errorCreatingTimeSheets"),
+						that = this;
+					// get workers for task
+					var aAllWorkers = this.getWorkersOfTask(oTask);
+					if (aAllWorkers.length === 0) {
+						return;
+					}
+					sMsgSucc = this.getResourceBundle().getText("successCreatingTimeSheet", [aAllWorkers.length]);
+					// get shiftParts worked
+					var aShiftPartsWorked = this.getShiftPartsAndValues(oTask, false);
+					if (aShiftPartsWorked.length === 0) {
+						return;
+					}
+					// create time sheet entries
+					aAllWorkers.reduce(function (p, oWorker, j, aWorkersArray) {
+						aShiftPartsWorked.reduce(function (q, oShiftPart, k, aShiftPartsArray) {
+							new Promise(function (resolve) {
+								var oTimeSheetEntry = {};
+								oTimeSheetEntry.project_ID = sProjectID;
+								oTimeSheetEntry.person_ID = oWorker.ID;
+								oTimeSheetEntry.task_ID = oTask.ID;
+								oTimeSheetEntry.shiftPart_ID = oShiftPart.shiftPartID;
+								oTimeSheetEntry.workingDate = oShiftPart.date;
+								oTimeSheetEntry.startTimeHrs = oShiftPart.startTimeHours;
+								oTimeSheetEntry.startTimeMins = oShiftPart.startTimeMinutes;
+								oTimeSheetEntry.endTimeHrs = oShiftPart.endTimeHours;
+								oTimeSheetEntry.endTimeMins = oShiftPart.endTimeMinutes;
+								oTimeSheetEntry.hoursWorked = parseFloat(that.getDecimalHours(oShiftPart.endTimeHours, oShiftPart.endTimeMinutes) -
+									that.getDecimalHours(oShiftPart.startTimeHours, oShiftPart.startTimeMinutes)).toFixed(3);
+								oTimeSheetEntry.rate = parseFloat(oWorker.rate * (1 + oShiftPart.wageIncrease * 0.01)).toFixed(3);
+								oTimeSheetEntry.calculatedCost = parseFloat(oTimeSheetEntry.hoursWorked * oTimeSheetEntry.rate).toFixed(3);
+								oModel.create("/TimeSheetEntries", oTimeSheetEntry, {
+									success: function (oData) {
+										if (j === (aWorkersArray.length - 1)) {
+											MessageToast.show(sMsgSucc);
+										}
+									},
+									error: function (oError) {
+										MessageToast.show(sMsgErr);
+									}
+								});
+							});
+						}, Promise.resolve());
+					}, Promise.resolve());
+				},
+		*/
 		getPlannedLabourValues: function (oTask) {
 			var aAllWorkers,
 				aShiftPartsPlanned,
@@ -1224,8 +1228,38 @@ sap.ui.define([
 					oReturn.cost += mRate * mHours;
 				}
 			}
+			oReturn.hours = parseFloat(String(oReturn.hours)).toFixed(2);
 			oReturn.cost = parseFloat(String(oReturn.cost)).toFixed(2);
 			return oReturn;
+		},
+
+		updatePlannedLaborCostOfTasks: function (aTaskIDs) {
+			// all tasks are loaded into the model already
+			var oModel = this.getModel(),
+				sTaskPath,
+				oTaskBC,
+				oTask,
+				oLaborValues = {
+					hours: 0,
+					cost: 0
+				},
+				that = this;
+
+			aTaskIDs.forEach(function (sTaskID) {
+				sTaskPath = "/" + oModel.createKey("Tasks", {
+					ID: sTaskID
+				});
+				oTaskBC = oModel.createBindingContext(sTaskPath);
+				oTask = oTaskBC.getObject();
+				oLaborValues = that.getPlannedLabourValues(oTask);
+				oModel.setProperty("hoursLaborPlanned", oLaborValues.hours, oTaskBC);
+				oModel.setProperty("costLaborPlanned", oLaborValues.cost, oTaskBC);
+			});
+			oModel.submitChanges({
+				error: function (oError) {
+					Log.error("Error updating planned labor cost after change of workforce");
+				}
+			});
 		},
 
 		getActualLabourValues: function (oTask) {
@@ -1311,6 +1345,7 @@ sap.ui.define([
 				actualQuantity = cumulativeValueArray[0];
 				actualDuration = cumulativeValueArray[1];
 				if (!actualQuantity || actualQuantity === 0 || Number(actualQuantity) < Number(oTask.quantity)) {
+					// create an autocomplete measurement with the value of the planned quantity
 					// if oNow is not in shift, set oNow to the last shift end
 					if (!that.inShift(oNow, oShift)) {
 						oNow = that.getShiftEnd(oNow, oShift);
@@ -1339,6 +1374,10 @@ sap.ui.define([
 					oTask.currentProductivity = parseFloat(oTask.quantity / oMeasurement.netDuration).toFixed(3);
 					oTask.KPI = parseFloat(
 						oTask.currentProductivity / (oTask.plannedProductivity * oTask.productivityFactor)).toFixed(3);
+					oTask.actualQuantity = oTask.quantity;
+					if (oTask.price) { // if subcontracted totals are equal as planned/actual quants are equal
+						oTask.actualTotalPrice = oTask.plannedTotalPrice;
+					}
 					sPath = "/" + oModel.createKey(
 						"Tasks", {
 							ID: oTask.ID

@@ -62,6 +62,51 @@
 							<items>
 								<ColumnListItem>
 									<cells>
+										<Text text="{i18n>laborCost}"/>
+										<Text text="{ path:'costLaborPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'costLaborActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>materialCost}"/>
+										<Text text="{ path:'costMaterialPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'costMaterialActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>equipmentCost}"/>
+										<Text text="{ path:'costEquipmentPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'costEquipmentActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>subcontractCost}"/>
+										<Text text="{ path:'plannedTotalPrice', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'actualTotalPrice', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>totalCost}"/>
+										<Text text="{ path:'costPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'costActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
 										<Text text="{i18n>taskMeasurementQuantity} [{path: 'UoM/code'}]"/>
 										<Text text="{ path:'quantity', type:'sap.ui.model.type.Float', formatOptions: { decimals: 3 } }"/>
 										<Text text="{ path:'actualQuantity', type:'sap.ui.model.type.Float', formatOptions: { decimals: 3 } }"/>
