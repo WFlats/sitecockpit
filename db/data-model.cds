@@ -444,11 +444,26 @@ entity ProblemCards : managed {
         problemPics		  : composition of many Pics on problemPics.problem=$self;
 }
 
+entity Timesheets		: managed {
+	key ID				: UUID;
+		project			: association to Projects;
+		person			: association to Persons;
+		workingDate		: DateTime;
+		hoursWorked		: Decimal(10, 3);
+		hoursShift		: Decimal(10, 3);
+		costWorking		: Decimal(10, 3); // redundant on purpose because wages change over time
+		costShift		: Decimal(10, 3);
+        approved		: Boolean;
+        transferred		: Boolean;
+        timeSheetEntries: composition of many TimeSheetEntries on timeSheetEntries.timesheet=$self;
+}
+
 entity TimeSheetEntries : managed { // no currency; all currencies are converted into project currency
 	key ID				: UUID;
 		project			: association to Projects;
 		person			: association to Persons;
 		task			: association to Tasks;
+		timesheet		: association to Timesheets;
 		workingDate		: DateTime;
 		shiftPart		: association to ShiftParts; // has links to shift, timeType
 		startTimeHrs	: Integer;
@@ -459,6 +474,4 @@ entity TimeSheetEntries : managed { // no currency; all currencies are converted
         hoursWorked		: Decimal(10, 3);
         rate			: Decimal(10, 3); // redundant; is wage rate times wage increase of time type
         calculatedCost	: Decimal(10, 3); // redundant on purpose because wages change over time
-        approved		: Boolean;
-        transferred		: Boolean;
 }
