@@ -202,7 +202,7 @@ entity Persons : managed {
         company             : association       to Companies;
         memberOfCrew        : association       to Crews;
         tasks               : composition of many WorkersForTask on tasks.worker=$self; //person can be booked for multiple tasks
-        timeSheetEntries	: composition of many TimeSheetEntries on timeSheetEntries.person=$self;
+        timesheets			: composition of many Timesheets on timesheets.person=$self;
 }
 
 entity UsersOfProject : managed {

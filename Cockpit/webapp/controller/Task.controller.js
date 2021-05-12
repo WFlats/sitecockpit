@@ -3954,7 +3954,8 @@ sap.ui.define([
 			var oModel = this.getModel(),
 				aCrewsForTasks,
 				aFilters,
-				aClashingTasks = [];
+				aClashingTasks = [],
+				bClash;
 
 			aFilters = [
 				new Filter("project_ID", sap.ui.model.FilterOperator.EQ, this.getModel("appView").getProperty("/selectedProjectID")),
@@ -3972,8 +3973,12 @@ sap.ui.define([
 					success: function (oData) {
 						aCrewsForTasks = oData.results || [];
 						for (var i = 0; i < aCrewsForTasks.length; i++) {
-							if ((aCrewsForTasks[i].task.actualStart && aCrewsForTasks[i].task.actualStart < oEnd) ||
-								aCrewsForTasks[i].task.plannedStart < oEnd) { // second clash filter
+							if (aCrewsForTasks[i].task.status > 1) {
+								bClash = aCrewsForTasks[i].task.actualStart < oEnd;
+							} else {
+								bClash = aCrewsForTasks[i].task.plannedStart < oEnd;
+							}
+							if (bClash) {
 								aClashingTasks.push(aCrewsForTasks[i].task);
 							}
 						}

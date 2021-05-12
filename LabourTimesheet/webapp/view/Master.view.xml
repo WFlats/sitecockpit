@@ -38,12 +38,15 @@
 						<ToolbarSeparator/>
 						<ToggleButton id="selectAllNoneButton" icon="sap-icon://multiselect-all" activeIcon="sap-icon://multiselect-none" type="Default"
 							press=".onToggleMultiSelect" visible="{masterView>/generateMode}" enabled="true" tooltip="{i18n>multiSelectTooltip}"/>
+						<ToolbarSeparator visible="{masterView>/generateMode}"/>
+						<Button press="minusDay" icon="sap-icon://less" visible="{masterView>/generateMode}" type="Transparent" tooltip="{i18n>prevDay}"/>
 						<DatePicker id="datePicker"
 							value="{path: 'appView>/selectedDate', type:'sap.ui.model.type.Date', formatOptions: { style: 'medium', strictParsing: true}}" width="200px"
 							displayFormat="short" visible="{masterView>/generateMode}" change="onDateChanged"/>
+						<Button press="plusDay" icon="sap-icon://add" visible="{masterView>/generateMode}" type="Transparent" tooltip="{i18n>nextDay}"/>
+						<ToolbarSeparator visible="{masterView>/generateMode}"/>
 						<Button id="goButton" text="Go" type="Emphasized" press=".onGenerate" visible="{masterView>/generateMode}" enabled="true"
 							tooltip="{i18n>geneateTimesheetsTooltip}"/>
-						<ToolbarSeparator visible="{masterView>/generateMode}"/>
 						<ToggleButton id="generateButton" icon="sap-icon://generate-shortcut" activeIcon="sap-icon://show-edit" type="Emphasized"
 							pressed="{masterView>/generateMode}" press=".onToggleGenerateMode" visible="true" enabled="true"
 							tooltip="{i18n>toggleGenerateDisplayTooltip}"/>

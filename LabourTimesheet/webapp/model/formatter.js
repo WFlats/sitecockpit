@@ -45,11 +45,27 @@ sap.ui.define([], function () {
 			return hours + ":" + minutes;
 		},
 
-		percentageWorked: function (productivHours, shiftHours) {
-			if (!productivHours || !shiftHours || isNaN(shiftHours)) {
-				return "%";
+		percentageWorked: function (productiveHours, shiftHours) {
+			if (!productiveHours || !shiftHours || isNaN(shiftHours)) {
+				return "";
 			}
-			return parseFloat(productivHours / shiftHours * 100).toFixed(0) + " %";
+			return parseFloat(productiveHours / shiftHours * 100).toFixed(0);
+		},
+
+		percentageWorkedState: function (productiveHours, shiftHours) {
+			// revisit: returning a string causes an error. but see https://sapui5.hana.ondemand.com/#/entity/sap.m.ObjectNumber/sample/sap.m.sample.Table/code/Formatter.js
+			var mKPI;
+			if (!productiveHours || !shiftHours || isNaN(shiftHours)) {
+				return "None";
+			}
+			mKPI = productiveHours / shiftHours;
+			if (mKPI >= 0.75) {
+				return "Success";
+			} else if (mKPI >= 0.50) {
+				return "Warning";
+			} else {
+				return "Error";
+			}
 		}
 	};
 });

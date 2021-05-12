@@ -111,6 +111,12 @@
 				"pattern": "Persons/{objectId}",
 				"name": "object",
 				"target": ["master", "object"]
+			}, {
+				"name": "DetailDetail",
+				"pattern": "Persons/{objectId}/timesheets{objectId2}",
+				"titleTarget": "",
+				"greedy": false,
+				"target": ["master", "object", "DetailDetail"]
 			}],
 			"targets": {
 				"master": {
@@ -132,6 +138,12 @@
 				"notFound": {
 					"viewName": "NotFound",
 					"viewId": "notFound"
+				},
+				"DetailDetail": {
+					"viewType": "XML",
+					"viewName": "DetailDetail",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages"
 				}
 			}
 		},

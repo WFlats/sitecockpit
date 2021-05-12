@@ -6,9 +6,12 @@ sap.ui.define([
 	"sap/ui/model/Sorter",
 	"sap/m/GroupHeaderListItem",
 	"sap/m/MessageBox",
+	"sap/base/Log",
+	"sap/ui/Device",
 	"../model/formatter",
 	"sap/m/library"
-], function (BaseController, JSONModel, Filter, FilterOperator, Sorter, GroupHeaderListItem, MessageBox, formatter, mobileLibrary) {
+], function (BaseController, JSONModel, Filter, FilterOperator, Sorter, GroupHeaderListItem, MessageBox, Log, Device, formatter,
+	mobileLibrary) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -29,12 +32,7 @@ sap.ui.define([
 			var oViewModel = new JSONModel({
 				busy: false,
 				delay: 0,
-				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading"),
-				selected: false,
-				shiftName: "",
-				shiftWorkingHours: 0,
-				actualWorkingHours: 0,
-				idleHours: 0
+				lineItemListTitle: ""
 			});
 
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
@@ -42,82 +40,11 @@ sap.ui.define([
 			this.setModel(oViewModel, "detailView");
 
 			this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
-
-			// initial date is today
-			this.byId("datePicker").setDateValue(new Date());
-		},
-
-		setSurroundingValues: function () {
-			var oViewModel = this.getModel("detailView"),
-				oTSList = this.byId("timesheetList"),
-				aItems = oTSList.getItems(),
-				sShiftPartID,
-				mActualWorkingHours = 0,
-				oShift = {},
-				mKPI,
-				sValueState = "None";
-
-			if (aItems && aItems.length > 0) {
-				// aItems[0] is a groupheader; all items must be within the same shift
-				sShiftPartID = aItems[1].getBindingContext().getProperty("shiftPart_ID");
-				oShift = this.getShiftIDAndName(sShiftPartID); // returns ID and shiftName
-				oViewModel.setProperty("/shiftName", oShift.shiftName);
-				oViewModel.setProperty("/shiftWorkingHours", this.getWorkingHoursOfShift(oShift.ID));
-				for (var i = 0; i < aItems.length; i++) {
-					if (!(aItems[i] instanceof sap.m.GroupHeaderListItem)) {
-						mActualWorkingHours += Number(aItems[i].getBindingContext().getProperty("hoursWorked"));
-					}
-				}
-				oViewModel.setProperty("/actualWorkingHours", mActualWorkingHours);
-				oViewModel.setProperty("/idleHours", oViewModel.getProperty("/shiftWorkingHours") - mActualWorkingHours);
-				mKPI = mActualWorkingHours / Number(oViewModel.getProperty("/shiftWorkingHours"));
-				if (mKPI >= 0.75) {
-					sValueState = "Success";
-				} else if (mKPI >= 0.50) {
-					sValueState = "Warning";
-				} else if (mKPI > 0) {
-					sValueState = "Error";
-				}
-				this.byId("objectHeader").setNumberState(sValueState);
-			}
-		},
-
-		clearSurroundingValues: function () {
-			// if after object changed or date changed there is no data then old values would stay
-			var oViewModel = this.getModel("detailView");
-			oViewModel.setProperty("/shiftName", "");
-			oViewModel.setProperty("/shiftWorkingHours", 0);
-			oViewModel.setProperty("/actualWorkingHours", 0);
-			oViewModel.setProperty("/idleHours", 0);
-			this.byId("objectHeader").setNumberState("None");
 		},
 
 		/* =========================================================== */
 		/* event handlers                                              */
 		/* =========================================================== */
-
-		onDateChanged: function (oEvent) {
-			//var sDate = oEvent.getParameter("value");
-			//this.getModel("appView").setProperty("/selectedDate", new Date(sDate));
-			this.clearSurroundingValues();
-			this.filterTimesheet();
-		},
-
-		minusDay: function () {
-			var oDate = new Date(this.getModel("appView").getProperty("/selectedDate"));
-			oDate.setDate(oDate.getDate() - 1);
-			this.getModel("appView").setProperty("/selectedDate", new Date(oDate));
-			this.clearSurroundingValues();
-			this.filterTimesheet();
-		},
-
-		plusDay: function () {
-			var oDate = new Date(this.getModel("appView").getProperty("/selectedDate"));
-			oDate.setDate(oDate.getDate() + 1);
-			this.getModel("appView").setProperty("/selectedDate", new Date(oDate));
-			this.clearSurroundingValues();
-			this.filterTimesheet();
-		},
 
 		/**
 		 * Event handler when the share by E-Mail button has been clicked
@@ -172,61 +99,21 @@ sap.ui.define([
 					sTitle = this.getResourceBundle().getText("detailLineItemTableHeading");
 				}
 				oViewModel.setProperty("/lineItemListTitle", sTitle);
-				this.setSurroundingValues();
 			}
 		},
 
-		filterTimesheet: function () {
-			var oDateBegin = new Date(this.getModel("appView").getProperty("/selectedDate")),
-				oDateEnd = new Date(this.getModel("appView").getProperty("/selectedDate"));
-
-			oDateBegin.setHours(0, 0, 0, 0);
-			oDateEnd.setHours(23, 59, 59);
-			this.byId("timesheetList").getBinding("items").filter(new Filter("workingDate", FilterOperator.BT, oDateBegin, oDateEnd));
-		},
-
-		getTask: function (oContext) {
-			return oContext.getProperty("task/location/code") + " " + oContext.getProperty("task/location/description") +
-				" / " + oContext.getProperty("task/taskName") + " (" + oContext.getProperty("task/number") + ") - " +
-				oContext.getProperty("task/shortText");
-		},
-
-		createGroupHeader: function (oGroup) {
-			return new GroupHeaderListItem({
-				title: oGroup.key,
-				upperCase: false
-			});
-		},
-
-		onSelectionChange: function () {
-			if (this.byId("timesheetList").getSelectedItems().length > 0) {
-				this.getModel("detailView").setProperty("/selected", true);
-			} else {
-				this.getModel("detailView").setProperty("/selected", false);
+		onSelectionChange: function (oEvent) {
+			var oListItem = oEvent.getParameter("listItem"),
+				sPersonID = this.getView().getBindingContext().getProperty("ID"),
+				sTimesheetID = oListItem.getBindingContext().getProperty("ID"),
+				bReplace = !Device.system.phone;
+			if (oListItem) {
+				this.getModel("appView").setProperty("/layout", "ThreeColumnsEndExpanded");
+				this.getRouter().navTo("DetailDetail", {
+					objectId: sPersonID,
+					objectId2: sTimesheetID
+				}, bReplace);
 			}
-		},
-
-		onDelete: function () {
-			var aItems = this.byId("timesheetList").getSelectedItems(),
-				oModel = this.getModel(),
-				oViewModel = this.getModel("detailView"),
-				sConfirmText = this.getResourceBundle().getText("timesheetDeleteDialogText"),
-				sConfirmTitle = this.getResourceBundle().getText("timesheetDeleteDialogTitle");
-
-			MessageBox.confirm(sConfirmText, {
-				icon: MessageBox.Icon.WARNING,
-				title: sConfirmTitle,
-				actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
-				initialFocus: MessageBox.Action.CANCEL,
-				onClose: function (sAction) {
-					if (sAction === "OK") {
-						for (var i = 0; i < aItems.length; i++) {
-							oModel.remove(aItems[i].getBindingContext().getPath());
-						}
-						oViewModel.setProperty("/selected", false);
-					}
-				}
-			});
 		},
 
 		/* =========================================================== */
@@ -299,10 +186,6 @@ sap.ui.define([
 				oViewModel = this.getModel("detailView");
 
 			this.getOwnerComponent().oListSelector.selectAListItem(sPath);
-
-			this.clearSurroundingValues();
-			this.filterTimesheet();
-			this.getModel("detailView").setProperty("/selcted", false); // disables the delete button
 
 			oViewModel.setProperty("/saveAsTileTitle", oResourceBundle.getText("shareSaveTileAppTitle", [sObjectName]));
 			oViewModel.setProperty("/shareOnJamTitle", sObjectName);

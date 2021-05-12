@@ -102,7 +102,7 @@ sap.ui.define([
 
 		setProjectBC: function (sID) {
 			var oModel = this.getModel(),
-				sTitle,
+				sTitle = this.getResourceBundle().getText("timeSheetTitle"),
 				sPath = "/" + oModel.createKey("Projects", {
 					ID: sID
 				}),
@@ -115,7 +115,7 @@ sap.ui.define([
 			this._applyFilterSearch();
 
 			// set the project as title
-			sTitle = oProjectBC.getProperty("code") + " - " + oProjectBC.getProperty("description");
+			sTitle += " " + oProjectBC.getProperty("code") + " - " + oProjectBC.getProperty("description");
 			this.getModel("masterView").setProperty("/title", sTitle);
 		},
 
@@ -214,38 +214,46 @@ sap.ui.define([
 				oDate = this.getModel("appView").getProperty("/selectedDate"),
 				oPersonList = this.byId("list"),
 				aShifts = this.getModel("workTimeModel").getProperty("/shifts"),
-				oLatestShiftEnd = new Date(oDate.getTime()), // hours/mins set to 00:00
-				oShiftEndToday = new Date(oDate.getTime()),
+				oShiftEndOfDay = new Date(oDate.getTime()),
 				sConfirmText = this.getResourceBundle().getText("notEndOfShiftMsg"),
 				sConfirmTitle = this.getResourceBundle().getText("confirmTitle"),
 				that = this;
 			// find last shift end on oDate
-			for (var i = 0; i < aShifts.length; i++) {
-				if (this.isWeekendDay(oDate) && !aShifts[i].ignoreWeekends) {
-					continue;
-				}
-				if (this.isSpecialDate(oDate) && !aShifts[i].ignoreHolidays) {
-					continue;
-				}
-				// only checking the last shiftPart
-				oLatestShiftEnd.setHours(aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeHrs,
-					aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeMins, 0, 0);
-				if (oShiftEndToday.getTime() < oLatestShiftEnd.getTime()) {
-					oShiftEndToday.setHours(aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeHrs,
-						aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeMins, 0, 0);
-				}
-			}
-			// check if there was a shift on oDate
-			if (oShiftEndToday.getHours() === 0) {
+			/*			for (var i = 0; i < aShifts.length; i++) {
+							if (this.isWeekendDay(oDate) && !aShifts[i].ignoreWeekends) {
+								continue;
+							}
+							if (this.isSpecialDate(oDate) && !aShifts[i].ignoreHolidays) {
+								continue;
+							}
+							// only checking the last shiftPart
+							oLatestShiftEnd.setHours(aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeHrs,
+								aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeMins, 0, 0);
+							if (oShiftEndToday.getTime() < oLatestShiftEnd.getTime()) {
+								oShiftEndToday.setHours(aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeHrs,
+									aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeMins, 0, 0);
+							}
+						}
+
+						
+						// check if there was a shift on oDate
+						if (oShiftEndToday.getHours() === 0) {
+							MessageToast.show(this.getResourceBundle().getText("toastNoShiftOnDate"));
+							return;
+						} */
+
+			oShiftEndOfDay = this.getEndOfLastShiftOnADay(aShifts, oDate);
+			if (!oShiftEndOfDay) {
 				MessageToast.show(this.getResourceBundle().getText("toastNoShiftOnDate"));
 				return;
 			}
+
 			if (aPersons.length === 0) {
 				MessageToast.show(this.getResourceBundle().getText("toastNoPersonSelected"));
 				return;
 			}
 			// check if shifts ended
-			if (new Date().getTime() < oShiftEndToday.getTime()) {
+			if (Date.now() < oShiftEndOfDay.getTime()) {
 				MessageBox.confirm(sConfirmText, {
 					icon: MessageBox.Icon.WARNING,
 					title: sConfirmTitle,
@@ -375,6 +383,8 @@ sap.ui.define([
 			var oModel = this.getModel(),
 				sProjectID = this.getModel("appView").getProperty("/selectedProjectID"),
 				iCount = 0,
+				mTimesheetTotalHoursWorked = 0,
+				mTimesheetTotalCostWorked = 0,
 				tasksOverlap = function (aTasks) {
 					var bOverlap = false;
 					for (var n = 0; n < aTasks.length - 1; n++) {
@@ -405,50 +415,93 @@ sap.ui.define([
 							} else if (tasksOverlap(aTasksWorked)) {
 								MessageBox.error(that.getResourceBundle().getText("tasksOverlappingError"));
 								that.getModel("masterView").setProperty("/busy", false);
-							} else {
-								aTasksWorked.reduce(function (q, oTaskWorked, k) {
-									new Promise(function (reso, reje) {
-										var aShiftPartsWorked = that.getShiftPartsAndValuesOnADay(oTaskWorked, oDate); // must exist
-										aShiftPartsWorked.reduce(function (r, oShiftPart, l) {
-											new Promise(function (res, rej) {
-												var oTimeSheetEntry = {},
-													mRate = oPerson.getBindingContext().getProperty("wageClass/rate");
-												oTimeSheetEntry.project_ID = sProjectID;
-												oTimeSheetEntry.person_ID = oPerson.getBindingContext().getProperty("ID");
-												oTimeSheetEntry.task_ID = oTaskWorked.ID;
-												oTimeSheetEntry.shiftPart_ID = oShiftPart.shiftPartID;
-												oTimeSheetEntry.workingDate = oShiftPart.date;
-												oTimeSheetEntry.startTimeHrs = oShiftPart.startTimeHours;
-												oTimeSheetEntry.startTimeMins = oShiftPart.startTimeMinutes;
-												oTimeSheetEntry.endTimeHrs = oShiftPart.endTimeHours;
-												oTimeSheetEntry.endTimeMins = oShiftPart.endTimeMinutes;
-												oTimeSheetEntry.hoursWorked = parseFloat(that.getDecimalHours(oShiftPart.endTimeHours, oShiftPart.endTimeMinutes) -
-													that.getDecimalHours(oShiftPart.startTimeHours, oShiftPart.startTimeMinutes)).toFixed(3);
-												oTimeSheetEntry.rate = parseFloat(mRate * (1 + oShiftPart.wageIncrease * 0.01)).toFixed(3);
-												oTimeSheetEntry.calculatedCost = parseFloat(oTimeSheetEntry.hoursWorked * oTimeSheetEntry.rate).toFixed(3);
-												that.getModel("masterView").setProperty("/busy", true);
-												iCount += 1;
-												that.getModel("masterView").setProperty("/busy", true);
-												oModel.create("/TimeSheetEntries", oTimeSheetEntry, {
-													success: function (oData) {
-														MessageToast.show(that.getResourceBundle().getText("timesheetSuccessMessage", [iCount]));
-														that.getModel("masterView").setProperty("/busy", false);
-													},
-													error: function (oError) {
-														Log.error("Error creating timesheets: " + JSON.stringify(oError));
-														that.getModel("masterView").setProperty("/busy", false);
-													}
+							} else { // all fine, create timesheet and then entries
+								var oTimesheet = {
+									project_ID: sProjectID,
+									person_ID: oPerson.getBindingContext().getProperty("ID"),
+									workingDate: oDate
+								};
+								oModel.create("/Timesheets", oTimesheet, {
+									success: function (oData) { // create timesheet entries
+										if (oData) {
+											aTasksWorked.reduce(function (q, oTaskWorked, k) {
+												new Promise(function (reso, reje) {
+													var aShiftPartsWorked = that.getShiftPartsAndValuesOnADay(oTaskWorked, oDate); // must exist
+													aShiftPartsWorked.reduce(function (r, oShiftPart, l) {
+														new Promise(function (res, rej) {
+															var oTimeSheetEntry = {},
+																mRate = oPerson.getBindingContext().getProperty("wageClass/rate");
+															oTimeSheetEntry.project_ID = sProjectID;
+															oTimeSheetEntry.person_ID = oPerson.getBindingContext().getProperty("ID");
+															oTimeSheetEntry.task_ID = oTaskWorked.ID;
+															oTimeSheetEntry.timesheet_ID = oData.ID;
+															oTimeSheetEntry.shiftPart_ID = oShiftPart.shiftPartID;
+															oTimeSheetEntry.workingDate = oDate;
+															oTimeSheetEntry.startTimeHrs = oShiftPart.startTimeHours;
+															oTimeSheetEntry.startTimeMins = oShiftPart.startTimeMinutes;
+															oTimeSheetEntry.endTimeHrs = oShiftPart.endTimeHours;
+															oTimeSheetEntry.endTimeMins = oShiftPart.endTimeMinutes;
+															oTimeSheetEntry.hoursWorked = parseFloat(that.getDecimalHours(oShiftPart.endTimeHours, oShiftPart.endTimeMinutes) -
+																that.getDecimalHours(oShiftPart.startTimeHours, oShiftPart.startTimeMinutes)).toFixed(3);
+															oTimeSheetEntry.rate = parseFloat(mRate * (1 + oShiftPart.wageIncrease * 0.01)).toFixed(3);
+															oTimeSheetEntry.calculatedCost = parseFloat(oTimeSheetEntry.hoursWorked * oTimeSheetEntry.rate).toFixed(
+																3);
+															that.getModel("masterView").setProperty("/busy", true);
+															iCount += 1;
+															oModel.create("/TimeSheetEntries", oTimeSheetEntry, {
+																success: function (oTimeSheetEntryCreated) {
+																	mTimesheetTotalHoursWorked += Number(oTimeSheetEntryCreated.hoursWorked);
+																	mTimesheetTotalCostWorked += Number(oTimeSheetEntryCreated.calculatedCost);
+																	MessageToast.show(that.getResourceBundle().getText("timesheetSuccessMessage", [iCount]));
+																	// when the last timesheet entry of the last task worked was created then update the timesheet with totals
+																	if (k === aTasksWorked.length - 1 && l === aShiftPartsWorked.length - 1) {
+																		that._updateTimesheet(oData.ID, oTaskWorked.shift_ID, oPerson, mTimesheetTotalHoursWorked,
+																			mTimesheetTotalCostWorked);
+																	}
+																	that.getModel("masterView").setProperty("/busy", false);
+																},
+																error: function (oError) {
+																	Log.error("Error creating timesheets: " + JSON.stringify(oError));
+																	that.getModel("masterView").setProperty("/busy", false);
+																}
+															});
+														});
+													}, Promise.resolve());
 												});
-											});
-										}, Promise.resolve());
-									});
-								}, Promise.resolve());
+											}, Promise.resolve());
+										}
+									},
+									error: function (oError) {
+										Log.error("Error creating timesheet");
+									}
+								});
 							}
 						} else {
 							that.getModel("masterView").setProperty("/busy", false);
 						}
 					});
 				}, Promise.resolve());
+			});
+		},
+
+		_updateTimesheet: function (sTimesheetID, sShiftID, oPerson, mTotalHours, mTotalCost) {
+			// called after timesheet entries were created; updates totals in timesheet
+			var oModel = this.getModel(),
+				sTimesheetPath = "/" + oModel.createKey("Timesheets", {
+					ID: sTimesheetID
+				}),
+				oTimesheet = oModel.createBindingContext(sTimesheetPath).getObject({
+					select: "*"
+				});
+
+			oTimesheet.hoursWorked = parseFloat(mTotalHours).toFixed(3);
+			oTimesheet.hoursShift = this.getWorkingHoursOfShift(sShiftID);
+			oTimesheet.costWorking = parseFloat(mTotalCost).toFixed(3);
+			oTimesheet.costShift = this.getCostOfShift(oPerson, sShiftID);
+			oModel.update(sTimesheetPath, oTimesheet, {
+				error: function (oError) {
+					Log.error("Error updating timesheet with time and cost totals");
+				}
 			});
 		},
 
@@ -489,6 +542,32 @@ sap.ui.define([
 				this._oListFilterState.aSearch = [];
 			}
 			this._applyFilterSearch();
+		},
+
+		onDateChanged: function (oEvent) {
+			//var sDate = oEvent.getParameter("value");
+			//this.getModel("appView").setProperty("/selectedDate", new Date(sDate));
+			this.getRouter().navTo("master");
+		},
+
+		minusDay: function () {
+			var oDate = new Date(this.getModel("appView").getProperty("/selectedDate"));
+			oDate.setDate(oDate.getDate() - 1);
+			this.getModel("appView").setProperty("/selectedDate", new Date(oDate));
+			//this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
+			// No item should be selected on master after detail page is closed
+			//this.getOwnerComponent().oListSelector.clearMasterListSelection();
+			//this.getRouter().navTo("master");
+		},
+
+		plusDay: function () {
+			var oDate = new Date(this.getModel("appView").getProperty("/selectedDate"));
+			oDate.setDate(oDate.getDate() + 1);
+			this.getModel("appView").setProperty("/selectedDate", new Date(oDate));
+			//this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
+			// No item should be selected on master after detail page is closed
+			//this.getOwnerComponent().oListSelector.clearMasterListSelection();
+			//this.getRouter().navTo("master");
 		},
 
 		onRefresh: function () {

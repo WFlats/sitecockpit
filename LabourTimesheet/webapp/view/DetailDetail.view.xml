@@ -1,0 +1,77 @@
+<mvc:View controllerName="labour.timesheet.LabourTimesheet.controller.DetailDetail" xmlns="sap.m" xmlns:semantic="sap.f.semantic"
+	xmlns:mvc="sap.ui.core.mvc">
+	<semantic:SemanticPage id="detailDetailPage" busy="{detailView>/busy}" busyIndicatorDelay="{detailView>/delay}">
+		<semantic:titleHeading>
+			<Title text="{i18n>timeSheetDetailsTitle}"/>
+		</semantic:titleHeading>
+		<semantic:headerContent>
+			<ObjectHeader id="objectHeader" title="{path: 'workingDate', type:'sap.ui.model.type.Date', formatOptions: { style: 'medium'}}"
+				showTitleSelector="false" number="{parts: [{path: 'hoursWorked'}, {path: 'hoursShift'}] , formatter: '.formatter.percentageWorked'} %"
+				numberUnit="{i18n>productive}">
+				<ObjectAttribute id="shiftName" title="{i18n>shiftLabel}" text="{detailDetailView>/shiftName}"/>
+				<statuses>
+					<ObjectStatus title="{i18n>productiveHours}" text="{path: 'hoursWorked', formatter: '.formatter.hoursToHoursMinutes'}"/>
+					<ObjectStatus title="{i18n>hoursOfShift}" text="{path: 'hoursShift', formatter: '.formatter.hoursToHoursMinutes'}"/>
+					<!-- ObjectStatus title="{i18n>idleHours}" text="{path: 'detailView>/idleHours', formatter: '.formatter.hoursToHoursMinutes'}"/ -->
+				</statuses>
+			</ObjectHeader>
+		</semantic:headerContent>
+		<semantic:content>
+			<Table id="timesheetDetailList" width="auto"
+				items="{path: 'timeSheetEntries', parameters: {expand: 'task, task/location, shiftPart, shiftPart/timeType, project'}, sorter: [{path: 'task/taskName', descending: false, group: '.getTask'}, {path: 'task/number'}, {path: 'startTimeHrs'}], groupHeaderFactory: '.createGroupHeader'}"
+				mode="MultiSelect" includeItemInSelection="true" updateFinished=".onListUpdateFinished" selectionChange=".onSelectionChange"
+				noDataText="{i18n>noTimesheetDetails}" busyIndicatorDelay="{detailView>/lineItemTableDelay}">
+				<headerToolbar>
+					<Toolbar>
+						<Title id="lineItemsTitle" text="{detailDetailView>/lineItemListTitle}" titleStyle="H3" level="H3"/>
+						<ToolbarSpacer/>
+						<Button press=".onDelete" icon="sap-icon://delete" enabled="{detailDetailView>/selected}" type="Transparent"/>
+					</Toolbar>
+				</headerToolbar>
+				<columns>
+					<Column>
+						<Label text="{i18n>shiftPartHeader}"/>
+					</Column>
+					<Column hAlign="End" width="10%">
+						<Label text="{i18n>startHeader}"/>
+					</Column>
+					<Column hAlign="End" width="10%">
+						<Label text="{i18n>endHeader}"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true" hAlign="End" width="10%">
+						<Label text="{i18n>hoursHeader}"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true" hAlign="End" width="18%">
+						<Label text="{i18n>rateHader}"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true" hAlign="End" width="18%">
+						<Label text="{i18n>costHeader}"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<Text text="{shiftPart/timeType/code}"/>
+							<Text text="{parts: [{path: 'startTimeHrs'}, {path: 'startTimeMins'}], formatter: '.formatter.hoursMinutes' }"/>
+							<Text text="{parts: [{path: 'endTimeHrs'}, {path: 'endTimeMins'}], formatter: '.formatter.hoursMinutes' }"/>
+							<Text text="{hoursWorked}"/>
+							<ObjectNumber number="{rate}" unit="{project/currency_code}"/>
+							<ObjectNumber number="{calculatedCost}" unit="{project/currency_code}"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</semantic:content>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

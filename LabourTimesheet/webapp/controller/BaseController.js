@@ -1,7 +1,8 @@
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
-	"sap/ui/core/routing/History"
-], function (Controller, History) {
+	"sap/ui/core/routing/History",
+	"sap/m/GroupHeaderListItem"
+], function (Controller, History, GroupHeaderListItem) {
 	"use strict";
 
 	return Controller.extend("labour.timesheet.LabourTimesheet.controller.BaseController", {
@@ -255,24 +256,87 @@ sap.ui.define([
 			}
 		},
 
+		getEndOfLastShiftOnADay: function (aInboundShifts, oDate) {
+			var aShifts = [],
+				oEndDate = new Date(oDate.getTime());
+			for (var i = 0; i < aInboundShifts.length; i++) {
+				if (this.isWeekendDay(oDate) && !aShifts[i].ignoreWeekends) {
+					continue;
+				}
+				if (this.isSpecialDate(oDate) && !aShifts[i].ignoreHolidays) {
+					continue;
+				}
+				aShifts.push(aInboundShifts[i]);
+			}
+			if (aShifts.length === 0) {
+				return undefined; // no shift on this oDate
+			}
+			if (aShifts.length === 1) {
+				oEndDate.setHours(aShifts[0].shiftParts[aShifts[0].shiftParts.length - 1].endTimeHrs,
+					aShifts[0].shiftParts[aShifts[0].shiftParts.length - 1].endTimeMins, 0, 0);
+				return oEndDate;
+			}
+			// sort descending by end time of last shift part
+			aShifts.sort(function (a, b) {
+				return b.shiftParts[b.shiftParts.length - 1].endTimeHrs + b.shiftParts[b.shiftParts.length - 1].endTimeMins / 60 -
+					a.shiftParts[a.shiftParts.length - 1].endTimeHrs + a.shiftParts[a.shiftParts.length - 1].endTimeMins / 60;
+			});
+			oEndDate.setHours(aShifts[0].shiftParts[aShifts[0].shiftParts.length - 1].endTimeHrs,
+				aShifts[0].shiftParts[aShifts[0].shiftParts.length - 1].endTimeMins, 0, 0);
+			return oEndDate;
+		},
+
 		getWorkingHoursOfShift: function (sShiftID) {
-			var oWorkTimeModel = this.getModel("workTimeModel"),
-				aShifts = oWorkTimeModel.getProperty("/shifts"),
-				aShiftParts,
+			var oShift = this.getShiftFromID(sShiftID),
+				aShiftParts = oShift.shiftParts,
 				mShiftTotalWorkingHours = 0;
 
-			for (var j = 0; j < aShifts.length; j++) {
-				if (aShifts[j].ID === sShiftID) { // shift found; calculate total working hours
-					aShiftParts = aShifts[j].shiftParts;
-					for (var l = 0; l < aShiftParts.length; l++) {
-						if (!aShiftParts[l].breakTime) {
-							mShiftTotalWorkingHours += (aShiftParts[l].endTimeHrs + aShiftParts[l].endTimeMins / 60) -
-								(aShiftParts[l].startTimeHrs + aShiftParts[l].startTimeMins / 60);
-						}
-					}
-					return mShiftTotalWorkingHours;
+			aShiftParts.forEach(function (oShiftPart) {
+				if (!oShiftPart.breakTime) {
+					mShiftTotalWorkingHours += (oShiftPart.endTimeHrs + oShiftPart.endTimeMins / 60) -
+						(oShiftPart.startTimeHrs + oShiftPart.startTimeMins / 60);
 				}
-			}
+			});
+			return parseFloat(mShiftTotalWorkingHours).toFixed(3);
+		},
+
+		getCostOfShift: function (oPerson, sShiftID) {
+			// oPerson is the listItem
+			var oShift = this.getShiftFromID(sShiftID),
+				aShiftParts = oShift.shiftParts,
+				mRate = oPerson.getBindingContext().getProperty("wageClass/rate"),
+				mShiftDurationHrs,
+				mShiftTotalCost = 0;
+
+			aShiftParts.forEach(function (oShiftPart) {
+				if (!oShiftPart.breakTime) {
+					mShiftDurationHrs = (oShiftPart.endTimeHrs + oShiftPart.endTimeMins / 60) -
+						(oShiftPart.startTimeHrs + oShiftPart.startTimeMins / 60);
+					mShiftTotalCost += oShiftPart.wageIncrease ? mRate * (1 + oShiftPart.wageIncrease / 100) * mShiftDurationHrs :
+						mRate * mShiftDurationHrs;
+				}
+			});
+			return parseFloat(mShiftTotalCost).toFixed(3);
+		},
+
+		getHoursWorkedOfTimesheet: function (aTimesheetEntries) {
+			var mHours = 0;
+			aTimesheetEntries.forEach(function (oTimesheetEntry) {
+				if (!(oTimesheetEntry instanceof GroupHeaderListItem)) {
+					mHours += Number(oTimesheetEntry.getBindingContext().getProperty("hoursWorked"));
+				}
+			});
+			return parseFloat(mHours).toFixed(3);
+		},
+
+		getCostWorkedOfTimesheet: function (aTimesheetEntries) {
+			var mCost = 0;
+			aTimesheetEntries.forEach(function (oTimesheetEntry) {
+				if (!(oTimesheetEntry instanceof GroupHeaderListItem)) {
+					mCost += Number(oTimesheetEntry.getBindingContext().getProperty("calculatedCost"));
+				}
+			});
+			return parseFloat(mCost).toFixed(3);
 		},
 
 		_loadShifts: function (sProjectID) {
