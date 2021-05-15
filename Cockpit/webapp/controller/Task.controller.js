@@ -391,11 +391,7 @@ sap.ui.define([
 			oFrag.byId("myFrag2", "shiftSelect").setEnabled(oTask.status < 2);
 
 			oQuantity.setValue(oTask.quantity);
-			if (oTask.status < 2) {
-				oStartDate.setDateValue(oTask.plannedStart);
-			} else {
-				oStartDate.setDateValue(oTask.actualStart);
-			}
+			oStartDate.setDateValue(oTask.plannedStart); // only display planned values
 			oEndDate.setDateValue(oTask.estimatedEnd);
 			oEndIncWaitDate.setDateValue(new Date(oTask.estimatedEnd.getTime() + (oTask.waitDuration || 0)));
 			oProductivity.setValue(parseFloat(oTask.plannedProductivity * oTask.productivityFactor).toFixed(3)); //display value only
@@ -788,6 +784,8 @@ sap.ui.define([
 				oEndDateIncWait = oFrag.byId("myFrag2", "endIncWaitDate"),
 				oSelect = oFrag.byId("myFrag2", "shiftSelect"),
 				sSelectedKey = oSelect.getSelectedKey(),
+				oTotalCost = oFrag.byId("myFrag2", "totalPlannedCost"),
+				sTotalCost = oTotalCost.getValue(),
 				oDays = oFrag.byId("myFrag2", "waitingTimeDays"),
 				oHours = oFrag.byId("myFrag2", "waitingTimeHours"),
 				oMinutes = oFrag.byId("myFrag2", "waitingTimeMinutes"),
@@ -809,8 +807,8 @@ sap.ui.define([
 			}
 			if (Number(sQuantity) === Number(oTask.quantity) && Number(sProductivityFactor) === Number(oTask.productivityFactor) &&
 				sStartDate === oTask.plannedStart && sEndDate === oTask.estimatedEnd && sSelectedKey === oTask.shift_ID &&
-				oTask.waitDuration === iWaitMs && bEnabled) {
-				bEnabled = false;
+				oTask.waitDuration === iWaitMs && oTask.costPlanned === Number(sTotalCost) && bEnabled) {
+				bEnabled = false; // no changes
 			}
 			aButtons[0].setEnabled(bEnabled);
 		},
@@ -828,6 +826,7 @@ sap.ui.define([
 				sHours,
 				sMinutes,
 				iWaitMs,
+				mTotalPlannedCost,
 				oModel,
 				sObjectPath,
 				oTask,
@@ -858,12 +857,13 @@ sap.ui.define([
 							sHours = oFrag.byId("myFrag2", "waitingTimeHours").getValue();
 							sMinutes = oFrag.byId("myFrag2", "waitingTimeMinutes").getValue();
 							iWaitMs = (Number(sDays) * 24 * 60 + Number(sHours) * 60 + Number(sMinutes)) * 60 * 1000;
+							mTotalPlannedCost = parseFloat(oFrag.byId("myFrag2", "totalPlannedCost").getValue()).toFixed(3);
 							oModel = that.getModel();
 							sObjectPath = that.getModel("taskView").getProperty("/sTaskPath");
 							oTask = oModel.getObject(sObjectPath, {
 								select: "*"
 							});
-							oShift = that.getShiftFromID(oTask.shift_ID);
+							oShift = that.getShiftFromID(sShiftID);
 							oTask.plannedStart = sStartDate;
 							oTask.quantity = sQuantity;
 							oTask.productivityFactor = sProductivityFactor; // planned productivity stays unchanged
@@ -877,7 +877,12 @@ sap.ui.define([
 								oTask.estimatedEnd = that.getEndDateInWorkingHours(oTask.actualStart, oTask.quantity, oTask.currentProductivity, oShift);
 							}
 							oTask.waitDuration = iWaitMs;
-							oModel.update(sObjectPath, oTask);
+							oTask.costPlanned = mTotalPlannedCost;
+							oModel.update(sObjectPath, oTask, {
+								error: function (oError) {
+									Log.error("Error updating task after editing");
+								}
+							});
 
 							that.oBaseEditDialog.close();
 						}

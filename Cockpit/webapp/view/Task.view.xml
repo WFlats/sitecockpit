@@ -17,13 +17,13 @@
 		</semantic:titleCustomTextActions>
 		<semantic:headerContent>
 			<ObjectHeader title="{path: 'shortText'}" showTitleSelector="false"
-				number="{parts: [{path: 'actualQuantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}, {path: 'i18n>ofTotal' }, {path: 'quantity' , type:'sap.ui.model.type.Float' , formatOptions: { decimals: 3 }}]} "
+				number="{parts: [{path: 'actualQuantity'}, {path: 'i18n>ofTotal' }, {path: 'quantity' }], formatter: '.formatter.actualOfTotal'} "
 				numberUnit="{path: 'UoM/code' }">
 				<ObjectAttribute title="{i18n>taskLocation}" text="{location/code} {location/description}"/>
 				<ObjectAttribute title="{i18n>taskDiscipline}" text="{discipline/code} {discipline/description}"/>
 				<ObjectAttribute id="shiftAttribute" title="{i18n>taskShiftName}" text="{shift/code}"/>
 				<statuses>
-					<ObjectStatus title="{i18n>taskIconTabPerformanceTitle}" text="{KPI}" state="{path: 'KPI', formatter: '.formatter.stateFormatter'}"
+					<ObjectStatus title="{i18n>productivityStatus}" text="{KPI}" state="{path: 'KPI', formatter: '.formatter.stateFormatter'}"
 						icon="{path: 'KPI', formatter: '.formatter.iconFormatter'}" visible="{= ${status} > 1 ? true : false}"/>
 					<ProgressIndicator class="sapUiNoMarginBottom" width="50%" percentValue="{= ${actualQuantity} / ${quantity} * 100}"
 						displayValue="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}], formatter: '.formatter.progress'} %" showValue="true"
@@ -38,13 +38,13 @@
 			<IconTabBar id="taskIconTabBar" visible="true" expandable="true" expanded="true" applyContentPadding="true" backgroundDesign="Solid"
 				headerBackgroundDesign="Solid" enableTabReordering="true" headerMode="Inline" tabDensityMode="Compact">
 				<items>
-					<IconTabFilter id="taskIconTabFilterPerformance" text="{i18n>taskIconTabPerformanceTitle}" icon="sap-icon://kpi-corporate-performance"
+					<IconTabFilter id="taskIconTabFilterProductivity" text="{i18n>taskIconTabProductivityTitle}" icon="sap-icon://performance"
 						iconColor="{= ${KPI} >= 1.000 ? 'Positive' : ${KPI} > 0.900 ? 'Critical' : 'Negative'}">
 						<Table alternateRowColors="true">
 							<headerToolbar>
 								<Toolbar>
 									<content>
-										<Title text="{i18n>taskPerformanceTitle}"/>
+										<Title text="{i18n>taskProductivityTitle}"/>
 									</content>
 								</Toolbar>
 							</headerToolbar>
@@ -59,51 +59,6 @@
 									<Label text="{i18n>taskCurrent}"/>
 								</Column>
 							</columns>
-							<items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{i18n>laborCost}"/>
-										<Text text="{ path:'costLaborPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-										<Text text="{ path:'costLaborActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-									</cells>
-								</ColumnListItem>
-							</items>
-							<items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{i18n>materialCost}"/>
-										<Text text="{ path:'costMaterialPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-										<Text text="{ path:'costMaterialActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-									</cells>
-								</ColumnListItem>
-							</items>
-							<items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{i18n>equipmentCost}"/>
-										<Text text="{ path:'costEquipmentPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-										<Text text="{ path:'costEquipmentActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-									</cells>
-								</ColumnListItem>
-							</items>
-							<items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{i18n>subcontractCost}"/>
-										<Text text="{ path:'plannedTotalPrice', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-										<Text text="{ path:'actualTotalPrice', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-									</cells>
-								</ColumnListItem>
-							</items>
-							<items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{i18n>totalCost}"/>
-										<Text text="{ path:'costPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-										<Text text="{ path:'costActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-									</cells>
-								</ColumnListItem>
-							</items>
 							<items>
 								<ColumnListItem>
 									<cells>
@@ -175,6 +130,83 @@
 										<Text text="{i18n>waitDuration} [{i18n>waitTimeUnit}]"/>
 										<Text id="recipeWaitDuration" text="{path:'recipe/waitDuration', formatter: '.formatter.dhmFromMsAsString'}"/>
 										<Text text="{path:'waitDuration', formatter: '.formatter.dhmFromMsAsString'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</IconTabFilter>
+					<IconTabFilter id="taskIconTabFilterPerformance" text="{i18n>taskIconTabPerformanceTitle}" icon="sap-icon://kpi-corporate-performance"
+						iconColor="{= ${costActual} / ${costPlanned} >= 1.000 ? 'Negative' : ${costActual} / ${costPlanned} > 0.900 ? 'Critical' : 'Positive'}">
+						<Table alternateRowColors="true">
+							<headerToolbar>
+								<Toolbar>
+									<content>
+										<Title text="{i18n>taskPerformanceTitle} [{taskView>/currency}]"/>
+									</content>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Label text=""/>
+								</Column>
+								<Column hAlign="Right">
+									<Label text="{i18n>taskPlanned}"/>
+								</Column>
+								<Column hAlign="Right">
+									<Label text="{i18n>taskCurrent}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>taskMeasurementQuantity} [{path: 'UoM/code'}]"/>
+										<Text text="{ path:'quantity', type:'sap.ui.model.type.Float', formatOptions: { decimals: 3 } }"/>
+										<Text text="{ path:'actualQuantity', type:'sap.ui.model.type.Float', formatOptions: { decimals: 3 } }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>laborCost}"/>
+										<Text text="{ path:'costLaborPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'costLaborActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>materialCost}"/>
+										<Text text="{ path:'costMaterialPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'costMaterialActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>equipmentCost}"/>
+										<Text text="{ path:'costEquipmentPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'costEquipmentActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>subcontractCost}"/>
+										<Text text="{ path:'plannedTotalPrice', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'actualTotalPrice', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>totalCost}"/>
+										<Text text="{ path:'costPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'costActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
 									</cells>
 								</ColumnListItem>
 							</items>

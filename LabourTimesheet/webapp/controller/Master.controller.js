@@ -219,29 +219,6 @@ sap.ui.define([
 				sConfirmTitle = this.getResourceBundle().getText("confirmTitle"),
 				that = this;
 			// find last shift end on oDate
-			/*			for (var i = 0; i < aShifts.length; i++) {
-							if (this.isWeekendDay(oDate) && !aShifts[i].ignoreWeekends) {
-								continue;
-							}
-							if (this.isSpecialDate(oDate) && !aShifts[i].ignoreHolidays) {
-								continue;
-							}
-							// only checking the last shiftPart
-							oLatestShiftEnd.setHours(aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeHrs,
-								aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeMins, 0, 0);
-							if (oShiftEndToday.getTime() < oLatestShiftEnd.getTime()) {
-								oShiftEndToday.setHours(aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeHrs,
-									aShifts[i].shiftParts[aShifts[i].shiftParts.length - 1].endTimeMins, 0, 0);
-							}
-						}
-
-						
-						// check if there was a shift on oDate
-						if (oShiftEndToday.getHours() === 0) {
-							MessageToast.show(this.getResourceBundle().getText("toastNoShiftOnDate"));
-							return;
-						} */
-
 			oShiftEndOfDay = this.getEndOfLastShiftOnADay(aShifts, oDate);
 			if (!oShiftEndOfDay) {
 				MessageToast.show(this.getResourceBundle().getText("toastNoShiftOnDate"));
@@ -505,6 +482,40 @@ sap.ui.define([
 			});
 		},
 
+		_updateTasksWithActualLaborCost: function (aTasks) {
+			var oModel = this.getModel();
+
+			aTasks.reduce(function (oAgg, oTask, i) {
+				Promise(function (resolve, reject) {
+					var oFilter = new Filter("task_ID", FilterOperator.EQ, oTask.getBindingContext().getProperty("ID"));
+					oModel.read("/TimeSheetEntries", {
+						filters: [oFilter],
+						success: function (oData) {
+							if (oData && oData.results.length > 0) {
+								var aTimesheetEntries = oData.results,
+									mActualLaborCost = 0,
+									mActualLaborHours = 0;
+								aTimesheetEntries.forEach(function (oTimesheetEntry) {
+									mActualLaborCost += oTimesheetEntry.calculatedCost;
+									mActualLaborHours += oTimesheetEntry.hoursWorked;
+								});
+								oModel.setProperty("costLaborActual", mActualLaborCost, oTask.getBindingContext());
+								oModel.setProperty("hoursLaborActual", mActualLaborHours, oTask.getBindingContext());
+								oModel.submitChanges({
+									error: function (oError) {
+										Log.error("Error updating task with actual labor values");
+									}
+								});
+							}
+						},
+						error: function (oError) {
+							Log.error("Error reading tasks to update with actual labor cost");
+						}
+					});
+				});
+			}, Promise.resolve());
+		},
+
 		/**
 		 * After list data is available, this handler method updates the
 		 * master list counter
@@ -554,20 +565,12 @@ sap.ui.define([
 			var oDate = new Date(this.getModel("appView").getProperty("/selectedDate"));
 			oDate.setDate(oDate.getDate() - 1);
 			this.getModel("appView").setProperty("/selectedDate", new Date(oDate));
-			//this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
-			// No item should be selected on master after detail page is closed
-			//this.getOwnerComponent().oListSelector.clearMasterListSelection();
-			//this.getRouter().navTo("master");
 		},
 
 		plusDay: function () {
 			var oDate = new Date(this.getModel("appView").getProperty("/selectedDate"));
 			oDate.setDate(oDate.getDate() + 1);
 			this.getModel("appView").setProperty("/selectedDate", new Date(oDate));
-			//this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
-			// No item should be selected on master after detail page is closed
-			//this.getOwnerComponent().oListSelector.clearMasterListSelection();
-			//this.getRouter().navTo("master");
 		},
 
 		onRefresh: function () {

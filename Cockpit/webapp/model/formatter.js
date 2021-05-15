@@ -46,6 +46,14 @@ sap.ui.define([
 			return parseFloat(sValue1 / sValue2).toFixed(3);
 		},
 
+		actualOfTotal: function (sActualQuantity, sText, sPlannedQuantity) {
+			if (!sActualQuantity) {
+				return sPlannedQuantity;
+			} else {
+				return sActualQuantity + " " + sText + " " + sPlannedQuantity;
+			}
+		},
+
 		taskTooltipFormatter: function (iStatus, oPlannedStart, oActualStart, oEstimatedEnd, iWait) {
 			var oDateFormat = DateFormat.getDateTimeInstance({
 					style: "short"
