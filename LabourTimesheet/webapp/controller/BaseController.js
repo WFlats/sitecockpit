@@ -1,8 +1,11 @@
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/ui/core/routing/History",
-	"sap/m/GroupHeaderListItem"
-], function (Controller, History, GroupHeaderListItem) {
+	"sap/m/GroupHeaderListItem",
+	"sap/base/Log",
+	"sap/ui/model/Filter",
+	"sap/ui/model/FilterOperator"
+], function (Controller, History, GroupHeaderListItem, Log, Filter, FilterOperator) {
 	"use strict";
 
 	return Controller.extend("labour.timesheet.LabourTimesheet.controller.BaseController", {
@@ -337,6 +340,88 @@ sap.ui.define([
 				}
 			});
 			return parseFloat(mCost).toFixed(3);
+		},
+
+		_updateTimesheet: function (sTimesheetID, sShiftID, oPerson, mTotalHours, mTotalCost) {
+			// called after timesheet entries were created; updates totals in timesheet
+			var oModel = this.getModel(),
+				sTimesheetPath = "/" + oModel.createKey("Timesheets", {
+					ID: sTimesheetID
+				}),
+				oTimesheet = oModel.createBindingContext(sTimesheetPath).getObject({
+					select: "*"
+				});
+
+			oTimesheet.hoursWorked = parseFloat(mTotalHours).toFixed(3);
+			oTimesheet.hoursShift = this.getWorkingHoursOfShift(sShiftID);
+			oTimesheet.costWorking = parseFloat(mTotalCost).toFixed(3);
+			oTimesheet.costShift = this.getCostOfShift(oPerson, sShiftID);
+			oModel.update(sTimesheetPath, oTimesheet, {
+				error: function (oError) {
+					Log.error("Error updating timesheet with time and cost totals");
+				}
+			});
+		},
+
+		_getTasksOfTimesheetEntries: function (aItems) {
+			var oModel = this.getModel(),
+				aTasks = [],
+				sTaskID,
+				sTaskPath,
+				aLastTaskIDAdded = "";
+
+			aItems.forEach(function (oItem) {
+				if (!(oItem instanceof GroupHeaderListItem)) {
+					sTaskID = oItem.getBindingContext().getProperty("task_ID");
+					if (sTaskID && sTaskID !== aLastTaskIDAdded) {
+						sTaskPath = "/" + oModel.createKey("Tasks", {
+							ID: sTaskID
+						});
+						aTasks.push(oModel.createBindingContext(sTaskPath).getObject());
+						aLastTaskIDAdded = sTaskID;
+					}
+				}
+			});
+			return aTasks;
+		},
+
+		_updateTasksWithActualLaborCost: function (aTasks) {
+			var oModel = this.getModel();
+			// updates tasks with actual values after timesheet(entries) was changed
+			aTasks.reduce(function (oAgg, oTask, i) {
+				new Promise(function (resolve, reject) {
+					var oFilter = new Filter("task_ID", FilterOperator.EQ, oTask.ID);
+					oModel.read("/TimeSheetEntries", {
+						filters: [oFilter],
+						success: function (oData) {
+							if (oData && oData.results.length > 0) {
+								var aTimesheetEntries = oData.results,
+									sTaskPath = oModel.createKey("/Tasks", {
+										ID: oTask.ID
+									}),
+									oTaskUpdate = {
+										costLaborActual: 0.0,
+										hoursLaborActual: 0.0
+									};
+								aTimesheetEntries.forEach(function (oTimesheetEntry) {
+									oTaskUpdate.costLaborActual += Number(oTimesheetEntry.calculatedCost);
+									oTaskUpdate.hoursLaborActual += Number(oTimesheetEntry.hoursWorked);
+								});
+								oTaskUpdate.costLaborActual = parseFloat(oTaskUpdate.costLaborActual).toFixed(3);
+								oTaskUpdate.hoursLaborActual = parseFloat(oTaskUpdate.hoursLaborActual).toFixed(3);
+								oModel.update(sTaskPath, oTaskUpdate, {
+									error: function () {
+										Log.error("Error updating task with actual labor values");
+									}
+								});
+							}
+						},
+						error: function (oError) {
+							Log.error("Error reading tasks to update them with actual labor cost");
+						}
+					});
+				});
+			}, Promise.resolve());
 		},
 
 		_loadShifts: function (sProjectID) {

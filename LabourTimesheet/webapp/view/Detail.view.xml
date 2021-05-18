@@ -12,7 +12,7 @@
 		</semantic:headerContent>
 		<semantic:content>
 			<Table id="timesheetList" width="auto"
-				items="{path: 'timesheets', parameters: {expand: 'project'}, sorter: {path: 'workingDate', type:'sap.ui.model.type.Date', descending: true}}"
+				items="{path: 'timesheets', parameters: {expand: 'project, person'}, sorter: {path: 'workingDate', type:'sap.ui.model.type.Date', descending: true}}"
 				mode="SingleSelectMaster" includeItemInSelection="true" updateFinished=".onListUpdateFinished" selectionChange=".onSelectionChange"
 				noDataText="{i18n>detailLineItemTableNoDataText}" busyIndicatorDelay="{detailView>/lineItemTableDelay}">
 				<headerToolbar>

@@ -127,30 +127,27 @@ sap.ui.define([
 				oViewModel = this.getModel("detailDetailView"),
 				oTSList = this.byId("timesheetDetailList"),
 				aItems = [],
+				aTasks = [],
 				oTimesheetBC = this.getView().getBindingContext(),
 				that = this;
 
 			// only update the counter if the length is final
 			if (oTSList.getBinding("items").isLengthFinal()) {
-				if (iTotalItems) {
-					sTitle = this.getResourceBundle().getText("timesheetEntriesTitleCount", [iTotalItems]);
-				} else {
-					//Display 'Line Items' instead of 'Line items (0)'
+				if (!iTotalItems) {
 					sTitle = this.getResourceBundle().getText("timesheetEntriesTitle");
-				}
-				oViewModel.setProperty("/lineItemListTitle", sTitle);
-				// update the timesheet from the list items (after deletion of items)
-				if (iTotalItems === 0) {
-					// remove timesheet if no entries are left
-					oModel.remove(oTimesheetBC.getPath(), {
-						success: function () {
-							that.onCloseDetailPress();
-						},
-						error: function (oError) {
-							Log.error("Error deleting timesheet after deleting entries");
-						}
-					});
+					// remove timesheet if no entries are left && the timesheet still exists
+					if (oTimesheetBC.getObject()) {
+						oModel.remove(oTimesheetBC.getPath(), {
+							success: function () {
+								that.onCloseDetailPress();
+							},
+							error: function (oError) {
+								Log.error("Error deleting timesheet after deleting all entries");
+							}
+						});
+					}
 				} else {
+					sTitle = this.getResourceBundle().getText("timesheetEntriesTitleCount", [iTotalItems]);
 					// update actual hours and cost if changed
 					aItems = oTSList.getItems();
 					oModel.setProperty("hoursWorked", that.getHoursWorkedOfTimesheet(aItems), oTimesheetBC);
@@ -165,6 +162,7 @@ sap.ui.define([
 					});
 				}
 				this.setObjectHeader();
+				oViewModel.setProperty("/lineItemListTitle", sTitle);
 			}
 		},
 
@@ -192,10 +190,12 @@ sap.ui.define([
 		onDelete: function () {
 			var oTimesheetEntriesList = this.byId("timesheetDetailList"),
 				aItems = oTimesheetEntriesList.getSelectedItems(),
+				aTasks = this._getTasksOfTimesheetEntries(aItems), // get them before timesheetEntries are deleted:-)
 				oModel = this.getModel(),
 				oViewModel = this.getModel("detailDetailView"),
 				sConfirmText = this.getResourceBundle().getText("timesheetDeleteDialogText"),
-				sConfirmTitle = this.getResourceBundle().getText("timesheetDeleteDialogTitle");
+				sConfirmTitle = this.getResourceBundle().getText("timesheetDeleteDialogTitle"),
+				that = this;
 
 			MessageBox.confirm(sConfirmText, {
 				icon: MessageBox.Icon.WARNING,
@@ -208,7 +208,11 @@ sap.ui.define([
 							oModel.remove(aItems[i].getBindingContext().getPath(), {
 								success: function () {
 									oViewModel.setProperty("/selected", false);
-									// Timesheet gets updated/deleted in the onListUpdateFinishes handler
+									if (i === aItems.length) {
+										// update tasks
+										that._updateTasksWithActualLaborCost(aTasks);
+									}
+									// Timesheet gets updated/deleted in the onListUpdateFinished handler
 								},
 								error: function (oError) {
 									Log.error("Error deleting timesheet entries");

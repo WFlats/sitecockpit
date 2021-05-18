@@ -251,9 +251,13 @@ sap.ui.define([
 							oPersonList.setMode("None");
 							that.byId("generateButton").setIcon("sap-icon://generate-shortcut");
 							aPersons.forEach(function (oPerson) {
-								oPerson.setType("Navigation");
 								oPersonList.setSelectedItem(oPerson, false);
 							});
+							if (Device.system.phone) {
+								that.byId("list").setMode("None");
+							} else {
+								that.byId("list").setMode("SingleSelectMaster");
+							}
 						}
 					}
 				});
@@ -269,9 +273,13 @@ sap.ui.define([
 				oPersonList.setMode("None");
 				that.byId("generateButton").setIcon("sap-icon://generate-shortcut");
 				aPersons.forEach(function (oPerson) {
-					oPerson.setType("Navigation");
 					oPersonList.setSelectedItem(oPerson, false);
 				});
+				if (Device.system.phone) {
+					that.byId("list").setMode("None");
+				} else {
+					that.byId("list").setMode("SingleSelectMaster");
+				}
 			}
 		},
 
@@ -430,10 +438,12 @@ sap.ui.define([
 																	mTimesheetTotalHoursWorked += Number(oTimeSheetEntryCreated.hoursWorked);
 																	mTimesheetTotalCostWorked += Number(oTimeSheetEntryCreated.calculatedCost);
 																	MessageToast.show(that.getResourceBundle().getText("timesheetSuccessMessage", [iCount]));
-																	// when the last timesheet entry of the last task worked was created then update the timesheet with totals
+																	// when the last timesheet entry of the last task worked was created then 
+																	// update the timesheet and the tasks with totals
 																	if (k === aTasksWorked.length - 1 && l === aShiftPartsWorked.length - 1) {
 																		that._updateTimesheet(oData.ID, oTaskWorked.shift_ID, oPerson, mTimesheetTotalHoursWorked,
 																			mTimesheetTotalCostWorked);
+																		that._updateTasksWithActualLaborCost(aTasksWorked);
 																	}
 																	that.getModel("masterView").setProperty("/busy", false);
 																},
@@ -459,61 +469,6 @@ sap.ui.define([
 					});
 				}, Promise.resolve());
 			});
-		},
-
-		_updateTimesheet: function (sTimesheetID, sShiftID, oPerson, mTotalHours, mTotalCost) {
-			// called after timesheet entries were created; updates totals in timesheet
-			var oModel = this.getModel(),
-				sTimesheetPath = "/" + oModel.createKey("Timesheets", {
-					ID: sTimesheetID
-				}),
-				oTimesheet = oModel.createBindingContext(sTimesheetPath).getObject({
-					select: "*"
-				});
-
-			oTimesheet.hoursWorked = parseFloat(mTotalHours).toFixed(3);
-			oTimesheet.hoursShift = this.getWorkingHoursOfShift(sShiftID);
-			oTimesheet.costWorking = parseFloat(mTotalCost).toFixed(3);
-			oTimesheet.costShift = this.getCostOfShift(oPerson, sShiftID);
-			oModel.update(sTimesheetPath, oTimesheet, {
-				error: function (oError) {
-					Log.error("Error updating timesheet with time and cost totals");
-				}
-			});
-		},
-
-		_updateTasksWithActualLaborCost: function (aTasks) {
-			var oModel = this.getModel();
-
-			aTasks.reduce(function (oAgg, oTask, i) {
-				Promise(function (resolve, reject) {
-					var oFilter = new Filter("task_ID", FilterOperator.EQ, oTask.getBindingContext().getProperty("ID"));
-					oModel.read("/TimeSheetEntries", {
-						filters: [oFilter],
-						success: function (oData) {
-							if (oData && oData.results.length > 0) {
-								var aTimesheetEntries = oData.results,
-									mActualLaborCost = 0,
-									mActualLaborHours = 0;
-								aTimesheetEntries.forEach(function (oTimesheetEntry) {
-									mActualLaborCost += oTimesheetEntry.calculatedCost;
-									mActualLaborHours += oTimesheetEntry.hoursWorked;
-								});
-								oModel.setProperty("costLaborActual", mActualLaborCost, oTask.getBindingContext());
-								oModel.setProperty("hoursLaborActual", mActualLaborHours, oTask.getBindingContext());
-								oModel.submitChanges({
-									error: function (oError) {
-										Log.error("Error updating task with actual labor values");
-									}
-								});
-							}
-						},
-						error: function (oError) {
-							Log.error("Error reading tasks to update with actual labor cost");
-						}
-					});
-				});
-			}, Promise.resolve());
 		},
 
 		/**

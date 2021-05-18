@@ -8,6 +8,7 @@
 			<ObjectHeader id="objectHeader" title="{path: 'workingDate', type:'sap.ui.model.type.Date', formatOptions: { style: 'medium'}}"
 				showTitleSelector="false" number="{parts: [{path: 'hoursWorked'}, {path: 'hoursShift'}] , formatter: '.formatter.percentageWorked'} %"
 				numberUnit="{i18n>productive}">
+				<ObjectAttribute id="workerName" title="{i18n>workerLabel}" text="{person/lastName} {person/firstName}"/>
 				<ObjectAttribute id="shiftName" title="{i18n>shiftLabel}" text="{detailDetailView>/shiftName}"/>
 				<statuses>
 					<ObjectStatus title="{i18n>productiveHours}" text="{path: 'hoursWorked', formatter: '.formatter.hoursToHoursMinutes'}"/>
