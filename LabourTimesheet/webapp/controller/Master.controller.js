@@ -217,7 +217,35 @@ sap.ui.define([
 				oShiftEndOfDay = new Date(oDate.getTime()),
 				sConfirmText = this.getResourceBundle().getText("notEndOfShiftMsg"),
 				sConfirmTitle = this.getResourceBundle().getText("confirmTitle"),
-				that = this;
+				sText = "",
+				sWorkerNames = "",
+				that = this,
+				fGenerate = function () {
+					that._getTasksOfDay(oDate).then(function (aTasksOfDay) {
+						if (aTasksOfDay && aTasksOfDay.length > 0) {
+							that._generateTimeSheets(aPersons, aTasksOfDay, oDate).then(function () {
+								that.getModel("masterView").setProperty("/busy", false);
+							});
+						} else {
+							MessageToast.show(this.getResourceBundle().getText("toastNoTaskOnADay"));
+							return;
+						}
+					});
+				},
+				fDeleteTimesheets = function (aWorkersWithTimesheets) {
+					var oModel = that.getModel(),
+						sPath;
+					aWorkersWithTimesheets.forEach(function (oWorkerWithTimesheet) {
+						sPath = "/" + oModel.createKey("Timesheets", {
+							ID: oWorkerWithTimesheet.timesheetID
+						});
+						oModel.remove(sPath, {
+							error: function (oError) {
+								Log.error("Error deleting existing timesheets");
+							}
+						});
+					});
+				};
 			// find last shift end on oDate
 			oShiftEndOfDay = this.getEndOfLastShiftOnADay(aShifts, oDate);
 			if (!oShiftEndOfDay) {
@@ -240,45 +268,80 @@ sap.ui.define([
 						if (sAction === "NO") {
 							return;
 						} else {
-							that._getTasksOfDay(oDate).then(function (aTasksOfDay) {
-								if (aTasksOfDay && aTasksOfDay.length > 0) {
-									that._generateTimeSheets(aPersons, aTasksOfDay, oDate).then(function () {
-										that.getModel("masterView").setProperty("/busy", false);
+							// check if timesheets exist
+							that.checkForExistingTimesheets(aPersons, oDate).then(function (aWorkersWithTimesheets) {
+								if (aWorkersWithTimesheets.length > 0) {
+									for (var m = 0; m < aWorkersWithTimesheets.length; m++) {
+										sWorkerNames += aWorkersWithTimesheets[m].name;
+										if (m > 9) {
+											sWorkerNames += "...";
+											break;
+										}
+									}
+									sText = that.getResourceBundle().getText("alertForExistingTimesheets") + "\n" + sWorkerNames;
+									MessageBox.error(sText, {
+										icon: MessageBox.Icon.ERROR,
+										title: that.getResourceBundle().getText("alertExistingTimesheetsTitle"),
+										actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.ABORT],
+										onClose: function (sAction2) {
+											if (sAction2 === sap.m.MessageBox.Action.OK) {
+												fDeleteTimesheets(aWorkersWithTimesheets);
+												fGenerate();
+											}
+										}
 									});
+								} else {
+									fGenerate();
 								}
 							});
 							that.getModel("masterView").setProperty("/generateMode", false);
-							oPersonList.setMode("None");
 							that.byId("generateButton").setIcon("sap-icon://generate-shortcut");
 							aPersons.forEach(function (oPerson) {
 								oPersonList.setSelectedItem(oPerson, false);
 							});
 							if (Device.system.phone) {
-								that.byId("list").setMode("None");
+								oPersonList.setMode("None");
 							} else {
-								that.byId("list").setMode("SingleSelectMaster");
+								oPersonList.setMode("SingleSelectMaster");
 							}
 						}
 					}
 				});
 			} else {
-				that._getTasksOfDay(oDate).then(function (aTasksOfDay) {
-					if (aTasksOfDay && aTasksOfDay.length > 0) {
-						that._generateTimeSheets(aPersons, aTasksOfDay, oDate).then(function () {
-							that.getModel("masterView").setProperty("/busy", false);
+				that.checkForExistingTimesheets(aPersons, oDate).then(function (aWorkersWithTimesheets) {
+					if (aWorkersWithTimesheets.length > 0) {
+						for (var m = 0; m < aWorkersWithTimesheets.length; m++) {
+							sWorkerNames += aWorkersWithTimesheets[m].name;
+							if (m > 9) {
+								sWorkerNames += "...";
+								break;
+							}
+						}
+						sText = that.getResourceBundle().getText("alertForExistingTimesheets") + "\n" + sWorkerNames;
+						MessageBox.error(sText, {
+							icon: MessageBox.Icon.ERROR,
+							title: that.getResourceBundle().getText("alertExistingTimesheetsTitle"),
+							actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.ABORT],
+							onClose: function (sAction) {
+								if (sAction === sap.m.MessageBox.Action.OK) {
+									fDeleteTimesheets(aWorkersWithTimesheets);
+									fGenerate();
+								}
+							}
 						});
+					} else {
+						fGenerate();
 					}
 				});
 				that.getModel("masterView").setProperty("/generateMode", false);
-				oPersonList.setMode("None");
 				that.byId("generateButton").setIcon("sap-icon://generate-shortcut");
 				aPersons.forEach(function (oPerson) {
 					oPersonList.setSelectedItem(oPerson, false);
 				});
 				if (Device.system.phone) {
-					that.byId("list").setMode("None");
+					oPersonList.setMode("None");
 				} else {
-					that.byId("list").setMode("SingleSelectMaster");
+					oPersonList.setMode("SingleSelectMaster");
 				}
 			}
 		},
@@ -426,11 +489,13 @@ sap.ui.define([
 															oTimeSheetEntry.startTimeMins = oShiftPart.startTimeMinutes;
 															oTimeSheetEntry.endTimeHrs = oShiftPart.endTimeHours;
 															oTimeSheetEntry.endTimeMins = oShiftPart.endTimeMinutes;
-															oTimeSheetEntry.hoursWorked = parseFloat(that.getDecimalHours(oShiftPart.endTimeHours, oShiftPart.endTimeMinutes) -
+															oTimeSheetEntry.hoursWorked = parseFloat(that.getDecimalHours(oShiftPart.endTimeHours,
+																	oShiftPart.endTimeMinutes) -
 																that.getDecimalHours(oShiftPart.startTimeHours, oShiftPart.startTimeMinutes)).toFixed(3);
 															oTimeSheetEntry.rate = parseFloat(mRate * (1 + oShiftPart.wageIncrease * 0.01)).toFixed(3);
-															oTimeSheetEntry.calculatedCost = parseFloat(oTimeSheetEntry.hoursWorked * oTimeSheetEntry.rate).toFixed(
-																3);
+															oTimeSheetEntry.calculatedCost = parseFloat(oTimeSheetEntry.hoursWorked * oTimeSheetEntry.rate)
+																.toFixed(
+																	3);
 															that.getModel("masterView").setProperty("/busy", true);
 															iCount += 1;
 															oModel.create("/TimeSheetEntries", oTimeSheetEntry, {
@@ -441,7 +506,8 @@ sap.ui.define([
 																	// when the last timesheet entry of the last task worked was created then 
 																	// update the timesheet and the tasks with totals
 																	if (k === aTasksWorked.length - 1 && l === aShiftPartsWorked.length - 1) {
-																		that._updateTimesheet(oData.ID, oTaskWorked.shift_ID, oPerson, mTimesheetTotalHoursWorked,
+																		that._updateTimesheet(oData.ID, oTaskWorked.shift_ID, oPerson,
+																			mTimesheetTotalHoursWorked,
 																			mTimesheetTotalCostWorked);
 																		that._updateTasksWithActualLaborCost(aTasksWorked);
 																	}
@@ -468,6 +534,55 @@ sap.ui.define([
 						}
 					});
 				}, Promise.resolve());
+			});
+		},
+
+		checkForExistingTimesheets: function (aPersons, oDate) {
+			var oModel = this.getModel(),
+				aWorkersWithTimesheets = [];
+
+			return new Promise(function (resolve) {
+				aPersons.reduce(function (aNames, oWorker, i) {
+					new Promise(function () {
+						var oStartOfDay = new Date(oDate.getTime()),
+							oEndOfDay = new Date(oDate.getTime()),
+							oTimesheetDateFilter,
+							aExistingTimesheetFilters,
+							oPerson;
+
+						oStartOfDay.setHours(0, 0, 0);
+						oEndOfDay.setHours(23, 59, 59);
+						oTimesheetDateFilter = new Filter("workingDate", FilterOperator.BT, oStartOfDay, oEndOfDay);
+						aExistingTimesheetFilters = [
+							new Filter("person_ID", FilterOperator.EQ, oWorker.getBindingContext().getProperty("ID")),
+							oTimesheetDateFilter
+						];
+						oModel.read("/Timesheets", {
+							urlParameters: {
+								$expand: "person",
+								$top: 1
+							},
+							filters: aExistingTimesheetFilters,
+							and: true,
+							success: function (oData) {
+								if (oData && oData.results.length > 0) {
+									oPerson = oData.results[0].person;
+									aWorkersWithTimesheets.push({
+										ID: oPerson.ID,
+										name: oPerson.lastName + ", " + oPerson.firstName + "\n",
+										timesheetID: oData.results[0].ID
+									});
+								}
+								if (i === aPersons.length - 1) {
+									resolve(aWorkersWithTimesheets);
+								}
+							},
+							error: function (oError) {
+								Log.error("Error reading timesheet of a day");
+							}
+						});
+					});
+				}, [], Promise.resolve());
 			});
 		},
 
