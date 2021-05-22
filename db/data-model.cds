@@ -475,3 +475,57 @@ entity TimeSheetEntries : managed { // no currency; all currencies are converted
         rate			: Decimal(10, 3); // redundant; is wage rate times wage increase of time type
         calculatedCost	: Decimal(10, 3); // redundant on purpose because wages change over time
 }
+
+entity PlanVersions		: managed {
+	key ID				: UUID;
+		project			: association to Projects;
+		snapshotDate	: DateTime;
+		versionNumber	: String(50);
+		description		: localized String(500);
+		useCase			: Integer enum {
+							daily = 0;
+							weekly = 1;
+							monthly = 2;
+							longterm = 3;
+						};
+		snapshotTasks	: composition of many SnapshotTasks on snapshotTasks.planVersion=$self;
+}
+
+entity SnapshotTasks		 : managed { // a copy of the main values of a task
+	key ID					 : UUID;
+		planVersion			 : association to PlanVersions;
+		task				 : association to Tasks; // to retrieve additional data like location, recipe, etc.
+		plannedStart         : DateTime;
+        plannedEnd           : DateTime;
+        estimatedEnd         : DateTime; // updated after new measurement and at completion
+        actualStart          : DateTime; // set when task is started
+        actualEnd            : DateTime; // set at time of approval
+        stoppedAt			 : DateTime;
+        stopDuration		 : Integer; // in ms
+        waitDuration		 : Integer; // in ms
+        status				 : Integer enum {
+							        planned = 0; 
+							        committed = 1; 
+							        started = 2; 
+							        stopped = 3; 
+							        completed = 4; 
+							        approved = 5;
+								};
+		plannedQuantity      : Decimal(10, 3);
+        actualQuantity		 : Decimal(10, 3);
+        plannedProductivity  : Decimal(10, 3);
+        productivityFactor   : Decimal(5, 3);
+        currentProductivity  : Decimal(10, 3);
+        costPlanned			 : Decimal(10, 3);
+        costActual			 : Decimal(10, 3);
+        costLaborPlanned	 : Decimal(10, 3);
+        costLaborActual		 : Decimal(10, 3);
+        hoursLaborPlanned	 : Decimal(10, 3);
+        hoursLaborActual	 : Decimal(10, 3);
+        costMaterialPlanned	 : Decimal(10, 3);
+        costMaterialActual	 : Decimal(10, 3);
+        costEquipmentPlanned : Decimal(10, 3);
+        costEquipmentActual  : Decimal(10, 3);
+        hoursEquipmentPlanned: Decimal(10, 3);
+        hoursEquipmentActual : Decimal(10, 3);
+}

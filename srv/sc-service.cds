@@ -48,6 +48,8 @@ service scService {
   entity ProblemCards as projection on sc.ProblemCards;
   entity Timesheets as projection on sc.Timesheets;
   entity TimeSheetEntries as projection on sc.TimeSheetEntries;
+  entity PlanVersions as projection on sc.PlanVersions;
+  entity SnapshotTasks as projection on sc.SnapshotTasks;
   annotate scService.Countries with @cds.persistence.skip :false;
   annotate scService.Currencies with @cds.persistence.skip :false;
   annotate scService.Countries with @cds.persistence.exists :true;
