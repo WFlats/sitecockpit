@@ -3055,11 +3055,19 @@ sap.ui.define([
 				bLumpSum = oFrag.byId("mySubbyFrag", "lumpSum").getSelected();
 
 			if (bLumpSum) {
-				oFrag.byId("mySubbyFrag", "actualCost").setValue(parseFloat(sPlannedTotalPrice).toFixed(2));
+				if (sPlannedTotalPrice) {
+					oFrag.byId("mySubbyFrag", "actualCost").setValue(parseFloat(sPlannedTotalPrice).toFixed(2));
+				} else {
+					oFrag.byId("mySubbyFrag", "actualCost").setValue(0);
+				}
 				oFrag.byId("mySubbyFrag", "unitRate").setEnabled(false);
 				oFrag.byId("mySubbyFrag", "plannedCost").setEnabled(true);
 			} else {
-				oFrag.byId("mySubbyFrag", "actualCost").setValue(parseFloat(sActualQuantity * sPrice).toFixed(2));
+				if (sActualQuantity && sPrice) {
+					oFrag.byId("mySubbyFrag", "actualCost").setValue(parseFloat(sActualQuantity * sPrice).toFixed(2));
+				} else {
+					oFrag.byId("mySubbyFrag", "actualCost").setValue(0);
+				}
 				oFrag.byId("mySubbyFrag", "unitRate").setEnabled(true);
 				oFrag.byId("mySubbyFrag", "plannedCost").setEnabled(false);
 			}
@@ -3072,7 +3080,9 @@ sap.ui.define([
 
 			// check for error states and that subby is selected
 			if (!oFrag.byId("mySubbyFrag", "selectSubby").getSelectedKey() ||
+				!oFrag.byId("mySubbyFrag", "unitRate").getValue() ||
 				oFrag.byId("mySubbyFrag", "unitRate").getValueState() === "Error" ||
+				!oFrag.byId("mySubbyFrag", "plannedCost").getValue() ||
 				oFrag.byId("mySubbyFrag", "plannedCost").getValueState() === "Error") {
 				this.oSubbyEditDialog.getButtons()[0].setEnabled(false);
 				return;

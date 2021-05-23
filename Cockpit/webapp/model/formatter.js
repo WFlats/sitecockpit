@@ -43,7 +43,7 @@ sap.ui.define([
 			if (!sValue1 || !sValue2) {
 				return "";
 			}
-			return parseFloat(sValue1 / sValue2).toFixed(3);
+			return parseFloat(Number(sValue1) / Number(sValue2)).toFixed(3);
 		},
 
 		actualOfTotal: function (sActualQuantity, sText, sPlannedQuantity) {
@@ -52,6 +52,14 @@ sap.ui.define([
 			} else {
 				return sActualQuantity + " " + sText + " " + sPlannedQuantity;
 			}
+		},
+
+		earnedValueKPI: function (actQuant, planQuant, actCost, planCost) {
+			var EV = Number(actQuant) / Number(planQuant) * Number(planCost);
+			if (isNaN(EV) || !actCost) {
+				return "";
+			}
+			return parseFloat(EV / Number(actCost)).toFixed(3);
 		},
 
 		taskTooltipFormatter: function (iStatus, oPlannedStart, oActualStart, oEstimatedEnd, iWait) {
@@ -165,6 +173,46 @@ sap.ui.define([
 			}
 		},
 
+		quantityStateFormatter: function (actualQuantity, plannedQuantity) {
+			var sState = "None";
+			if (!actualQuantity || !plannedQuantity || plannedQuantity === 0) {
+				return sState;
+			}
+			sState = (actualQuantity / plannedQuantity) > 1 ? "Success" : "None";
+			sState = (actualQuantity / plannedQuantity) < 1 ? "Error" : "None";
+			return sState;
+		},
+
+		CPIStateFormatter: function (actQuant, planQuant, actCost, planCost) {
+			// "Cost" can also be quantity of a resource
+			var CPI = actQuant / planQuant * planCost / actCost;
+			if (isNaN(CPI)) {
+				return "None";
+			}
+			if (CPI < 0.9) {
+				return "Error";
+			}
+			if (CPI < 1.0) {
+				return "Warning";
+			}
+			return "Success";
+		},
+
+		CPIIconFormatter: function (actQuant, planQuant, actCost, planCost) {
+			// "Cost" can also be quantity of a resource
+			var CPI = actQuant / planQuant * planCost / actCost;
+			if (isNaN(CPI)) {
+				return "Neutral";
+			}
+			if (CPI < 0.9) {
+				return "Negative";
+			}
+			if (CPI < 1.0) {
+				return "Critical";
+			}
+			return "Positiv";
+		},
+
 		selectProgressStateFormatter: function (sKPI) {
 			if (sKPI === "") {
 				return "None";
@@ -226,6 +274,7 @@ sap.ui.define([
 			case 5: // approved
 				return this.getResourceBundle().getText("statusApproved");
 			}
+			return "";
 		},
 
 		plannedNetDuration: function (quantity, plannedProductivity, productivityFactor) {

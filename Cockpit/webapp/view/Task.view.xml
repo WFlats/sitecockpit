@@ -136,12 +136,12 @@
 						</Table>
 					</IconTabFilter>
 					<IconTabFilter id="taskIconTabFilterPerformance" text="{i18n>taskIconTabPerformanceTitle}" icon="sap-icon://kpi-corporate-performance"
-						iconColor="{= ${costActual} / ${costPlanned} >= 1.000 ? 'Negative' : ${costActual} / ${costPlanned} > 0.900 ? 'Critical' : 'Positive'}">
+						iconColor="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'costActual'}, {path: 'costPlanned'}], formatter: '.formatter.CPIIconFormatter'}">
 						<Table alternateRowColors="true">
 							<headerToolbar>
 								<Toolbar>
 									<content>
-										<Title text="{i18n>taskPerformanceTitle} [{taskView>/currency}]"/>
+										<Title text="{i18n>taskPerformanceTitle}"/>
 									</content>
 								</Toolbar>
 							</headerToolbar>
@@ -155,6 +155,9 @@
 								<Column hAlign="Right">
 									<Label text="{i18n>taskCurrent}"/>
 								</Column>
+								<Column hAlign="Right" width="15%" minScreenWidth="Tablet">
+									<Label text="{i18n>taskKPI}"/>
+								</Column>
 							</columns>
 							<items>
 								<ColumnListItem>
@@ -162,15 +165,32 @@
 										<Text text="{i18n>taskMeasurementQuantity} [{path: 'UoM/code'}]"/>
 										<Text text="{ path:'quantity', type:'sap.ui.model.type.Float', formatOptions: { decimals: 3 } }"/>
 										<Text text="{ path:'actualQuantity', type:'sap.ui.model.type.Float', formatOptions: { decimals: 3 } }"/>
+										<ObjectNumber number="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}], formatter: '.formatter.numberDivision'}"
+											state="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}], formatter: '.formatter.quantityStateFormatter'}"/>
 									</cells>
 								</ColumnListItem>
 							</items>
 							<items>
 								<ColumnListItem>
 									<cells>
-										<Text text="{i18n>laborCost}"/>
+										<Text text="{i18n>laborCost} [{taskView>/currency}]"/>
 										<Text text="{ path:'costLaborPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
 										<Text text="{ path:'costLaborActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<ObjectNumber
+											number="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'costLaborActual'}, {path: 'costLaborPlanned'}], formatter: '.formatter.earnedValueKPI'}"
+											state="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'costLaborActual'}, {path: 'costLaborPlanned'}], formatter: '.formatter.CPIStateFormatter'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{i18n>laborHours}"/>
+										<Text text="{ path:'hoursLaborPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'hoursLaborActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<ObjectNumber
+											number="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'hoursLaborActual'}, {path: 'hoursLaborPlanned'}], formatter: '.formatter.earnedValueKPI'}"
+											state="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'hoursLaborActual'}, {path: 'hoursLaborPlanned'}], formatter: '.formatter.CPIStateFormatter'}"/>
 									</cells>
 								</ColumnListItem>
 							</items>
@@ -198,6 +218,9 @@
 										<Text text="{i18n>subcontractCost}"/>
 										<Text text="{ path:'plannedTotalPrice', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
 										<Text text="{ path:'actualTotalPrice', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<ObjectNumber
+											number="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'actualTotalPrice'}, {path: 'plannedTotalPrice'}], formatter: '.formatter.earnedValueKPI'}"
+											state="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'actualTotalPrice'}, {path: 'plannedTotalPrice'}], formatter: '.formatter.CPIStateFormatter'}"/>
 									</cells>
 								</ColumnListItem>
 							</items>
@@ -207,6 +230,9 @@
 										<Text text="{i18n>totalCost}"/>
 										<Text text="{ path:'costPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
 										<Text text="{ path:'costActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<ObjectNumber
+											number="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'costActual'}, {path: 'costPlanned'}], formatter: '.formatter.earnedValueKPI'}"
+											state="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'costActual'}, {path: 'costPlanned'}], formatter: '.formatter.CPIStateFormatter'}"/>
 									</cells>
 								</ColumnListItem>
 							</items>

@@ -22,6 +22,9 @@
 						<m:Button type="Transparent" id="deleteButton" icon="sap-icon://delete" press="onDeleteLocation" visible="{masterView>/editMode}"
 							enabled="false" tooltip="{i18n>deleteLocationTooltip}"/>
 						<m:ToolbarSeparator visible="{masterView>/editMode}"/>
+						<m:Button type="Transparent" id="snapshotButton" icon="sap-icon://ppt-attachment" press="onCreatePlanVersion"
+							visible="{masterView>/editMode}" enabled="true" tooltip="Create plan version"/>
+						<m:ToolbarSeparator visible="{masterView>/editMode}"/>
 						<m:Button type="Transparent" id="menuButton" icon="sap-icon://menu" press="onLocationMenu" visible="{masterView>/editMode}"
 							enabled="{masterView>/editMode}" tooltip="{i18n>menuButtonTooltip}"/>
 					</m:OverflowToolbar>
