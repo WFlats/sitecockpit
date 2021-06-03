@@ -36,7 +36,8 @@ sap.ui.define([
 				activeEndDate: new Date(),
 				activeQuantity: 0.0,
 				pullMode: false,
-				incWait: true
+				incWait: true,
+				planVersionID: ""
 			});
 			this.setModel(oViewModel, "appView");
 

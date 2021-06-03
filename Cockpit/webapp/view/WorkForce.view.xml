@@ -2,7 +2,7 @@
 	controllerName="cockpit.Cockpit.controller.WorkForce" xmlns:html="http://www.w3.org/1999/xhtml">
 	<semantic:SemanticPage id="workForcePage" busy="{workForceView>/busy}" busyIndicatorDelay="{workForceView>/delay}">
 		<semantic:titleHeading>
-			<Title text="Assign Work Force"/>
+			<Title text="{i18n>titleAssignWorkforce}"/>
 		</semantic:titleHeading>
 		<semantic:headerContent>
 			<Table id="requiredSkillsList" width="auto"

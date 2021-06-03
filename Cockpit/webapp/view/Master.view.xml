@@ -22,9 +22,6 @@
 						<m:Button type="Transparent" id="deleteButton" icon="sap-icon://delete" press="onDeleteLocation" visible="{masterView>/editMode}"
 							enabled="false" tooltip="{i18n>deleteLocationTooltip}"/>
 						<m:ToolbarSeparator visible="{masterView>/editMode}"/>
-						<m:Button type="Transparent" id="snapshotButton" icon="sap-icon://ppt-attachment" press="onCreatePlanVersion"
-							visible="{masterView>/editMode}" enabled="true" tooltip="Create plan version"/>
-						<m:ToolbarSeparator visible="{masterView>/editMode}"/>
 						<m:Button type="Transparent" id="menuButton" icon="sap-icon://menu" press="onLocationMenu" visible="{masterView>/editMode}"
 							enabled="{masterView>/editMode}" tooltip="{i18n>menuButtonTooltip}"/>
 					</m:OverflowToolbar>
@@ -58,8 +55,10 @@
 			</TreeTable>
 		</semantic:content>
 		<semantic:titleCustomIconActions>
-			<m:OverflowToolbarToggleButton icon="sap-icon://edit" press="onEdit" tooltip="{i18n>buttonEditTooltip}"/>
-			<m:OverflowToolbarButton icon="sap-icon://upload-to-cloud" press="onLoadP6" tooltip="{i18n>buttonImportScheduleTooltip}"/>
+			<m:OverflowToolbarToggleButton id="toggleAnalyticsButton" icon="sap-icon://accelerated" activeIcon="sap-icon://line-chart"
+				press="onAnalyticsMode" pressed="{masterView>/analyticMode}" visible="{= ${masterView>/editMode} ? false : true }"
+				tooltip="{i18n>toggleToAnalyticsTooltip}"/>
+			<m:OverflowToolbarToggleButton icon="sap-icon://edit" press="onEdit" pressed="{masterView>/editMode}" tooltip="{i18n>buttonEditTooltip}"/>
 		</semantic:titleCustomIconActions>
 	</semantic:SemanticPage>
 </mvc:View>

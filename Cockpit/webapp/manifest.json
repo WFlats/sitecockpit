@@ -44,7 +44,9 @@
 		}
 	},
 	"sap.platform.cf": {
-		"oAuthScopes": ["$XSAPPNAME.Project_User"]
+		"oAuthScopes": [
+			"$XSAPPNAME.Project_User"
+		]
 	},
 	"sap.ui": {
 		"technology": "UI5",
@@ -109,45 +111,97 @@
 				},
 				"async": true
 			},
-			"routes": [{
-				"pattern": "",
-				"name": "master",
-				"target": "master"
-			}, {
-				"pattern": "Locations/{no}",
-				"name": "object",
-				"target": ["master", "object"]
-			}, {
-				"name": "Recipes",
-				"pattern": "Recipes",
-				"titleTarget": "",
-				"greedy": false,
-				"target": ["master", "object", "Recipes"]
-			}, {
-				"name": "BIM",
-				"pattern": "BIM",
-				"titleTarget": "",
-				"greedy": false,
-				"target": ["master", "object", "BIM"]
-			}, {
-				"name": "Task",
-				"pattern": "Tasks/{ID}",
-				"titleTarget": "",
-				"greedy": false,
-				"target": ["master", "object", "Task"]
-			}, {
-				"name": "WorkForce",
-				"pattern": "WorkForce/{ID}",
-				"titleTarget": "",
-				"greedy": false,
-				"target": ["master", "object", "WorkForce"]
-			}, {
-				"name": "Clashes",
-				"pattern": "Clashes",
-				"titleTarget": "",
-				"greedy": false,
-				"target": ["master", "object", "Clashes"]
-			}],
+			"routes": [
+				{
+					"pattern": "",
+					"name": "master",
+					"target": "master"
+				},
+				{
+					"pattern": "Locations/{no}",
+					"name": "object",
+					"target": [
+						"master",
+						"object"
+					]
+				},
+				{
+					"name": "Recipes",
+					"pattern": "Recipes",
+					"titleTarget": "",
+					"greedy": false,
+					"target": [
+						"master",
+						"object",
+						"Recipes"
+					]
+				},
+				{
+					"name": "BIM",
+					"pattern": "BIM",
+					"titleTarget": "",
+					"greedy": false,
+					"target": [
+						"master",
+						"object",
+						"BIM"
+					]
+				},
+				{
+					"name": "Task",
+					"pattern": "Tasks/{ID}",
+					"titleTarget": "",
+					"greedy": false,
+					"target": [
+						"master",
+						"object",
+						"Task"
+					]
+				},
+				{
+					"name": "WorkForce",
+					"pattern": "WorkForce/{ID}",
+					"titleTarget": "",
+					"greedy": false,
+					"target": [
+						"master",
+						"object",
+						"WorkForce"
+					]
+				},
+				{
+					"name": "Clashes",
+					"pattern": "Clashes",
+					"titleTarget": "",
+					"greedy": false,
+					"target": [
+						"master",
+						"object",
+						"Clashes"
+					]
+				},
+				{
+					"name": "Analytics",
+					"pattern": "project{projectID}/locations{locationID}",
+					"titleTarget": "",
+					"greedy": false,
+					"target": [
+						"master",
+						"Analytics"
+					]
+				},
+				{
+					"name": "Snapshots",
+					"pattern": "project{projectID}",
+					"titleTarget": "",
+					"greedy": false,
+					"target": [
+						"master",
+						"Analytics",
+						"Snapshots"
+					]
+				}
+			],
 			"targets": {
 				"master": {
 					"viewName": "Master",
@@ -209,6 +263,20 @@
 					"viewId": "Clashes",
 					"controlAggregation": "endColumnPages",
 					"viewLevel": 1
+				},
+				"Analytics": {
+					"viewType": "XML",
+					"viewName": "Analytics",
+					"viewId": "Analytics",
+					"viewLevel": 1,
+					"controlAggregation": "midColumnPages"
+				},
+				"Snapshots": {
+					"viewType": "XML",
+					"viewName": "Snapshots",
+					"viewId": "Snapshots",
+					"viewLevel": 1,
+					"controlAggregation": "endColumnPages"
 				}
 			}
 		},

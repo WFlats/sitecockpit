@@ -1,0 +1,30 @@
+<core:FragmentDefinition xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form" xmlns="sap.m">
+	<l:VerticalLayout class="sapUiContentPadding" width="100%">
+		<l:content>
+			<f:SimpleForm id="newSnapsotForm" editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="4"
+				labelSpanS="12" adjustLabelSpan="false" emptySpanXL="-1" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1"
+				columnsM="1" singleContainerFullSize="false">
+				<Label text="Created at" labelFor="snapshotDate" required="true"/>
+				<DateTimePicker id="snapshotDate" displayFormat="short" required="true" enabled="false" width="200px"/>
+				<Label text="Version Number" labelFor="version"/>
+				<Input id="version" change="onVersionChange" width="250px" enableSuggestionsHighlighting="false" showSuggestion="true"
+					showTableSuggestionValueHelp="false" required="true" valueLiveUpdate="true" liveChange="onVersionChange" maxLength="50"
+					suggestionItems="{/PlanVersions}">
+					<suggestionItems>
+						<core:Item id="ID" text="{versionNumber}"/>
+					</suggestionItems>
+				</Input>
+				<Label text="Type" labelFor="useCase" required="true"/>
+				<Select id="useCase" forceSelection="true" change="onUseCaseChange" width="200px" selectedKey="2">
+					<core:Item key="0" text="Daily"/>
+					<core:Item key="1" text="Weekly"/>
+					<core:Item key="2" text="Monthly"/>
+					<core:Item key="3" text="Long term"/>
+				</Select>
+				<Label text="Description" labelFor="description" required="false"/>
+				<TextArea id="description" width="100%" required="false" rows="8" maxLength="500" showExceededText="true" wrapping="None"
+					liveChange="onDescriptionChange"/>
+			</f:SimpleForm>
+		</l:content>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

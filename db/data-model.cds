@@ -153,6 +153,7 @@ entity Projects : managed {
         crews				 : composition of many Crews on crews.project=$self;
         locations			 : composition of many Locations on locations.project=$self;
         users				 : composition of many UsersOfProject on users.project=$self;
+        planVersions		 : composition of many PlanVersions on planVersions.project=$self;
 }
 
 entity Companies : managed {
@@ -489,6 +490,7 @@ entity PlanVersions		: managed {
 							longterm = 3;
 						};
 		snapshotTasks	: composition of many SnapshotTasks on snapshotTasks.planVersion=$self;
+		snapshotsComplete : Boolean; // only display for selection once all snapshots were taken
 }
 
 entity SnapshotTasks		 : managed { // a copy of the main values of a task

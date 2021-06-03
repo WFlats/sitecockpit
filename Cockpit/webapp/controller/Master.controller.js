@@ -12,9 +12,10 @@ sap.ui.define([
 	"sap/m/MessageBox",
 	"sap/m/MessageToast",
 	"../model/formatter",
-	"sap/ui/events/ControlEvents"
+	"sap/ui/events/ControlEvents",
+	"sap/base/Log"
 ], function (BaseController, JSONModel, History, Filter, Sorter, FilterOperator, GroupHeaderListItem, Device, Dialog, Fragment,
-	MessageBox, MessageToast, formatter, ControlEvents) {
+	MessageBox, MessageToast, formatter, ControlEvents, Log) {
 	"use strict";
 
 	return BaseController.extend("cockpit.Cockpit.controller.Master", {
@@ -54,9 +55,6 @@ sap.ui.define([
 			this.byId("menuButton").attachBrowserEvent("tab keyup", function (oEvent) {
 				this._bKeyboard = oEvent.type === "keyup";
 			}, this);
-
-			var oContextMenu = sap.ui.xmlfragment("cockpit.Cockpit.view.LocationContextMenu", this);
-			oList.setContextMenu(oContextMenu);
 
 			// find to which project(s) the user has access
 			// if more than one, let the user select
@@ -202,7 +200,7 @@ sap.ui.define([
 				aSelectedIndices = oTreeTable.getSelectedIndices(),
 				aSelectedRowIDs = [];
 
-			if (!this.getModel("masterView").getProperty("/editMode")) {
+			if (!oContextMenu || !this.getModel("masterView").getProperty("/editMode")) {
 				return;
 			}
 			// if right click is not on a selected row then select context row
@@ -210,7 +208,9 @@ sap.ui.define([
 				// remove previous selections
 				oTreeTable.setSelectedIndex(-1);
 				oTreeTable.setSelectedIndex(iContextIndex);
-				aSelectedRowIDs.push(oTreeTable.getContextByIndex(iContextIndex).getObject().ID);
+				if (oTreeTable.getContextByIndex(iContextIndex)) { // if not an empty row was right clicked
+					aSelectedRowIDs.push(oTreeTable.getContextByIndex(iContextIndex).getObject().ID);
+				}
 				this.getModel("appView").setProperty("/selectedRowIDs", aSelectedRowIDs);
 			}
 			this.setEnableMenuItems(oContextMenu);
@@ -303,7 +303,11 @@ sap.ui.define([
 					this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
 					this.getModel("appView").setProperty("/layout", "OneColumn");
 				} else {
-					this._showSelectedRows();
+					if (this.getModel("masterView").getProperty("/analyticMode")) {
+						this._showAnalytics();
+					} else { // planning board mode
+						this._showSelectedRows();
+					}
 				}
 			}
 		},
@@ -341,7 +345,7 @@ sap.ui.define([
 			var aDraggedRowContexts = oDragSession.getComplexData("hierarchymaintenance").draggedRowContexts;
 			var oNewParentContext = oTreeTable.getContextByIndex(oDroppedRow.getIndex());
 
-			if (aDraggedRowContexts.length === 0 || !oNewParentContext) {
+			if (aDraggedRowContexts.length === 0 || !oNewParentContext || !this.getModel("masterView").getProperty("editMode")) {
 				return;
 			}
 
@@ -368,14 +372,13 @@ sap.ui.define([
 		},
 
 		onEdit: function () {
-			var oViewModel = this.getModel("masterView"),
-				bEdit = oViewModel.getProperty("/editMode"),
-				oTree = this.byId("projectTreeTable"),
+			var oTree = this.byId("projectTreeTable"),
 				aSelectedIndices = oTree.getSelectedIndices();
 
-			oViewModel.setProperty("/editMode", !bEdit);
-			this.getModel("masterView").setProperty("/mode", "None");
-			if (!bEdit) {
+			if (this.getModel("masterView").getProperty("/editMode")) {
+				this.getModel("masterView").setProperty("/mode", "None");
+				//this.getModel("masterView").setProperty("/planningMode", false);
+				//this.getModel("masterView").setProperty("/analyticMode", false);
 				this.byId("addButton").setEnabled(false);
 				this.byId("editButton").setEnabled(false);
 				this.byId("deleteButton").setEnabled(false);
@@ -387,8 +390,22 @@ sap.ui.define([
 					this.byId("addButton").setEnabled(true);
 				}
 				this.getModel("appView").setProperty("/layout", "OneColumn");
-			} else if (aSelectedIndices.length > 0) {
-				this._showSelectedRows();
+				oTree.setSelectionMode("MultiToggle");
+				var oContextMenu = sap.ui.xmlfragment("cockpit.Cockpit.view.LocationContextMenu", this);
+				oTree.setContextMenu(oContextMenu);
+			} else { // leave edit mode
+				oTree.destroyContextMenu();
+				if (this.getModel("masterView").getProperty("/analyticMode")) { // analytics mode
+					oTree.setSelectionMode("Single");
+					this.byId("toggleAnalyticsButton").setIcon("sap-icon://line-chart");
+					this.byId("toggleAnalyticsButton").setTooltip(this.getResourceBundle().getText("toggleToPlanningTooltip"));
+				} else { // planning board mode
+					this.byId("toggleAnalyticsButton").setIcon("sap-icon://accelerated");
+					this.byId("toggleAnalyticsButton").setTooltip(this.getResourceBundle().getText("toggleToAnalyticsTooltip"));
+					if (this.byId("projectTreeTable").getSelectedIndices().length > 0) {
+						this._showSelectedRows();
+					}
+				}
 			}
 		},
 
@@ -396,6 +413,25 @@ sap.ui.define([
 			this.byId("addButton").setEnabled(false);
 			this.byId("editButton").setEnabled(false);
 			this.byId("deleteButton").setEnabled(false);
+		},
+
+		onAnalyticsMode: function (oEvent) {
+			this.getModel("masterView").setProperty("/editMode", false); // leave edit mode anyway
+			if (this.getModel("masterView").getProperty("/analyticMode")) { // analytics mode was pressed
+				this.byId("toggleAnalyticsButton").setIcon("sap-icon://line-chart");
+				this.byId("toggleAnalyticsButton").setTooltip(this.getResourceBundle().getText("toggleToPlanningTooltip"));
+				this.byId("projectTreeTable").setSelectionMode("Single");
+				if (this.byId("projectTreeTable").getSelectedIndices().length === 1) {
+					this._showAnalytics();
+				}
+			} else { // planning board mode
+				this.byId("toggleAnalyticsButton").setIcon("sap-icon://accelerated");
+				this.byId("toggleAnalyticsButton").setTooltip(this.getResourceBundle().getText("toggleToAnalyticsTooltip"));
+				this.byId("projectTreeTable").setSelectionMode("MultiToggle");
+				if (this.byId("projectTreeTable").getSelectedIndices().length > 0) {
+					this._showSelectedRows();
+				}
+			}
 		},
 
 		onAddLocation: function (oEvent) {
@@ -900,6 +936,7 @@ sap.ui.define([
 			this.oLocationDialog.addStyleClass("sapUiContentPadding");
 			this.getView().addDependent(this.oLocationDialog);
 		},
+		///////////////////////////////////// HELPER FUNCTIONS ////////////////////////////////////////
 
 		/**
 		 * Event handler for the master search field. Applies current
@@ -1051,6 +1088,8 @@ sap.ui.define([
 				noDataText: this.getResourceBundle().getText("masterListNoDataText"),
 				sortBy: "code",
 				groupBy: "None",
+				planningMode: true, // selection displays planning board
+				analyticMode: false, // selection of a location displays analytics
 				editMode: false, // the mode of the tree list
 				mode: "None", // the mode of edit (edit, create or copy)
 				paste: false, // if true then copy was pressed before
@@ -1066,10 +1105,9 @@ sap.ui.define([
 		},
 
 		/**
-		 * Shows the selected rows on the detail page
+		 * Shows the selected rows on the detail page when in planning mode
 		 */
 		_showSelectedRows: function () {
-			//var mNoOfSelectedRows = this.getModel("appView").getProperty("/selectedRowIDs").length;
 			var mNoOfSelectedRows = this.byId("projectTreeTable").getSelectedIndices().length;
 
 			if (mNoOfSelectedRows === 0) {
@@ -1081,6 +1119,22 @@ sap.ui.define([
 			}, true);
 
 		},
+
+		_showAnalytics: function () {
+			var sSelectedLocationID = this.getModel("appView").getProperty("/selectedRowIDs")[0],
+				sProjectID = this.getModel("appView").getProperty("/selectedProjectID");
+
+			if (!sSelectedLocationID) {
+				return;
+			}
+			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			this.getRouter().navTo("Analytics", {
+				projectID: sProjectID,
+				locationID: sSelectedLocationID
+			}, true);
+		},
+
+		///////////////////////////////////////// HELPER FUNCTIONS /////////////////////////////////////
 
 		_isCodeUnique: function (sCode) {
 			var oModel = this.getModel(),

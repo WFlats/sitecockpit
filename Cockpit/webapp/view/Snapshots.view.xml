@@ -1,0 +1,59 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:semantic="sap.f.semantic"
+	controllerName="cockpit.Cockpit.controller.Snapshots" xmlns:html="http://www.w3.org/1999/xhtml">
+	<semantic:SemanticPage id="planVersionPage" busy="{planVersionView>/busy}" busyIndicatorDelay="{planVersionView>/delay}">
+		<semantic:titleHeading>
+			<Title text="{i18n>planVersionsTitle}"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<Table id="planVersionsList" width="auto"
+				items="{path: 'planVersions', sorter: [{ path: 'useCase', descending: false, group: '.getUseCase' }, {path: 'snapshotDate', type:'sap.ui.model.type.DateTime', descending: true}], groupHeaderFactory: '.createGroupHeader' }"
+				mode="MultiSelect" selectionChange=".onPlanVersionSelectionChange" includeItemInSelection="true" noDataText="{i18n>noPlanVersions}"
+				alternateRowColors="true" updateFinished="onPlanVersionsListUpdateFinished" busy="{planVersionView>/busy}">
+				<headerToolbar>
+					<Toolbar id="planVersionsHeaderToolbar">
+						<Title id="lineItemsTitle" text="{planVersionView>/planVersionsListTitle}" titleStyle="H3" level="H3"/>
+						<ToolbarSpacer id="spacerId"/>
+						<Button id="selectPlanVersionButton" text="{i18n>buttonSelectText}" type="Emphasized" tooltip="{i18n>selectPlanVersionTooltip}"
+							press="onSelectPlanVersion" enabled="{planVersionView>/oneSelected}"/>
+						<Button id="addPlanVersionButton" icon="sap-icon://add" type="Default" tooltip="{i18n>addPlanVersionTooltip}" press="onCreatePlanVersion"/>
+						<Button id="editPlanVersionButton" icon="sap-icon://edit" type="Default" tooltip="{i18n>editPlanVersionTooltip}" press="onEditPlanVersion"
+							enabled="{planVersionView>/oneSelected}"/>
+						<Button id="deletePlanVersionButton" icon="sap-icon://delete" type="Default" tooltip="{i18n>deletePlanVersionTooltip}"
+							press="onDeletePlanVersion" enabled="{planVersionView>/selected}"/>
+					</Toolbar>
+				</headerToolbar>
+				<columns>
+					<Column>
+						<Label text="Date"/>
+					</Column>
+					<Column>
+						<Label text="Version"/>
+					</Column>
+					<Column>
+						<Label text="Description"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem type="Active">
+						<cells>
+							<Text text="{path: 'snapshotDate', type:'sap.ui.model.type.DateTime', formatOptions: {format: 'yMdhm'}}"/>
+							<Text text="{versionNumber}"/>
+							<Text text="{description}" tooltip="{description}" maxLines="1"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</semantic:content>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onClosePlanVersionPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/endColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>

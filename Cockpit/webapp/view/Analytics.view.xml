@@ -1,0 +1,66 @@
+<mvc:View controllerName="cockpit.Cockpit.controller.Analytics" xmlns="sap.suite.ui.commons" xmlns:viz="sap.viz.ui5.controls"
+	xmlns:vizData="sap.viz.ui5.data" xmlns:vizFeeds="sap.viz.ui5.controls.common.feeds" xmlns:semantic="sap.f.semantic"
+	xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" xmlns:m="sap.m" xmlns:dnd="sap.ui.core.dnd">
+	<semantic:SemanticPage id="detailPage">
+		<semantic:titleHeading>
+			<m:Title id="title" text="{analyticsModel>/analyticsTitle}"/>
+		</semantic:titleHeading>
+		<semantic:content>
+			<ChartContainer id="chartContainer" showFullScreen="false" showPersonalization="false" autoAdjustHeight="false"
+				personalizationPress="attachPersonalizationPress" contentChange="attachContentChange" title="{analyticsModel>/chartTitle}">
+				<content>
+					<ChartContainerContent id="chartContent" icon="sap-icon://line-chart" title="{analyticsModel>/analyticsTitle}">
+						<content>
+							<viz:VizFrame id="chartContainerVizFrame" height="600px" width="100%" uiConfig="{applicationSet:'fiori'}">
+								<viz:dataset>
+									<vizData:FlattenedDataset data="{/Values}">
+										<vizData:dimensions>
+											<vizData:DimensionDefinition name="Values" value="{Value}"/>
+										</vizData:dimensions>
+										<vizData:measures>
+											<vizData:MeasureDefinition name="PV" unit="EUR" value="{PV}"/>
+											<vizData:MeasureDefinition name="EV" unit="EUR" value="{EV}"/>
+											<vizData:MeasureDefinition name="AC" unit="EUR" value="{AC}"/>
+											<vizData:MeasureDefinition name="CV" unit="EUR" value="{CV}"/>
+											<vizData:MeasureDefinition name="SV" unit="EUR" value="{SV}"/>
+										</vizData:measures>
+									</vizData:FlattenedDataset>
+								</viz:dataset>
+								<viz:feeds>
+									<vizFeeds:FeedItem type="Measure" uid="valueAxis" values="PV"/>
+									<vizFeeds:FeedItem type="Measure" uid="valueAxis" values="EV"/>
+									<vizFeeds:FeedItem type="Measure" uid="valueAxis" values="AC"/>
+									<vizFeeds:FeedItem type="Measure" uid="valueAxis" values="CV"/>
+									<vizFeeds:FeedItem type="Measure" uid="valueAxis" values="SV"/>
+									<vizFeeds:FeedItem type="Dimension" uid="categoryAxis" values="Values"/>
+								</viz:feeds>
+							</viz:VizFrame>
+						</content>
+					</ChartContainerContent>
+				</content>
+				<toolbar>
+					<m:OverflowToolbar id="appToolbar">
+						<!--m:ToolbarSpacer/ -->
+						<m:Button id="toSnapshots" icon="sap-icon://copy" type="Transparent" press="onNavToSnapshots" tooltip="{i18n>navToSnapshots}"></m:Button>
+						<m:ToolbarSpacer/>
+						<ChartContainerToolbarPlaceholder></ChartContainerToolbarPlaceholder>
+					</m:OverflowToolbar>
+				</toolbar>
+			</ChartContainer>
+		</semantic:content>
+		<semantic:titleCustomIconActions>
+			<m:OverflowToolbarButton icon="sap-icon://database" press="onOpenBIM" visible="false" tooltip="Open BIM viewer"/>
+		</semantic:titleCustomIconActions>
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>
