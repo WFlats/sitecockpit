@@ -186,7 +186,7 @@ sap.ui.define([
 		CPIStateFormatter: function (actQuant, planQuant, actCost, planCost) {
 			// "Cost" can also be quantity of a resource
 			var CPI = actQuant / planQuant * planCost / actCost;
-			if (isNaN(CPI)) {
+			if (!Number.isFinite(CPI) || Number(actCost) === 0 || isNaN(CPI)) {
 				return "None";
 			}
 			if (CPI < 0.9) {
@@ -199,9 +199,9 @@ sap.ui.define([
 		},
 
 		CPIIconFormatter: function (actQuant, planQuant, actCost, planCost) {
-			// "Cost" can also be quantity of a resource
+			// "Cost" can also be quantity of a resource like man hours
 			var CPI = actQuant / planQuant * planCost / actCost;
-			if (isNaN(CPI)) {
+			if (!Number.isFinite(CPI) || Number(actCost) === 0 || isNaN(CPI)) {
 				return "Neutral";
 			}
 			if (CPI < 0.9) {
@@ -210,7 +210,7 @@ sap.ui.define([
 			if (CPI < 1.0) {
 				return "Critical";
 			}
-			return "Positiv";
+			return "Positive";
 		},
 
 		selectProgressStateFormatter: function (sKPI) {

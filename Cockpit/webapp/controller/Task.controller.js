@@ -382,6 +382,7 @@ sap.ui.define([
 				oWaitDays = oFrag.byId("myFrag2", "waitingTimeDays"),
 				oWaitHours = oFrag.byId("myFrag2", "waitingTimeHours"),
 				oWaitMinutes = oFrag.byId("myFrag2", "waitingTimeMinutes"),
+				oTotalCost = oFrag.byId("myFrag2", "totalPlannedCost"),
 				aValues = formatter.dhmFromMs(oTask.waitDuration),
 				bPull = this.getModel("appView").getProperty("/pullMode");
 			// disable start date and shift select after task started
@@ -401,6 +402,7 @@ sap.ui.define([
 			oWaitDays.setValue(aValues[0]);
 			oWaitHours.setValue(aValues[1]);
 			oWaitMinutes.setValue(aValues[2]);
+			oTotalCost.setValue(oTask.costPlanned);
 			oQuantity.setValueState("None");
 			oStartDate.setValueState("None");
 			oEndDate.setValueState("None");
@@ -410,6 +412,7 @@ sap.ui.define([
 			oWaitDays.setValueState("None");
 			oWaitHours.setValueState("None");
 			oWaitMinutes.setValueState("None");
+			oTotalCost.setValueState("None");
 			this._saveButtonEnablement();
 			this.oBaseEditDialog.open();
 		},

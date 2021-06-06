@@ -496,6 +496,7 @@ entity PlanVersions		: managed {
 entity SnapshotTasks		 : managed { // a copy of the main values of a task
 	key ID					 : UUID;
 		planVersion			 : association to PlanVersions;
+		location			 : association to Locations; // to avoid an expand to tasks
 		task				 : association to Tasks; // to retrieve additional data like location, recipe, etc.
 		plannedStart         : DateTime;
         plannedEnd           : DateTime;
@@ -530,4 +531,6 @@ entity SnapshotTasks		 : managed { // a copy of the main values of a task
         costEquipmentActual  : Decimal(10, 3);
         hoursEquipmentPlanned: Decimal(10, 3);
         hoursEquipmentActual : Decimal(10, 3);
+        costSubcontractorPlanned : Decimal(10, 3);
+        costSubcontractorActual  : Decimal(10, 3);
 }

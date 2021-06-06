@@ -235,7 +235,7 @@ sap.ui.define([
 								success: function (oData) {
 									MessageToast.show(that.getResourceBundle().getText("creatingSnapshots"));
 									// create snapshots
-									that.createSnapshot(oData.ID);
+									that.createSnapshot(oData.ID, oPlanVersion.snapshotDate);
 								},
 								error: function (oError) {
 									Log.error("Error creating plan version");
@@ -280,23 +280,27 @@ sap.ui.define([
 			this.getView().addDependent(this.oPlanVersionDialog);
 		},
 
-		createSnapshot: function (sPlanVersionID) { // revisit: temporarily - must be replaced with a backend function
+		createSnapshot: function (sPlanVersionID, oDate) { // revisit: temporarily - must be replaced with a backend function
 			var oModel = this.getModel(),
 				sProjectID = this.getModel("appView").getProperty("/selectedProjectID"),
 				oProjectFilter = new Filter("project_ID", FilterOperator.EQ, sProjectID),
+				oFutureFilter = new Filter("estimatedEnd", FilterOperator.GT, oDate),
 				sPlanVersionPath = "/" + oModel.createKey("PlanVersions", {
 					ID: sPlanVersionID
 				}),
-				oPlanVersionBC = oModel.createBindingContext(sPlanVersionPath);
+				oPlanVersionBC = oModel.createBindingContext(sPlanVersionPath),
+				that = this;
 
 			oModel.read("/Tasks", {
-				filters: [oProjectFilter],
+				filters: [oProjectFilter, oFutureFilter],
+				and: true,
 				success: function (oData) {
 					if (oData && oData.results.length > 0) {
 						oData.results.reduce(function (a, oTask, i) {
 							new Promise(function () {
 								var oSnapshotTask = {};
 								oSnapshotTask.planVersion_ID = sPlanVersionID;
+								oSnapshotTask.location_ID = oTask.location_ID;
 								oSnapshotTask.task_ID = oTask.ID;
 								oSnapshotTask.plannedStart = oTask.plannedStart;
 								oSnapshotTask.plannedEnd = oTask.plannedEnd;
@@ -324,6 +328,8 @@ sap.ui.define([
 								oSnapshotTask.costEquipmentActual = oTask.costEquipmentActual;
 								oSnapshotTask.hoursEquipmentPlanned = oTask.hoursEquipmentPlanned;
 								oSnapshotTask.hoursEquipmentActual = oTask.hoursEquipmentActual;
+								oSnapshotTask.costSubcontractorPlanned = oTask.plannedTotalPrice;
+								oSnapshotTask.costSubcontractorActual = oTask.actualTotalPrice;
 								oModel.create("/SnapshotTasks", oSnapshotTask, {
 									groupId: i,
 									success: function (oSnap) {
@@ -346,6 +352,13 @@ sap.ui.define([
 								});
 							});
 						}, Promise.resolve());
+					} else { // if no tasks were found, inform the user and delete the plan version
+						MessageBox.error(that.getResourceBundle().getText("noFutureTasks"));
+						oModel.remove(sPlanVersionPath, {
+							error: function (oError) {
+								Log.error("Error deleting plan version after no tasks for snapshot were found");
+							}
+						});
 					}
 				},
 				error: function (oError) {
