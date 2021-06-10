@@ -1,6 +1,6 @@
 <mvc:View controllerName="cockpit.Cockpit.controller.Analytics" xmlns="sap.suite.ui.commons" xmlns:viz="sap.viz.ui5.controls"
 	xmlns:vizData="sap.viz.ui5.data" xmlns:vizFeeds="sap.viz.ui5.controls.common.feeds" xmlns:semantic="sap.f.semantic"
-	xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" xmlns:m="sap.m" xmlns:dnd="sap.ui.core.dnd">
+	xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" xmlns:m="sap.m">
 	<semantic:SemanticPage id="detailPage">
 		<semantic:titleHeading>
 			<m:Title id="title" text="{analyticsModel>/analyticsTitle}"/>

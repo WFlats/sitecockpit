@@ -498,6 +498,7 @@ entity SnapshotTasks		 : managed { // a copy of the main values of a task
 		planVersion			 : association to PlanVersions;
 		location			 : association to Locations; // to avoid an expand to tasks
 		task				 : association to Tasks; // to retrieve additional data like location, recipe, etc.
+		shift				 : association to Shifts; // to avoid an expand to tasks
 		plannedStart         : DateTime;
         plannedEnd           : DateTime;
         estimatedEnd         : DateTime; // updated after new measurement and at completion

@@ -302,6 +302,7 @@ sap.ui.define([
 								oSnapshotTask.planVersion_ID = sPlanVersionID;
 								oSnapshotTask.location_ID = oTask.location_ID;
 								oSnapshotTask.task_ID = oTask.ID;
+								oSnapshotTask.shift_ID = oTask.shift_ID;
 								oSnapshotTask.plannedStart = oTask.plannedStart;
 								oSnapshotTask.plannedEnd = oTask.plannedEnd;
 								oSnapshotTask.estimatedEnd = oTask.estimatedEnd;

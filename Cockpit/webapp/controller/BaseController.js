@@ -191,6 +191,7 @@ sap.ui.define([
 		},
 
 		getNetDurationHoursFromDates: function (oStartDate, oEndDate, oShift) {
+			// finds the workig hours within the given period
 			var oCurrentTime = new Date(oStartDate.getTime()),
 				oAdjustedEndDate = new Date(oEndDate.getTime()),
 				mNetDuration = 0,
