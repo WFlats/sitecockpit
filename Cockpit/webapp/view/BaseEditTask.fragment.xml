@@ -48,8 +48,9 @@
 					items="{ path: 'workTimeModel>/shifts' , sorter: { path: 'defaultShift', descending: true } }">
 					<core:Item key="{ID}" text="{workTimeModel>code}"/> -->
 				<Select id="shiftSelect" forceSelection="true" change="handleShiftChange" width="80%"></Select>
-				<Label text="Total planned Cost" labelFor="totalPlannedCost"/>
-				<Input id="totalPlannedCost" type="Number" width="50%" valueLiveUpdate="true" liveChange="handleTotalPlannedCostChangeChange"/>
+				<Label text="Total planned Cost" visible="false" labelFor="totalPlannedCost"/>
+				<Input id="totalPlannedCost" visible="false" type="Number" width="50%" valueLiveUpdate="true"
+					liveChange="handleTotalPlannedCostChangeChange"/>
 			</f:SimpleForm>
 		</l:content>
 	</l:VerticalLayout>

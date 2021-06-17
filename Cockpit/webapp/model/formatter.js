@@ -55,8 +55,8 @@ sap.ui.define([
 		},
 
 		earnedValueKPI: function (actQuant, planQuant, actCost, planCost) {
-			var EV = Number(actQuant) / Number(planQuant) * Number(planCost);
-			if (isNaN(EV) || !actCost) {
+			var EV = (Number(actQuant) / Number(planQuant)) * Number(planCost);
+			if (isNaN(EV) || !actCost || !actQuant) {
 				return "";
 			}
 			return parseFloat(EV / Number(actCost)).toFixed(3);
@@ -185,8 +185,8 @@ sap.ui.define([
 
 		CPIStateFormatter: function (actQuant, planQuant, actCost, planCost) {
 			// "Cost" can also be quantity of a resource
-			var CPI = actQuant / planQuant * planCost / actCost;
-			if (!Number.isFinite(CPI) || Number(actCost) === 0 || isNaN(CPI)) {
+			var CPI = (actQuant / planQuant) * (planCost / actCost); // = EV / AC
+			if (!actQuant || !Number.isFinite(CPI) || Number(actCost) === 0 || isNaN(CPI)) {
 				return "None";
 			}
 			if (CPI < 0.9) {
@@ -311,6 +311,9 @@ sap.ui.define([
 		},
 
 		hoursToHoursMinutes: function (sHours) {
+			if (!sHours) {
+				return "00:00";
+			}
 			var decimalTime = parseFloat(sHours);
 			decimalTime = decimalTime * 60 * 60;
 			var hours = Math.floor((decimalTime / (60 * 60)));

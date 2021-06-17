@@ -43,6 +43,8 @@ sap.ui.define([
 				sResourceClass,
 				oStart,
 				oEnd,
+				oMaxDate,
+				oActualDate,
 				that = this;
 
 			// fill the work times model only once
@@ -92,7 +94,28 @@ sap.ui.define([
 			this.byId("planDatePicker").setDateValue(oPlanVersionBC.getProperty("snapshotDate"));
 			// actual date must be later than plan Date and not in the future
 			this.byId("actualDatePicker").setMinDate(oPlanVersionBC.getProperty("snapshotDate"));
-			this.byId("actualDatePicker").setMaxDate(new Date());
+			// set the max date to the range of the plan version
+			oMaxDate = new Date(oPlanVersionBC.getProperty("snapshotDate").getTime());
+			switch (oPlanVersionBC.getProperty("useCase")) {
+			case 0: // daily
+				oMaxDate.setDate(oMaxDate.getDate() + 1);
+				break;
+			case 1: // weekly
+				oMaxDate.setDate(oMaxDate.getDate() + 7);
+				break;
+			case 2: // monthly
+				oMaxDate.setMonth(oMaxDate.getMonth() + 1);
+				break;
+			default: // long term
+				oMaxDate = new Date(9999, 0, 0);
+				break;
+			}
+			oMaxDate = (oMaxDate.getTime() > new Date().getTime()) ? new Date() : oMaxDate;
+			this.byId("actualDatePicker").setMaxDate(oMaxDate);
+			oActualDate = this.byId("actualDatePicker").getDateValue();
+			if (!oActualDate || oActualDate.getTime() > oMaxDate.getTime()) {
+				this.byId("actualDatePicker").setDateValue(oMaxDate);
+			}
 
 			// develop tooltip for planned date
 			sTooltip = oPlanVersionBC.getProperty("versionNumber") + " ";
@@ -114,9 +137,6 @@ sap.ui.define([
 			}
 			//this.getModel("analyticsModel").setProperty("/chartTitle", sVersionTitle);
 			this.byId("planDatePicker").setTooltip(sTooltip);
-			if (!this.byId("actualDatePicker").getDateValue()) {
-				this.byId("actualDatePicker").setDateValue(new Date());
-			}
 			oStart = this.byId("planDatePicker").getDateValue();
 			oEnd = this.byId("actualDatePicker").getDateValue();
 			sResourceClass = this.byId("resourceSelect").getSelectedKey();
@@ -131,7 +151,7 @@ sap.ui.define([
 				});
 		},
 
-		onResourceChange: function () {
+		onResourceOrDateChange: function () {
 			var sResourceClass = this.byId("resourceSelect").getSelectedKey(),
 				sLocationID = this.getModel("analyticsModel").getProperty("/locationID"),
 				sPlanVersionID = this.getModel("appView").getProperty("/planVersionID"),
@@ -166,7 +186,7 @@ sap.ui.define([
 					filters: aFilters,
 					and: true,
 					success: function (oData) {
-						var mPlanned = 0.0;
+						var mPlanned = 0;
 						if (oData && oData.results.length > 0) {
 							oData.results.forEach(function (oTask) {
 								var mPeriodFactor = that._getFactorOfPlannedWorkWithinPeriod(oTask, oStart, oEnd);
@@ -196,7 +216,7 @@ sap.ui.define([
 									mPlanned += 0;
 								}
 							});
-							resolve(parseFloat(mPlanned).toFixed(iDecimals));
+							resolve(mPlanned);
 						} else {
 							resolve(0);
 						}
@@ -226,13 +246,13 @@ sap.ui.define([
 					and: true,
 					success: function (oData) {
 						var oActuals = {
-							earned: 0.0,
-							actual: 0.0
+							earned: 0,
+							actual: 0
 						};
 						if (oData && oData.results.length > 0) {
 							oData.results.forEach(function (oTask) {
 								// actualQuantity = undefined if no measurement made
-								var mEarnedValueFactor = that._getFactorOfWorkWithinPeriod(oTask, oStart, oEnd);
+								var mEarnedValueFactor = that._getFactorOfActualWorkWithinPeriod(oTask, oStart, oEnd);
 								switch (sResourceClass) {
 								case "0": // total cost
 									oActuals.earned += Number(oTask.costPlanned) * mEarnedValueFactor;
@@ -267,8 +287,6 @@ sap.ui.define([
 									oActuals.actual += 0;
 								}
 							});
-							oActuals.earned = parseFloat(oActuals.earned).toFixed(iDecimals);
-							oActuals.actual = parseFloat(oActuals.actual).toFixed(iDecimals);
 							resolve(oActuals);
 						} else {
 							resolve(oActuals);
@@ -295,11 +313,11 @@ sap.ui.define([
 			}
 			// value from start to period end
 			mHoursPlannedInPeriod = this.getNetDurationHoursFromDates(oSnapshotTask.plannedStart, oPeriodEnd, oShift);
-			mFactor = mHoursPlannedInPeriod / oSnapshotTask.quantity / oSnapshotTask.plannedProductivity;
+			mFactor = mHoursPlannedInPeriod / oSnapshotTask.plannedQuantity / oSnapshotTask.plannedProductivity;
 			return mFactor;
 		},
 
-		_getFactorOfWorkWithinPeriod: function (oTask, oPeriodStart, oPeriodEnd) {
+		_getFactorOfActualWorkWithinPeriod: function (oTask, oPeriodStart, oPeriodEnd) {
 			// as period end can be adjusted oTask can be started before, within or after the period
 			if (!oTask.actualQuantity || oTask.actualStart.getTime() > oPeriodEnd.getTime()) {
 				return 0;
@@ -326,7 +344,7 @@ sap.ui.define([
 					mHoursWorkedInPeriod = this.getNetDurationHoursFromDates(oTask.actualStart, oDateActualQuantityAchieved, oShift);
 				}
 			}
-			mFactor = mHoursWorkedInPeriod / oTask.quantity / oTask.currentProductivity; // quantity / productivity = duration
+			mFactor = mHoursWorkedInPeriod / (oTask.quantity / oTask.currentProductivity); // quantity / productivity = duration
 			return mFactor;
 		},
 
@@ -376,25 +394,25 @@ sap.ui.define([
 		},
 
 		setDataModel: function (pv, ev, ac, rc) {
-			var sLabel = (rc === "2" || rc === "5") ?
+			var iDecimals = (rc === "2" || rc === "5") ? 2 : 0,
+				sLabel = (rc === "2" || rc === "5") ?
 				this.getResourceBundle().getText("chartLabelHours") : this.getResourceBundle().getText("chartLabelCost"),
+				cpi = (ac && !isNaN(ac) && Number(ac) !== 0) ? parseFloat(ev / ac).toFixed(2) : "0.00",
+				spi = (pv && !isNaN(pv) && Number(pv) !== 0) ? parseFloat(ev / pv).toFixed(2) : "0.00",
+				sTitle = "CPI " + cpi + " - SPI " + spi,
 				oJSONModel = new JSONModel({
 					"Values": [{
 						"Value": sLabel,
-						"PV": pv,
-						"EV": ev,
-						"AC": ac,
-						"CV": ev - ac,
-						"SV": ev - pv
+						"PV": parseFloat(pv).toFixed(iDecimals),
+						"EV": parseFloat(ev).toFixed(iDecimals),
+						"AC": parseFloat(ac).toFixed(iDecimals),
+						"CV": parseFloat(ev - ac).toFixed(iDecimals),
+						"SV": parseFloat(ev - pv).toFixed(iDecimals)
 					}]
 				}),
-				cpi = (ac && Number(ac) !== 0) ? parseFloat(ev / ac).toFixed(2) : "0.00",
-				spi = (pv && Number(pv) !== 0) ? parseFloat(ev / pv).toFixed(2) : "0.00",
-				sTitle = "CPI " + cpi + " SPI " + spi;
+				oVizFrame = this.byId("chartContainerVizFrame");
+
 			this.byId("chartContainerVizFrame").setModel(oJSONModel);
-			//this.getModel("analyticsModel").setProperty("/analyticsTitle", sTitle);
-			//this.byId("chartContent").setTitle(sTitle);
-			var oVizFrame = this.byId("chartContainerVizFrame");
 			oVizFrame.setVizProperties({
 				title: {
 					text: sTitle
@@ -408,11 +426,11 @@ sap.ui.define([
 				return; // called by onInit, i.e. oModel not available yet
 			}
 			if (rc === "2" || rc === "5") { // labor or equipment hours
-				this.byId("mD1").setUnit("Hours");
-				this.byId("mD2").setUnit("Hours");
-				this.byId("mD3").setUnit("Hours");
-				this.byId("mD4").setUnit("Hours");
-				this.byId("mD5").setUnit("Hours");
+				this.byId("mD1").setUnit(this.getResourceBundle().getText("hours"));
+				this.byId("mD2").setUnit(this.getResourceBundle().getText("hours"));
+				this.byId("mD3").setUnit(this.getResourceBundle().getText("hours"));
+				this.byId("mD4").setUnit(this.getResourceBundle().getText("hours"));
+				this.byId("mD5").setUnit(this.getResourceBundle().getText("hours"));
 			} else {
 				var oModel = this.getModel(),
 					sProjectPath = "/" + oModel.createKey("Projects", {

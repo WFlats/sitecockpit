@@ -186,8 +186,8 @@
 								<ColumnListItem>
 									<cells>
 										<Text text="{i18n>laborHours}"/>
-										<Text text="{ path:'hoursLaborPlanned', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
-										<Text text="{ path:'hoursLaborActual', type:'sap.ui.model.type.Float', formatOptions: { decimals: 2 } }"/>
+										<Text text="{ path:'hoursLaborPlanned', formatter: '.formatter.hoursToHoursMinutes' }"/>
+										<Text text="{ path:'hoursLaborActual', formatter: '.formatter.hoursToHoursMinutes' }"/>
 										<ObjectNumber
 											number="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'hoursLaborActual'}, {path: 'hoursLaborPlanned'}], formatter: '.formatter.earnedValueKPI'}"
 											state="{parts: [{path: 'actualQuantity'}, {path: 'quantity'}, {path: 'hoursLaborActual'}, {path: 'hoursLaborPlanned'}], formatter: '.formatter.CPIStateFormatter'}"/>
@@ -283,9 +283,6 @@
 						<Toolbar>
 							<Title text="{i18n>foremanLabel} {supervisor/lastName} {supervisor/firstName}" level="H3"/>
 							<ToolbarSpacer/>
-							<Button id="laborAnalytics" type="Ghost" visible="{= ${taskView>/countCrews} + ${taskView>/countWorkers} > 0 ? true : false}"
-								icon="sap-icon://vertical-bar-chart" tooltip="{i18n>workerChartButtonTooltip}" press="onLaborChart"/>
-							<ToolbarSeparator visible="{= ${taskView>/countCrews} + ${taskView>/countWorkers} > 0 ? true : false}"/>
 							<Button id="addEditForeman" type="Ghost" icon="sap-icon://add" press="onAddEditForeman" tooltip="{i18n>taskAddForeman}"/>
 							<Button id="removeForeman" type="Ghost" icon="sap-icon://negative" press="onRemoveForeman" enabled="{= ${supervisor_ID} ? true : false}"
 								tooltip="{i18n>taskRemoveForemanTooltip}"/>

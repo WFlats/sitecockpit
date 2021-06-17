@@ -41,18 +41,18 @@
 				</content>
 				<toolbar>
 					<m:OverflowToolbar id="appToolbar">
-						<m:Label id="planLabel" text="Plan" visible="false"/>
-						<m:DateTimePicker id="planDatePicker" displayFormat="short" editable="false" width="150px" visible="false"/>
-						<m:Label id="actualLabel" text="Actual" visible="false"/>
-						<m:DateTimePicker id="actualDatePicker" displayFormat="short" change="onActualDateChanged" width="150px" visible="false"/>
-						<m:Select id="resourceSelect" forceSelection="true" change="onResourceChange" width="150px" selectedKey="1">
-							<core:Item key="0" text="Total cost" enabled="false"/>
-							<core:Item key="1" text="Labor cost"/>
-							<core:Item key="2" text="Labor hours"/>
-							<core:Item key="3" text="Material cost" enabled="false"/>
-							<core:Item key="4" text="Equipment cost" enabled="false"/>
-							<core:Item key="5" text="Equipment hours" enabled="false"/>
-							<core:Item key="6" text="Subcontract cost"/>
+						<m:Label id="planLabel" text="{i18n>fromLabel}" visible="false"/>
+						<m:DateTimePicker id="planDatePicker" displayFormat="short" editable="false" width="130px" visible="false"/>
+						<m:Label id="actualLabel" text="{i18n>toLabel}" visible="false"/>
+						<m:DateTimePicker id="actualDatePicker" displayFormat="short" change="onResourceOrDateChange" width="170px" visible="false"/>
+						<m:Select id="resourceSelect" forceSelection="true" change="onResourceOrDateChange" width="150px" selectedKey="1">
+							<core:Item key="0" text="{i18n>selectTotalCost}" enabled="false"/>
+							<core:Item key="1" text="{i18n>selectLaborCost}"/>
+							<core:Item key="2" text="{i18n>selectLaborHours}"/>
+							<core:Item key="3" text="{i18n>selectMaterialCost}" enabled="false"/>
+							<core:Item key="4" text="{i18n>selectEquipmentCost}" enabled="false"/>
+							<core:Item key="5" text="{i18n>selectEquipmentHours}" enabled="false"/>
+							<core:Item key="6" text="{i18n>selectSubcontractCost}"/>
 						</m:Select>
 						<m:ToolbarSpacer/>
 						<m:Button id="toSnapshots" icon="sap-icon://copy" type="Transparent" press="onNavToSnapshots" tooltip="{i18n>navToSnapshots}"></m:Button>

@@ -155,16 +155,27 @@ sap.ui.define([
 				aItems = oList.getSelectedItems(),
 				sKey;
 
-			aItems.forEach(function (oItem) {
-				sKey = "/" + oModel.createKey("PlanVersions", {
-					ID: oItem.getBindingContext().getProperty("ID")
-				});
-				oModel.remove(sKey, {
-					error: function (oError) {
-						Log.error("Error deleting plan version");
+			MessageBox.confirm(
+				this.getResourceBundle().getText("confirmDeletionPlanVersions"), {
+					icon: MessageBox.Icon.WARNING,
+					title: this.getResourceBundle().getText("confirmDeletion"),
+					actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+					initialFocus: MessageBox.Action.CANCEL,
+					onClose: function (oAction) {
+						if (oAction === "OK") {
+							aItems.forEach(function (oItem) {
+								sKey = "/" + oModel.createKey("PlanVersions", {
+									ID: oItem.getBindingContext().getProperty("ID")
+								});
+								oModel.remove(sKey, {
+									error: function (oError) {
+										Log.error("Error deleting plan version");
+									}
+								});
+							});
+						}
 					}
 				});
-			});
 		},
 
 		onVersionChange: function () {
@@ -235,7 +246,7 @@ sap.ui.define([
 								success: function (oData) {
 									MessageToast.show(that.getResourceBundle().getText("creatingSnapshots"));
 									// create snapshots
-									that.createSnapshot(oData.ID, oPlanVersion.snapshotDate);
+									that.createSnapshot(oData.ID, oPlanVersion.snapshotDate, oPlanVersion.useCase);
 								},
 								error: function (oError) {
 									Log.error("Error creating plan version");
@@ -280,19 +291,41 @@ sap.ui.define([
 			this.getView().addDependent(this.oPlanVersionDialog);
 		},
 
-		createSnapshot: function (sPlanVersionID, oDate) { // revisit: temporarily - must be replaced with a backend function
+		createSnapshot: function (sPlanVersionID, oDate, sUseCase) { // revisit: temporarily - must be replaced with a backend function
 			var oModel = this.getModel(),
 				sProjectID = this.getModel("appView").getProperty("/selectedProjectID"),
-				oProjectFilter = new Filter("project_ID", FilterOperator.EQ, sProjectID),
-				oFutureFilter = new Filter("estimatedEnd", FilterOperator.GT, oDate),
+				aFilters = [
+					new Filter("project_ID", FilterOperator.EQ, sProjectID),
+					new Filter("estimatedEnd", FilterOperator.GT, oDate)
+				],
+				oMaxDate = new Date(oDate),
 				sPlanVersionPath = "/" + oModel.createKey("PlanVersions", {
 					ID: sPlanVersionID
 				}),
 				oPlanVersionBC = oModel.createBindingContext(sPlanVersionPath),
 				that = this;
 
+			// limit the snapshots to the period given by the plan version type
+			switch (sUseCase) {
+			case "0": // daily
+				oMaxDate.setDate(oMaxDate.getDate() + 1);
+				break;
+			case "1": // weekly
+				oMaxDate.setDate(oMaxDate.getDate() + 7);
+				break;
+			case "2": // monthly
+				oMaxDate.setMonth(oMaxDate.getMonth() + 1);
+				break;
+			default: // long term
+				oMaxDate = undefined;
+				break;
+			}
+			if (oMaxDate) {
+				aFilters.push(new Filter("plannedStart", FilterOperator.LT, oMaxDate));
+			}
+
 			oModel.read("/Tasks", {
-				filters: [oProjectFilter, oFutureFilter],
+				filters: aFilters,
 				and: true,
 				success: function (oData) {
 					if (oData && oData.results.length > 0) {

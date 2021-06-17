@@ -171,6 +171,15 @@ sap.ui.define([
 							overlappingTasksOfCrews: [],
 							overlappingTasksOfWorkers: []
 						});
+						// disable buttons if task completed
+						if (oTask.status >= 4) {
+							that.byId("addEditForeman").setEnabled(false);
+							that.byId("removeForeman").setEnabled(false);
+							that.byId("addCrews").setEnabled(false);
+							that.byId("removeCrews").setEnabled(false);
+							that.byId("addWorkers").setEnabled(false);
+							that.byId("removeWorkers").setEnabled(false);
+						}
 					},
 					dataRequested: function () {
 						oViewModel.setProperty("/busy", true);
@@ -880,7 +889,7 @@ sap.ui.define([
 								oTask.estimatedEnd = that.getEndDateInWorkingHours(oTask.actualStart, oTask.quantity, oTask.currentProductivity, oShift);
 							}
 							oTask.waitDuration = iWaitMs;
-							oTask.costPlanned = mTotalPlannedCost;
+							oTask.costPlanned = (!mTotalPlannedCost || isNaN(mTotalPlannedCost)) ? null : mTotalPlannedCost;
 							oModel.update(sObjectPath, oTask, {
 								error: function (oError) {
 									Log.error("Error updating task after editing");
@@ -1757,7 +1766,7 @@ sap.ui.define([
 				aWorkers.forEach(function (oWorker) {
 					oWorker.setHighlight(sap.ui.core.MessageType.Warning); // indicate waiting until clashes determined
 				});
-				aWorkers.reduce(function (oAggr, oWorker, i) {
+				aWorkers.reduce(function (oAggr, oWorker) {
 					new Promise(function () {
 						var sWorkersForTaskID = oWorker.getBindingContext().getProperty("ID"),
 							sWorkerID = oWorker.getBindingContext().getProperty("worker_ID"),
@@ -2410,7 +2419,7 @@ sap.ui.define([
 				oModel = this.getModel(),
 				oViewModel = this.getView().getModel("taskView"),
 				sProjectID = this.getModel("appView").getProperty("/selectedProjectID"),
-				//sTaskID = oViewModel.getProperty("/taskID"),
+				sTaskID,
 				sTitle = this.getResourceBundle().getText("taskAddCrewTitle"),
 				sAdd = this.getResourceBundle().getText("addButtonText"),
 				sCancel = this.getResourceBundle().getText("cancelButtonText"),
@@ -2432,13 +2441,14 @@ sap.ui.define([
 						visible: true,
 						press: function () {
 							aSelectedCrewItems = oFrag.byId("addCrewFrag", "taskAddCrewsList").getSelectedItems();
+							sTaskID = that.getView().getBindingContext().getProperty("ID");
 							for (var i = 0; i < aSelectedCrewItems.length; i++) {
 								sCrewID = aSelectedCrewItems[i].getBindingContext().getObject().ID;
 								oModel.createEntry("/CrewsForTask", {
 									properties: {
 										project_ID: sProjectID,
 										crew_ID: sCrewID,
-										task_ID: oViewModel.getProperty("/taskID")
+										task_ID: sTaskID
 									}
 								});
 							}
@@ -2717,6 +2727,7 @@ sap.ui.define([
 							that.oAddWorkerDialog.close();
 							for (var i = 0; i < aSelectedWorkerItems.length; i++) {
 								sWorkerID = aSelectedWorkerItems[i].getBindingContext().getObject().ID;
+								sTaskID = that.getView().getBindingContext().getProperty("ID");
 								oModel.createEntry("/WorkersForTask", {
 									properties: {
 										project_ID: sProjectID,
@@ -2850,119 +2861,119 @@ sap.ui.define([
 		},
 
 		/////////////////////////////////////////// LABOR CHART POPOVER /////////////////////////
+		/*
+				onLaborChart: function (oEvent) {
+					var oFrag = sap.ui.core.Fragment,
+						oButton = oEvent.getSource(),
+						oView = this.getView(),
+						that = this;
 
-		onLaborChart: function (oEvent) {
-			var oFrag = sap.ui.core.Fragment,
-				oButton = oEvent.getSource(),
-				oView = this.getView(),
-				that = this;
+					if (!this._laborChartPopover) {
+						this._laborChartPopover = oFrag.load({
+							id: oView.getId(),
+							name: "cockpit.Cockpit.view.LaborChart",
+							controller: this
+						}).then(function (oPopover) {
+							oView.addDependent(oPopover);
+							//oPopover.bindElement("/ProductCollection/0");
+							return oPopover;
+						});
+					}
+					this._laborChartPopover.then(function (oPopover) {
+						that.setLaborChartValues();
+						oPopover.openBy(oButton);
+					});
+				},
 
-			if (!this._laborChartPopover) {
-				this._laborChartPopover = oFrag.load({
-					id: oView.getId(),
-					name: "cockpit.Cockpit.view.LaborChart",
-					controller: this
-				}).then(function (oPopover) {
-					oView.addDependent(oPopover);
-					//oPopover.bindElement("/ProductCollection/0");
-					return oPopover;
-				});
-			}
-			this._laborChartPopover.then(function (oPopover) {
-				that.setLaborChartValues();
-				oPopover.openBy(oButton);
-			});
-		},
+				setLaborChartValues: function () {
+					var oFrag = sap.ui.core.Fragment,
+						oTaskView = this.getModel("taskView"),
+						oView = this.getView(),
+						mQuantity = oView.getBindingContext().getProperty("quantity"),
+						mActualQuantity = oTaskView.getProperty("/cumulativeQuantity"),
+						oTotalHrsChart = oFrag.byId(oView.getId(), "totalHrs"),
+						oTotalCostChart = oFrag.byId(oView.getId(), "totalCost"),
+						mKPIHours = oTaskView.getProperty("/actualLabourHours") / oTaskView.getProperty("/plannedLabourHours") || 0,
+						// if more quantity than planned was performed then hrs and cost KPI can differ
+						mKPICost = oTaskView.getProperty("/actualLabourCost") / oTaskView.getProperty("/plannedLabourCost") || 0,
+						sHours, sCost;
 
-		setLaborChartValues: function () {
-			var oFrag = sap.ui.core.Fragment,
-				oTaskView = this.getModel("taskView"),
-				oView = this.getView(),
-				mQuantity = oView.getBindingContext().getProperty("quantity"),
-				mActualQuantity = oTaskView.getProperty("/cumulativeQuantity"),
-				oTotalHrsChart = oFrag.byId(oView.getId(), "totalHrs"),
-				oTotalCostChart = oFrag.byId(oView.getId(), "totalCost"),
-				mKPIHours = oTaskView.getProperty("/actualLabourHours") / oTaskView.getProperty("/plannedLabourHours") || 0,
-				// if more quantity than planned was performed then hrs and cost KPI can differ
-				mKPICost = oTaskView.getProperty("/actualLabourCost") / oTaskView.getProperty("/plannedLabourCost") || 0,
-				sHours, sCost;
-
-			// total hours
-			if (oTaskView.getProperty("/plannedLabourHours")) {
-				oTotalHrsChart.getColumns()[0].setValue(Number(oTaskView.getProperty("/plannedLabourHours")));
-				sHours = formatter.hoursToHoursMinutes(Number(oTaskView.getProperty("/plannedLabourHours")));
-			} else {
-				oTotalHrsChart.getColumns()[0].setValue(0);
-				sHours = "0";
-			}
-			oTotalHrsChart.setLeftTopLabel(oTotalHrsChart.getLeftTopLabel().setLabel(sHours));
-			if (oTaskView.getProperty("/actualLabourHours")) {
-				oTotalHrsChart.getColumns()[1].setValue(Number(oTaskView.getProperty("/actualLabourHours")));
-				oTotalHrsChart.getColumns()[1].setColor(mKPIHours >= 1.0 ? sap.m.ValueColor.Error : sap.m.ValueColor.Good);
-				sHours = formatter.hoursToHoursMinutes(oTaskView.getProperty("/actualLabourHours"));
-			} else {
-				oTotalHrsChart.getColumns()[1].setValue(0);
-				sHours = "0";
-			}
-			oTotalHrsChart.setRightTopLabel(oTotalHrsChart.getRightTopLabel().setLabel(sHours));
-			// hrs per UoM
-			oTotalHrsChart = oFrag.byId(oView.getId(), "totalHrsPerUoM");
-			if (oTaskView.getProperty("/plannedLabourHours")) {
-				oTotalHrsChart.getColumns()[0].setValue(Number(oTaskView.getProperty("/plannedLabourHours") / mQuantity));
-				sHours = formatter.hoursToHoursMinutes(oTaskView.getProperty("/plannedLabourHours") / mQuantity);
-			} else {
-				oTotalHrsChart.getColumns()[0].setValue(0);
-				sHours = "0";
-			}
-			oTotalHrsChart.setLeftTopLabel(oTotalHrsChart.getLeftTopLabel().setLabel(sHours));
-			if (oTaskView.getProperty("/actualLabourHours") && mActualQuantity) {
-				oTotalHrsChart.getColumns()[1].setValue(Number(oTaskView.getProperty("/actualLabourHours") / mActualQuantity));
-				oTotalHrsChart.getColumns()[1].setColor(mKPIHours >= 1.0 ? sap.m.ValueColor.Error : sap.m.ValueColor.Good);
-				sHours = formatter.hoursToHoursMinutes(oTaskView.getProperty("/actualLabourHours") / mActualQuantity);
-			} else {
-				oTotalHrsChart.getColumns()[1].setValue(0);
-				sHours = "0";
-			}
-			oTotalHrsChart.setRightTopLabel(oTotalHrsChart.getRightTopLabel().setLabel(sHours));
-			// total cost
-			if (oTaskView.getProperty("/plannedLabourCost")) {
-				oTotalCostChart.getColumns()[0].setValue(Number(oTaskView.getProperty("/plannedLabourCost")));
-				sCost = formatter.currencyValue(oTaskView.getProperty("/plannedLabourCost"));
-			} else {
-				oTotalCostChart.getColumns()[0].setValue(0);
-				sCost = "0";
-			}
-			oTotalCostChart.setLeftTopLabel(oTotalCostChart.getLeftTopLabel().setLabel(sCost));
-			if (oTaskView.getProperty("/actualLabourCost")) {
-				oTotalCostChart.getColumns()[1].setValue(Number(oTaskView.getProperty("/actualLabourCost")));
-				oTotalCostChart.getColumns()[1].setColor(mKPIHours >= 1.0 ? sap.m.ValueColor.Error : sap.m.ValueColor.Good);
-				sCost = formatter.currencyValue(oTaskView.getProperty("/actualLabourCost"));
-			} else {
-				oTotalCostChart.getColumns()[1].setValue(0);
-				sCost = "0";
-			}
-			oTotalCostChart.setRightTopLabel(oTotalCostChart.getRightTopLabel().setLabel(sCost));
-			// cost per UoM
-			oTotalCostChart = oFrag.byId(oView.getId(), "totalCostPerUoM");
-			if (oTaskView.getProperty("/plannedLabourCost")) {
-				oTotalCostChart.getColumns()[0].setValue(Number(oTaskView.getProperty("/plannedLabourCost") / mQuantity));
-				sCost = formatter.currencyValue(oTaskView.getProperty("/plannedLabourCost") / mQuantity);
-			} else {
-				oTotalCostChart.getColumns()[0].setValue(0);
-				sCost = "0";
-			}
-			oTotalCostChart.setLeftTopLabel(oTotalCostChart.getLeftTopLabel().setLabel(sCost));
-			if (oTaskView.getProperty("/actualLabourCost") && mActualQuantity) {
-				oTotalCostChart.getColumns()[1].setValue(Number(oTaskView.getProperty("/actualLabourCost") / mActualQuantity));
-				oTotalCostChart.getColumns()[1].setColor(mKPICost >= 1.0 ? sap.m.ValueColor.Error : sap.m.ValueColor.Good);
-				sCost = formatter.currencyValue(oTaskView.getProperty("/actualLabourCost") / mActualQuantity);
-			} else {
-				oTotalCostChart.getColumns()[1].setValue(0);
-				sCost = "0";
-			}
-			oTotalCostChart.setRightTopLabel(oTotalCostChart.getRightTopLabel().setLabel(sCost));
-		},
-
+					// total hours
+					if (oTaskView.getProperty("/plannedLabourHours")) {
+						oTotalHrsChart.getColumns()[0].setValue(Number(oTaskView.getProperty("/plannedLabourHours")));
+						sHours = formatter.hoursToHoursMinutes(Number(oTaskView.getProperty("/plannedLabourHours")));
+					} else {
+						oTotalHrsChart.getColumns()[0].setValue(0);
+						sHours = "0";
+					}
+					oTotalHrsChart.setLeftTopLabel(oTotalHrsChart.getLeftTopLabel().setLabel(sHours));
+					if (oTaskView.getProperty("/actualLabourHours")) {
+						oTotalHrsChart.getColumns()[1].setValue(Number(oTaskView.getProperty("/actualLabourHours")));
+						oTotalHrsChart.getColumns()[1].setColor(mKPIHours >= 1.0 ? sap.m.ValueColor.Error : sap.m.ValueColor.Good);
+						sHours = formatter.hoursToHoursMinutes(oTaskView.getProperty("/actualLabourHours"));
+					} else {
+						oTotalHrsChart.getColumns()[1].setValue(0);
+						sHours = "0";
+					}
+					oTotalHrsChart.setRightTopLabel(oTotalHrsChart.getRightTopLabel().setLabel(sHours));
+					// hrs per UoM
+					oTotalHrsChart = oFrag.byId(oView.getId(), "totalHrsPerUoM");
+					if (oTaskView.getProperty("/plannedLabourHours")) {
+						oTotalHrsChart.getColumns()[0].setValue(Number(oTaskView.getProperty("/plannedLabourHours") / mQuantity));
+						sHours = formatter.hoursToHoursMinutes(oTaskView.getProperty("/plannedLabourHours") / mQuantity);
+					} else {
+						oTotalHrsChart.getColumns()[0].setValue(0);
+						sHours = "0";
+					}
+					oTotalHrsChart.setLeftTopLabel(oTotalHrsChart.getLeftTopLabel().setLabel(sHours));
+					if (oTaskView.getProperty("/actualLabourHours") && mActualQuantity) {
+						oTotalHrsChart.getColumns()[1].setValue(Number(oTaskView.getProperty("/actualLabourHours") / mActualQuantity));
+						oTotalHrsChart.getColumns()[1].setColor(mKPIHours >= 1.0 ? sap.m.ValueColor.Error : sap.m.ValueColor.Good);
+						sHours = formatter.hoursToHoursMinutes(oTaskView.getProperty("/actualLabourHours") / mActualQuantity);
+					} else {
+						oTotalHrsChart.getColumns()[1].setValue(0);
+						sHours = "0";
+					}
+					oTotalHrsChart.setRightTopLabel(oTotalHrsChart.getRightTopLabel().setLabel(sHours));
+					// total cost
+					if (oTaskView.getProperty("/plannedLabourCost")) {
+						oTotalCostChart.getColumns()[0].setValue(Number(oTaskView.getProperty("/plannedLabourCost")));
+						sCost = formatter.currencyValue(oTaskView.getProperty("/plannedLabourCost"));
+					} else {
+						oTotalCostChart.getColumns()[0].setValue(0);
+						sCost = "0";
+					}
+					oTotalCostChart.setLeftTopLabel(oTotalCostChart.getLeftTopLabel().setLabel(sCost));
+					if (oTaskView.getProperty("/actualLabourCost")) {
+						oTotalCostChart.getColumns()[1].setValue(Number(oTaskView.getProperty("/actualLabourCost")));
+						oTotalCostChart.getColumns()[1].setColor(mKPIHours >= 1.0 ? sap.m.ValueColor.Error : sap.m.ValueColor.Good);
+						sCost = formatter.currencyValue(oTaskView.getProperty("/actualLabourCost"));
+					} else {
+						oTotalCostChart.getColumns()[1].setValue(0);
+						sCost = "0";
+					}
+					oTotalCostChart.setRightTopLabel(oTotalCostChart.getRightTopLabel().setLabel(sCost));
+					// cost per UoM
+					oTotalCostChart = oFrag.byId(oView.getId(), "totalCostPerUoM");
+					if (oTaskView.getProperty("/plannedLabourCost")) {
+						oTotalCostChart.getColumns()[0].setValue(Number(oTaskView.getProperty("/plannedLabourCost") / mQuantity));
+						sCost = formatter.currencyValue(oTaskView.getProperty("/plannedLabourCost") / mQuantity);
+					} else {
+						oTotalCostChart.getColumns()[0].setValue(0);
+						sCost = "0";
+					}
+					oTotalCostChart.setLeftTopLabel(oTotalCostChart.getLeftTopLabel().setLabel(sCost));
+					if (oTaskView.getProperty("/actualLabourCost") && mActualQuantity) {
+						oTotalCostChart.getColumns()[1].setValue(Number(oTaskView.getProperty("/actualLabourCost") / mActualQuantity));
+						oTotalCostChart.getColumns()[1].setColor(mKPICost >= 1.0 ? sap.m.ValueColor.Error : sap.m.ValueColor.Good);
+						sCost = formatter.currencyValue(oTaskView.getProperty("/actualLabourCost") / mActualQuantity);
+					} else {
+						oTotalCostChart.getColumns()[1].setValue(0);
+						sCost = "0";
+					}
+					oTotalCostChart.setRightTopLabel(oTotalCostChart.getRightTopLabel().setLabel(sCost));
+				},
+		*/
 		/////////////////////////////////////////////////////////////////SUBCONTRACT////////////////////////////////////
 
 		editSubby: function () {
