@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
-  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Capabilities.V1.xml" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-    <edmx:Include Alias="Capabilities" Namespace="Org.OData.Capabilities.V1"/>
-  </edmx:Reference>
   <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
     <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
   </edmx:Reference>
@@ -41,6 +38,8 @@
         <EntitySet Name="Persons" EntityType="scService.Persons"/>
         <EntitySet Name="Persons_texts" EntityType="scService.Persons_texts"/>
         <EntitySet Name="Pics" EntityType="scService.Pics"/>
+        <EntitySet Name="PlanVersions" EntityType="scService.PlanVersions"/>
+        <EntitySet Name="PlanVersions_texts" EntityType="scService.PlanVersions_texts"/>
         <EntitySet Name="ProblemCards" EntityType="scService.ProblemCards"/>
         <EntitySet Name="ProblemCards_texts" EntityType="scService.ProblemCards_texts"/>
         <EntitySet Name="ProblemTypes" EntityType="scService.ProblemTypes"/>
@@ -64,6 +63,7 @@
         <EntitySet Name="Shifts_texts" EntityType="scService.Shifts_texts"/>
         <EntitySet Name="Skills" EntityType="scService.Skills"/>
         <EntitySet Name="SkillsForRecipe" EntityType="scService.SkillsForRecipe"/>
+        <EntitySet Name="SnapshotTasks" EntityType="scService.SnapshotTasks"/>
         <EntitySet Name="SpecialDates" EntityType="scService.SpecialDates"/>
         <EntitySet Name="SpecialDates_texts" EntityType="scService.SpecialDates_texts"/>
         <EntitySet Name="Tasks" EntityType="scService.Tasks"/>
@@ -71,6 +71,7 @@
         <EntitySet Name="TimeSheetEntries" EntityType="scService.TimeSheetEntries"/>
         <EntitySet Name="TimeTypes" EntityType="scService.TimeTypes"/>
         <EntitySet Name="TimeTypes_texts" EntityType="scService.TimeTypes_texts"/>
+        <EntitySet Name="Timesheets" EntityType="scService.Timesheets"/>
         <EntitySet Name="UoMs" EntityType="scService.UoMs"/>
         <EntitySet Name="UoMs_texts" EntityType="scService.UoMs_texts"/>
         <EntitySet Name="UsersOfProject" EntityType="scService.UsersOfProject"/>
@@ -258,6 +259,18 @@
           <End Role="Pics" EntitySet="Pics"/>
           <End Role="ProblemCards" EntitySet="ProblemCards"/>
         </AssociationSet>
+        <AssociationSet Name="PlanVersions_project" Association="scService.PlanVersions_project">
+          <End Role="PlanVersions" EntitySet="PlanVersions"/>
+          <End Role="Projects" EntitySet="Projects"/>
+        </AssociationSet>
+        <AssociationSet Name="PlanVersions_texts_1" Association="scService.PlanVersions_texts_1">
+          <End Role="PlanVersions" EntitySet="PlanVersions"/>
+          <End Role="PlanVersions_texts" EntitySet="PlanVersions_texts"/>
+        </AssociationSet>
+        <AssociationSet Name="PlanVersions_localized" Association="scService.PlanVersions_localized">
+          <End Role="PlanVersions" EntitySet="PlanVersions"/>
+          <End Role="PlanVersions_texts" EntitySet="PlanVersions_texts"/>
+        </AssociationSet>
         <AssociationSet Name="ProblemCards_project" Association="scService.ProblemCards_project">
           <End Role="ProblemCards" EntitySet="ProblemCards"/>
           <End Role="Projects" EntitySet="Projects"/>
@@ -426,6 +439,22 @@
           <End Role="SkillsForRecipe" EntitySet="SkillsForRecipe"/>
           <End Role="Recipes" EntitySet="Recipes"/>
         </AssociationSet>
+        <AssociationSet Name="SnapshotTasks_planVersion" Association="scService.SnapshotTasks_planVersion">
+          <End Role="SnapshotTasks" EntitySet="SnapshotTasks"/>
+          <End Role="PlanVersions" EntitySet="PlanVersions"/>
+        </AssociationSet>
+        <AssociationSet Name="SnapshotTasks_location" Association="scService.SnapshotTasks_location">
+          <End Role="SnapshotTasks" EntitySet="SnapshotTasks"/>
+          <End Role="Locations" EntitySet="Locations"/>
+        </AssociationSet>
+        <AssociationSet Name="SnapshotTasks_task" Association="scService.SnapshotTasks_task">
+          <End Role="SnapshotTasks" EntitySet="SnapshotTasks"/>
+          <End Role="Tasks" EntitySet="Tasks"/>
+        </AssociationSet>
+        <AssociationSet Name="SnapshotTasks_shift" Association="scService.SnapshotTasks_shift">
+          <End Role="SnapshotTasks" EntitySet="SnapshotTasks"/>
+          <End Role="Shifts" EntitySet="Shifts"/>
+        </AssociationSet>
         <AssociationSet Name="SpecialDates_project" Association="scService.SpecialDates_project">
           <End Role="SpecialDates" EntitySet="SpecialDates"/>
           <End Role="Projects" EntitySet="Projects"/>
@@ -445,10 +474,6 @@
         <AssociationSet Name="Tasks_recipe" Association="scService.Tasks_recipe">
           <End Role="Tasks" EntitySet="Tasks"/>
           <End Role="Recipes" EntitySet="Recipes"/>
-        </AssociationSet>
-        <AssociationSet Name="Tasks_pulseStep" Association="scService.Tasks_pulseStep">
-          <End Role="Tasks" EntitySet="Tasks"/>
-          <End Role="PulseSteps" EntitySet="PulseSteps"/>
         </AssociationSet>
         <AssociationSet Name="Tasks_UoM" Association="scService.Tasks_UoM">
           <End Role="Tasks" EntitySet="Tasks"/>
@@ -494,6 +519,10 @@
           <End Role="TimeSheetEntries" EntitySet="TimeSheetEntries"/>
           <End Role="Tasks" EntitySet="Tasks"/>
         </AssociationSet>
+        <AssociationSet Name="TimeSheetEntries_timesheet" Association="scService.TimeSheetEntries_timesheet">
+          <End Role="TimeSheetEntries" EntitySet="TimeSheetEntries"/>
+          <End Role="Timesheets" EntitySet="Timesheets"/>
+        </AssociationSet>
         <AssociationSet Name="TimeSheetEntries_shiftPart" Association="scService.TimeSheetEntries_shiftPart">
           <End Role="TimeSheetEntries" EntitySet="TimeSheetEntries"/>
           <End Role="ShiftParts" EntitySet="ShiftParts"/>
@@ -509,6 +538,14 @@
         <AssociationSet Name="TimeTypes_localized" Association="scService.TimeTypes_localized">
           <End Role="TimeTypes" EntitySet="TimeTypes"/>
           <End Role="TimeTypes_texts" EntitySet="TimeTypes_texts"/>
+        </AssociationSet>
+        <AssociationSet Name="Timesheets_project" Association="scService.Timesheets_project">
+          <End Role="Timesheets" EntitySet="Timesheets"/>
+          <End Role="Projects" EntitySet="Projects"/>
+        </AssociationSet>
+        <AssociationSet Name="Timesheets_person" Association="scService.Timesheets_person">
+          <End Role="Timesheets" EntitySet="Timesheets"/>
+          <End Role="Persons" EntitySet="Persons"/>
         </AssociationSet>
         <AssociationSet Name="UoMs_baseUnit" Association="scService.UoMs_baseUnit">
           <End Role="UoMs" EntitySet="UoMs"/>
@@ -921,7 +958,7 @@
         <NavigationProperty Name="company" Relationship="scService.Persons_company" FromRole="Persons" ToRole="Companies"/>
         <NavigationProperty Name="memberOfCrew" Relationship="scService.Persons_memberOfCrew" FromRole="Persons" ToRole="Crews"/>
         <NavigationProperty Name="tasks" Relationship="scService.WorkersForTask_worker" FromRole="Persons" ToRole="WorkersForTask"/>
-        <NavigationProperty Name="timeSheetEntries" Relationship="scService.TimeSheetEntries_person" FromRole="Persons" ToRole="TimeSheetEntries"/>
+        <NavigationProperty Name="timesheets" Relationship="scService.Timesheets_person" FromRole="Persons" ToRole="Timesheets"/>
         <NavigationProperty Name="texts" Relationship="scService.Persons_texts_1" FromRole="Persons" ToRole="Persons_texts"/>
         <NavigationProperty Name="localized" Relationship="scService.Persons_localized" FromRole="Persons" ToRole="Persons_texts"/>
         <Property Name="country_code" Type="Edm.String" MaxLength="3"/>
@@ -942,7 +979,7 @@
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <Property Name="gender" Type="Edm.String" MaxLength="20"/>
       </EntityType>
-      <EntityType Name="Pics">
+      <EntityType Name="Pics" m:HasStream="true">
         <Key>
           <PropertyRef Name="ID"/>
         </Key>
@@ -952,12 +989,40 @@
         <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <NavigationProperty Name="project" Relationship="scService.Pics_project" FromRole="Pics" ToRole="Projects"/>
-        <Property Name="pic" Type="Edm.Binary"/>
         <NavigationProperty Name="measurement" Relationship="scService.Pics_measurement" FromRole="Pics" ToRole="Measurements"/>
         <NavigationProperty Name="problem" Relationship="scService.Pics_problem" FromRole="Pics" ToRole="ProblemCards"/>
         <Property Name="project_ID" Type="Edm.Guid"/>
         <Property Name="measurement_ID" Type="Edm.Guid"/>
         <Property Name="problem_ID" Type="Edm.Guid"/>
+      </EntityType>
+      <EntityType Name="PlanVersions">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <NavigationProperty Name="project" Relationship="scService.PlanVersions_project" FromRole="PlanVersions" ToRole="Projects"/>
+        <Property Name="snapshotDate" Type="Edm.DateTimeOffset"/>
+        <Property Name="versionNumber" Type="Edm.String" MaxLength="50"/>
+        <Property Name="description" Type="Edm.String" MaxLength="500"/>
+        <Property Name="useCase" Type="Edm.Int32"/>
+        <NavigationProperty Name="snapshotTasks" Relationship="scService.SnapshotTasks_planVersion" FromRole="PlanVersions" ToRole="SnapshotTasks"/>
+        <Property Name="snapshotsComplete" Type="Edm.Boolean"/>
+        <NavigationProperty Name="texts" Relationship="scService.PlanVersions_texts_1" FromRole="PlanVersions" ToRole="PlanVersions_texts"/>
+        <NavigationProperty Name="localized" Relationship="scService.PlanVersions_localized" FromRole="PlanVersions" ToRole="PlanVersions_texts"/>
+        <Property Name="project_ID" Type="Edm.Guid"/>
+      </EntityType>
+      <EntityType Name="PlanVersions_texts">
+        <Key>
+          <PropertyRef Name="locale"/>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="locale" Type="Edm.String" MaxLength="14" Nullable="false"/>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="description" Type="Edm.String" MaxLength="500"/>
       </EntityType>
       <EntityType Name="ProblemCards">
         <Key>
@@ -1083,6 +1148,7 @@
         <NavigationProperty Name="crews" Relationship="scService.Crews_project" FromRole="Projects" ToRole="Crews"/>
         <NavigationProperty Name="locations" Relationship="scService.Locations_project" FromRole="Projects" ToRole="Locations"/>
         <NavigationProperty Name="users" Relationship="scService.UsersOfProject_project" FromRole="Projects" ToRole="UsersOfProject"/>
+        <NavigationProperty Name="planVersions" Relationship="scService.PlanVersions_project" FromRole="Projects" ToRole="PlanVersions"/>
         <NavigationProperty Name="texts" Relationship="scService.Projects_texts_1" FromRole="Projects" ToRole="Projects_texts"/>
         <NavigationProperty Name="localized" Relationship="scService.Projects_localized" FromRole="Projects" ToRole="Projects_texts"/>
         <Property Name="address_ID" Type="Edm.Guid"/>
@@ -1319,6 +1385,52 @@
         <Property Name="skill_ID" Type="Edm.Guid"/>
         <Property Name="recipe_ID" Type="Edm.Guid"/>
       </EntityType>
+      <EntityType Name="SnapshotTasks">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <NavigationProperty Name="planVersion" Relationship="scService.SnapshotTasks_planVersion" FromRole="SnapshotTasks" ToRole="PlanVersions"/>
+        <NavigationProperty Name="location" Relationship="scService.SnapshotTasks_location" FromRole="SnapshotTasks" ToRole="Locations"/>
+        <NavigationProperty Name="task" Relationship="scService.SnapshotTasks_task" FromRole="SnapshotTasks" ToRole="Tasks"/>
+        <NavigationProperty Name="shift" Relationship="scService.SnapshotTasks_shift" FromRole="SnapshotTasks" ToRole="Shifts"/>
+        <Property Name="plannedStart" Type="Edm.DateTimeOffset"/>
+        <Property Name="plannedEnd" Type="Edm.DateTimeOffset"/>
+        <Property Name="estimatedEnd" Type="Edm.DateTimeOffset"/>
+        <Property Name="actualStart" Type="Edm.DateTimeOffset"/>
+        <Property Name="actualEnd" Type="Edm.DateTimeOffset"/>
+        <Property Name="stoppedAt" Type="Edm.DateTimeOffset"/>
+        <Property Name="stopDuration" Type="Edm.Int32"/>
+        <Property Name="waitDuration" Type="Edm.Int32"/>
+        <Property Name="status" Type="Edm.Int32"/>
+        <Property Name="plannedQuantity" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="actualQuantity" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="plannedProductivity" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="productivityFactor" Type="Edm.Decimal" Scale="3" Precision="5"/>
+        <Property Name="currentProductivity" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costLaborPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costLaborActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursLaborPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursLaborActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costMaterialPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costMaterialActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costEquipmentPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costEquipmentActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursEquipmentPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursEquipmentActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costSubcontractorPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costSubcontractorActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="planVersion_ID" Type="Edm.Guid"/>
+        <Property Name="location_ID" Type="Edm.Guid"/>
+        <Property Name="task_ID" Type="Edm.Guid"/>
+        <Property Name="shift_ID" Type="Edm.Guid"/>
+      </EntityType>
       <EntityType Name="SpecialDates">
         <Key>
           <PropertyRef Name="ID"/>
@@ -1359,11 +1471,13 @@
         <Property Name="shortText" Type="Edm.String" MaxLength="50" Nullable="false"/>
         <Property Name="description" Type="Edm.String"/>
         <NavigationProperty Name="recipe" Relationship="scService.Tasks_recipe" FromRole="Tasks" ToRole="Recipes"/>
-        <NavigationProperty Name="pulseStep" Relationship="scService.Tasks_pulseStep" FromRole="Tasks" ToRole="PulseSteps"/>
         <NavigationProperty Name="UoM" Relationship="scService.Tasks_UoM" FromRole="Tasks" ToRole="UoMs"/>
         <NavigationProperty Name="shift" Relationship="scService.Tasks_shift" FromRole="Tasks" ToRole="Shifts"/>
         <Property Name="quantity" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="actualQuantity" Type="Edm.Decimal" Scale="3" Precision="10"/>
         <Property Name="price" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="plannedTotalPrice" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="actualTotalPrice" Type="Edm.Decimal" Scale="3" Precision="10"/>
         <Property Name="lumpSum" Type="Edm.Boolean"/>
         <Property Name="plannedProductivity" Type="Edm.Decimal" Scale="3" Precision="10"/>
         <Property Name="productivityFactor" Type="Edm.Decimal" Scale="3" Precision="5"/>
@@ -1385,16 +1499,27 @@
         <Property Name="stopDuration" Type="Edm.Int32"/>
         <Property Name="waitDuration" Type="Edm.Int32"/>
         <Property Name="status" Type="Edm.Int32"/>
-        <Property Name="buffer" Type="Edm.Boolean"/>
+        <Property Name="pinned" Type="Edm.Boolean"/>
         <NavigationProperty Name="company" Relationship="scService.Tasks_company" FromRole="Tasks" ToRole="CompaniesForProjects"/>
         <NavigationProperty Name="measurements" Relationship="scService.Measurements_task" FromRole="Tasks" ToRole="Measurements"/>
         <NavigationProperty Name="problems" Relationship="scService.ProblemCards_task" FromRole="Tasks" ToRole="ProblemCards"/>
         <NavigationProperty Name="timeSheetEntries" Relationship="scService.TimeSheetEntries_task" FromRole="Tasks" ToRole="TimeSheetEntries"/>
+        <Property Name="costPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costLaborPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costLaborActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursLaborPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursLaborActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costMaterialPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costMaterialActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costEquipmentPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costEquipmentActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursEquipmentPlanned" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursEquipmentActual" Type="Edm.Decimal" Scale="3" Precision="10"/>
         <NavigationProperty Name="texts" Relationship="scService.Tasks_texts_1" FromRole="Tasks" ToRole="Tasks_texts"/>
         <NavigationProperty Name="localized" Relationship="scService.Tasks_localized" FromRole="Tasks" ToRole="Tasks_texts"/>
         <Property Name="project_ID" Type="Edm.Guid"/>
         <Property Name="recipe_ID" Type="Edm.Guid"/>
-        <Property Name="pulseStep_ID" Type="Edm.Guid"/>
         <Property Name="UoM_ID" Type="Edm.Guid"/>
         <Property Name="shift_ID" Type="Edm.Guid"/>
         <Property Name="discipline_ID" Type="Edm.Guid"/>
@@ -1425,6 +1550,7 @@
         <NavigationProperty Name="project" Relationship="scService.TimeSheetEntries_project" FromRole="TimeSheetEntries" ToRole="Projects"/>
         <NavigationProperty Name="person" Relationship="scService.TimeSheetEntries_person" FromRole="TimeSheetEntries" ToRole="Persons"/>
         <NavigationProperty Name="task" Relationship="scService.TimeSheetEntries_task" FromRole="TimeSheetEntries" ToRole="Tasks"/>
+        <NavigationProperty Name="timesheet" Relationship="scService.TimeSheetEntries_timesheet" FromRole="TimeSheetEntries" ToRole="Timesheets"/>
         <Property Name="workingDate" Type="Edm.DateTimeOffset"/>
         <NavigationProperty Name="shiftPart" Relationship="scService.TimeSheetEntries_shiftPart" FromRole="TimeSheetEntries" ToRole="ShiftParts"/>
         <Property Name="startTimeHrs" Type="Edm.Int32"/>
@@ -1435,11 +1561,10 @@
         <Property Name="hoursWorked" Type="Edm.Decimal" Scale="3" Precision="10"/>
         <Property Name="rate" Type="Edm.Decimal" Scale="3" Precision="10"/>
         <Property Name="calculatedCost" Type="Edm.Decimal" Scale="3" Precision="10"/>
-        <Property Name="approved" Type="Edm.Boolean"/>
-        <Property Name="transferred" Type="Edm.Boolean"/>
         <Property Name="project_ID" Type="Edm.Guid"/>
         <Property Name="person_ID" Type="Edm.Guid"/>
         <Property Name="task_ID" Type="Edm.Guid"/>
+        <Property Name="timesheet_ID" Type="Edm.Guid"/>
         <Property Name="shiftPart_ID" Type="Edm.Guid"/>
       </EntityType>
       <EntityType Name="TimeTypes">
@@ -1467,6 +1592,28 @@
         <Property Name="locale" Type="Edm.String" MaxLength="14" Nullable="false"/>
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <Property Name="code" Type="Edm.String" MaxLength="50" Nullable="false"/>
+      </EntityType>
+      <EntityType Name="Timesheets">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <NavigationProperty Name="project" Relationship="scService.Timesheets_project" FromRole="Timesheets" ToRole="Projects"/>
+        <NavigationProperty Name="person" Relationship="scService.Timesheets_person" FromRole="Timesheets" ToRole="Persons"/>
+        <Property Name="workingDate" Type="Edm.DateTimeOffset"/>
+        <Property Name="hoursWorked" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="hoursShift" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costWorking" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="costShift" Type="Edm.Decimal" Scale="3" Precision="10"/>
+        <Property Name="approved" Type="Edm.Boolean"/>
+        <Property Name="transferred" Type="Edm.Boolean"/>
+        <NavigationProperty Name="timeSheetEntries" Relationship="scService.TimeSheetEntries_timesheet" FromRole="Timesheets" ToRole="TimeSheetEntries"/>
+        <Property Name="project_ID" Type="Edm.Guid"/>
+        <Property Name="person_ID" Type="Edm.Guid"/>
       </EntityType>
       <EntityType Name="UoMs">
         <Key>
@@ -2068,6 +2215,36 @@
           </Dependent>
         </ReferentialConstraint>
       </Association>
+      <Association Name="PlanVersions_project">
+        <End Role="PlanVersions" Type="scService.PlanVersions" Multiplicity="*"/>
+        <End Role="Projects" Type="scService.Projects" Multiplicity="0..1"/>
+        <ReferentialConstraint>
+          <Principal Role="Projects">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="PlanVersions">
+            <PropertyRef Name="project_ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="PlanVersions_texts_1">
+        <End Role="PlanVersions" Type="scService.PlanVersions" Multiplicity="*"/>
+        <End Role="PlanVersions_texts" Type="scService.PlanVersions_texts" Multiplicity="*">
+          <OnDelete Action="Cascade"/>
+        </End>
+      </Association>
+      <Association Name="PlanVersions_localized">
+        <End Role="PlanVersions" Type="scService.PlanVersions" Multiplicity="*"/>
+        <End Role="PlanVersions_texts" Type="scService.PlanVersions_texts" Multiplicity="0..1"/>
+        <ReferentialConstraint>
+          <Principal Role="PlanVersions_texts">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="PlanVersions">
+            <PropertyRef Name="ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
       <Association Name="ProblemCards_project">
         <End Role="ProblemCards" Type="scService.ProblemCards" Multiplicity="*"/>
         <End Role="Projects" Type="scService.Projects" Multiplicity="0..1"/>
@@ -2522,6 +2699,56 @@
           </Dependent>
         </ReferentialConstraint>
       </Association>
+      <Association Name="SnapshotTasks_planVersion">
+        <End Role="SnapshotTasks" Type="scService.SnapshotTasks" Multiplicity="*">
+          <OnDelete Action="Cascade"/>
+        </End>
+        <End Role="PlanVersions" Type="scService.PlanVersions" Multiplicity="0..1"/>
+        <ReferentialConstraint>
+          <Principal Role="PlanVersions">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="SnapshotTasks">
+            <PropertyRef Name="planVersion_ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="SnapshotTasks_location">
+        <End Role="SnapshotTasks" Type="scService.SnapshotTasks" Multiplicity="*"/>
+        <End Role="Locations" Type="scService.Locations" Multiplicity="0..1"/>
+        <ReferentialConstraint>
+          <Principal Role="Locations">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="SnapshotTasks">
+            <PropertyRef Name="location_ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="SnapshotTasks_task">
+        <End Role="SnapshotTasks" Type="scService.SnapshotTasks" Multiplicity="*"/>
+        <End Role="Tasks" Type="scService.Tasks" Multiplicity="0..1"/>
+        <ReferentialConstraint>
+          <Principal Role="Tasks">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="SnapshotTasks">
+            <PropertyRef Name="task_ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="SnapshotTasks_shift">
+        <End Role="SnapshotTasks" Type="scService.SnapshotTasks" Multiplicity="*"/>
+        <End Role="Shifts" Type="scService.Shifts" Multiplicity="0..1"/>
+        <ReferentialConstraint>
+          <Principal Role="Shifts">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="SnapshotTasks">
+            <PropertyRef Name="shift_ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
       <Association Name="SpecialDates_project">
         <End Role="SpecialDates" Type="scService.SpecialDates" Multiplicity="*">
           <OnDelete Action="Cascade"/>
@@ -2575,18 +2802,6 @@
           </Principal>
           <Dependent Role="Tasks">
             <PropertyRef Name="recipe_ID"/>
-          </Dependent>
-        </ReferentialConstraint>
-      </Association>
-      <Association Name="Tasks_pulseStep">
-        <End Role="Tasks" Type="scService.Tasks" Multiplicity="*"/>
-        <End Role="PulseSteps" Type="scService.PulseSteps" Multiplicity="0..1"/>
-        <ReferentialConstraint>
-          <Principal Role="PulseSteps">
-            <PropertyRef Name="ID"/>
-          </Principal>
-          <Dependent Role="Tasks">
-            <PropertyRef Name="pulseStep_ID"/>
           </Dependent>
         </ReferentialConstraint>
       </Association>
@@ -2695,9 +2910,7 @@
         </ReferentialConstraint>
       </Association>
       <Association Name="TimeSheetEntries_person">
-        <End Role="TimeSheetEntries" Type="scService.TimeSheetEntries" Multiplicity="*">
-          <OnDelete Action="Cascade"/>
-        </End>
+        <End Role="TimeSheetEntries" Type="scService.TimeSheetEntries" Multiplicity="*"/>
         <End Role="Persons" Type="scService.Persons" Multiplicity="0..1"/>
         <ReferentialConstraint>
           <Principal Role="Persons">
@@ -2719,6 +2932,18 @@
           </Principal>
           <Dependent Role="TimeSheetEntries">
             <PropertyRef Name="task_ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="TimeSheetEntries_timesheet">
+        <End Role="TimeSheetEntries" Type="scService.TimeSheetEntries" Multiplicity="*"/>
+        <End Role="Timesheets" Type="scService.Timesheets" Multiplicity="0..1"/>
+        <ReferentialConstraint>
+          <Principal Role="Timesheets">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="TimeSheetEntries">
+            <PropertyRef Name="timesheet_ID"/>
           </Dependent>
         </ReferentialConstraint>
       </Association>
@@ -2763,6 +2988,32 @@
           </Principal>
           <Dependent Role="TimeTypes">
             <PropertyRef Name="ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="Timesheets_project">
+        <End Role="Timesheets" Type="scService.Timesheets" Multiplicity="*"/>
+        <End Role="Projects" Type="scService.Projects" Multiplicity="0..1"/>
+        <ReferentialConstraint>
+          <Principal Role="Projects">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="Timesheets">
+            <PropertyRef Name="project_ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="Timesheets_person">
+        <End Role="Timesheets" Type="scService.Timesheets" Multiplicity="*">
+          <OnDelete Action="Cascade"/>
+        </End>
+        <End Role="Persons" Type="scService.Persons" Multiplicity="0..1"/>
+        <ReferentialConstraint>
+          <Principal Role="Persons">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="Timesheets">
+            <PropertyRef Name="person_ID"/>
           </Dependent>
         </ReferentialConstraint>
       </Association>
@@ -3409,6 +3660,30 @@
         <Annotation Term="Core.Description" String="Jedinečné ID uživatele"/>
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
       </Annotations>
+      <Annotations Target="scService.PlanVersions/createdAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Vytvořeno dne"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
+      <Annotations Target="scService.PlanVersions/createdBy" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Vytvořil"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="Jedinečné ID uživatele"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
+      <Annotations Target="scService.PlanVersions/modifiedAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Změněno dne"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
+      <Annotations Target="scService.PlanVersions/modifiedBy" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Autor změny"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="Jedinečné ID uživatele"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
       <Annotations Target="scService.ProblemCards/createdAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Common.Label" String="Vytvořeno dne"/>
         <Annotation Term="Core.Computed" Bool="true"/>
@@ -3770,6 +4045,30 @@
         <Annotation Term="Core.Description" String="Jedinečné ID uživatele"/>
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
       </Annotations>
+      <Annotations Target="scService.SnapshotTasks/createdAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Vytvořeno dne"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
+      <Annotations Target="scService.SnapshotTasks/createdBy" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Vytvořil"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="Jedinečné ID uživatele"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
+      <Annotations Target="scService.SnapshotTasks/modifiedAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Změněno dne"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
+      <Annotations Target="scService.SnapshotTasks/modifiedBy" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Autor změny"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="Jedinečné ID uživatele"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
       <Annotations Target="scService.SpecialDates/createdAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Common.Label" String="Vytvořeno dne"/>
         <Annotation Term="Core.Computed" Bool="true"/>
@@ -3793,13 +4092,6 @@
         <Annotation Term="Core.Computed" Bool="true"/>
         <Annotation Term="Core.Description" String="Jedinečné ID uživatele"/>
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
-      </Annotations>
-      <Annotations Target="scService.EntityContainer/Tasks" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Capabilities.SearchRestrictions">
-          <Record Type="Capabilities.SearchRestrictionsType">
-            <PropertyValue Property="Searchable" Bool="true"/>
-          </Record>
-        </Annotation>
       </Annotations>
       <Annotations Target="scService.Tasks/createdAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Common.Label" String="Vytvořeno dne"/>
@@ -3868,6 +4160,30 @@
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
       </Annotations>
       <Annotations Target="scService.TimeTypes/modifiedBy" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Autor změny"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="Jedinečné ID uživatele"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
+      <Annotations Target="scService.Timesheets/createdAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Vytvořeno dne"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
+      <Annotations Target="scService.Timesheets/createdBy" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Vytvořil"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="Jedinečné ID uživatele"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
+      <Annotations Target="scService.Timesheets/modifiedAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Common.Label" String="Změněno dne"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+      </Annotations>
+      <Annotations Target="scService.Timesheets/modifiedBy" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Common.Label" String="Autor změny"/>
         <Annotation Term="Core.Computed" Bool="true"/>
         <Annotation Term="Core.Description" String="Jedinečné ID uživatele"/>

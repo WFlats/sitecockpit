@@ -2721,17 +2721,17 @@
             }
           ]
         },
-        "timeSheetEntries": {
-          "@cds.persistence.name": "TIMESHEETENTRIES",
+        "timesheets": {
+          "@cds.persistence.name": "TIMESHEETS",
           "type": "cds.Composition",
           "cardinality": {
             "max": "*"
           },
-          "target": "localized.my.site.cockpit.TimeSheetEntries",
+          "target": "localized.my.site.cockpit.Timesheets",
           "on": [
             {
               "ref": [
-                "timeSheetEntries",
+                "timesheets",
                 "person"
               ]
             },
@@ -2951,6 +2951,7 @@
           ]
         },
         "pic": {
+          "@Core.MediaType": "image/png",
           "@cds.persistence.name": "PIC",
           "type": "cds.LargeBinary"
         },
@@ -2993,6 +2994,251 @@
         "problem_ID": {
           "@cds.persistence.name": "PROBLEM_ID",
           "@odata.foreignKey4": "problem",
+          "type": "cds.UUID"
+        }
+      }
+    },
+    "localized.my.site.cockpit.PlanVersions": {
+      "kind": "entity",
+      "@cds.persistence.name": "LOCALIZED_MY_SITE_COCKPIT_PLANVERSIONS",
+      "@odata.draft.enabled": false,
+      "query": {
+        "SELECT": {
+          "from": {
+            "ref": [
+              "my.site.cockpit.PlanVersions"
+            ],
+            "as": "L"
+          },
+          "columns": [
+            "*",
+            {
+              "func": "coalesce",
+              "args": [
+                {
+                  "ref": [
+                    "L",
+                    "localized",
+                    "description"
+                  ]
+                },
+                {
+                  "ref": [
+                    "L",
+                    "description"
+                  ]
+                }
+              ],
+              "as": "description"
+            }
+          ]
+        }
+      },
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "project": {
+          "@cds.persistence.name": "PROJECT",
+          "type": "cds.Association",
+          "target": "localized.my.site.cockpit.Projects",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "project_ID"
+            }
+          ]
+        },
+        "snapshotDate": {
+          "@cds.persistence.name": "SNAPSHOTDATE",
+          "type": "cds.DateTime"
+        },
+        "versionNumber": {
+          "@cds.persistence.name": "VERSIONNUMBER",
+          "type": "cds.String",
+          "length": 50
+        },
+        "description": {
+          "@Core.Computed": true,
+          "@cds.persistence.name": "DESCRIPTION",
+          "localized": true,
+          "type": "cds.String",
+          "length": 500
+        },
+        "useCase": {
+          "@cds.persistence.name": "USECASE",
+          "type": "cds.Integer",
+          "enum": {
+            "daily": {
+              "val": 0
+            },
+            "weekly": {
+              "val": 1
+            },
+            "monthly": {
+              "val": 2
+            },
+            "longterm": {
+              "val": 3
+            }
+          }
+        },
+        "snapshotTasks": {
+          "@cds.persistence.name": "SNAPSHOTTASKS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "localized.my.site.cockpit.SnapshotTasks",
+          "on": [
+            {
+              "ref": [
+                "snapshotTasks",
+                "planVersion"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "snapshotsComplete": {
+          "@cds.persistence.name": "SNAPSHOTSCOMPLETE",
+          "type": "cds.Boolean"
+        },
+        "texts": {
+          "@cds.persistence.name": "TEXTS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "my.site.cockpit.PlanVersions_texts",
+          "on": [
+            {
+              "ref": [
+                "texts",
+                "ID"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "ID"
+              ]
+            }
+          ]
+        },
+        "localized": {
+          "@cds.persistence.name": "LOCALIZED",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.PlanVersions_texts",
+          "on": [
+            {
+              "ref": [
+                "localized",
+                "ID"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "ID"
+              ]
+            },
+            "and",
+            {
+              "ref": [
+                "localized",
+                "locale"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$user",
+                "locale"
+              ]
+            }
+          ]
+        },
+        "project_ID": {
+          "@cds.persistence.name": "PROJECT_ID",
+          "@odata.foreignKey4": "project",
           "type": "cds.UUID"
         }
       }
@@ -4136,6 +4382,28 @@
             {
               "ref": [
                 "users",
+                "project"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "planVersions": {
+          "@cds.persistence.name": "PLANVERSIONS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "localized.my.site.cockpit.PlanVersions",
+          "on": [
+            {
+              "ref": [
+                "planVersions",
                 "project"
               ]
             },
@@ -6143,6 +6411,341 @@
         }
       }
     },
+    "localized.my.site.cockpit.SnapshotTasks": {
+      "kind": "entity",
+      "@cds.persistence.name": "LOCALIZED_MY_SITE_COCKPIT_SNAPSHOTTASKS",
+      "@odata.draft.enabled": false,
+      "query": {
+        "SELECT": {
+          "from": {
+            "ref": [
+              "my.site.cockpit.SnapshotTasks"
+            ],
+            "as": "L"
+          },
+          "columns": [
+            "*"
+          ]
+        }
+      },
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "planVersion": {
+          "@cds.persistence.name": "PLANVERSION",
+          "type": "cds.Association",
+          "target": "localized.my.site.cockpit.PlanVersions",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "planVersion_ID"
+            }
+          ]
+        },
+        "location": {
+          "@cds.persistence.name": "LOCATION",
+          "type": "cds.Association",
+          "target": "localized.my.site.cockpit.Locations",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "location_ID"
+            }
+          ]
+        },
+        "task": {
+          "@cds.persistence.name": "TASK",
+          "type": "cds.Association",
+          "target": "localized.my.site.cockpit.Tasks",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "task_ID"
+            }
+          ]
+        },
+        "shift": {
+          "@cds.persistence.name": "SHIFT",
+          "type": "cds.Association",
+          "target": "localized.my.site.cockpit.Shifts",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "shift_ID"
+            }
+          ]
+        },
+        "plannedStart": {
+          "@cds.persistence.name": "PLANNEDSTART",
+          "type": "cds.DateTime"
+        },
+        "plannedEnd": {
+          "@cds.persistence.name": "PLANNEDEND",
+          "type": "cds.DateTime"
+        },
+        "estimatedEnd": {
+          "@cds.persistence.name": "ESTIMATEDEND",
+          "type": "cds.DateTime"
+        },
+        "actualStart": {
+          "@cds.persistence.name": "ACTUALSTART",
+          "type": "cds.DateTime"
+        },
+        "actualEnd": {
+          "@cds.persistence.name": "ACTUALEND",
+          "type": "cds.DateTime"
+        },
+        "stoppedAt": {
+          "@cds.persistence.name": "STOPPEDAT",
+          "type": "cds.DateTime"
+        },
+        "stopDuration": {
+          "@cds.persistence.name": "STOPDURATION",
+          "type": "cds.Integer"
+        },
+        "waitDuration": {
+          "@cds.persistence.name": "WAITDURATION",
+          "type": "cds.Integer"
+        },
+        "status": {
+          "@cds.persistence.name": "STATUS",
+          "type": "cds.Integer",
+          "enum": {
+            "planned": {
+              "val": 0
+            },
+            "committed": {
+              "val": 1
+            },
+            "started": {
+              "val": 2
+            },
+            "stopped": {
+              "val": 3
+            },
+            "completed": {
+              "val": 4
+            },
+            "approved": {
+              "val": 5
+            }
+          }
+        },
+        "plannedQuantity": {
+          "@cds.persistence.name": "PLANNEDQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "actualQuantity": {
+          "@cds.persistence.name": "ACTUALQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "plannedProductivity": {
+          "@cds.persistence.name": "PLANNEDPRODUCTIVITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "productivityFactor": {
+          "@cds.persistence.name": "PRODUCTIVITYFACTOR",
+          "type": "cds.Decimal",
+          "precision": 5,
+          "scale": 3
+        },
+        "currentProductivity": {
+          "@cds.persistence.name": "CURRENTPRODUCTIVITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costPlanned": {
+          "@cds.persistence.name": "COSTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costActual": {
+          "@cds.persistence.name": "COSTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborPlanned": {
+          "@cds.persistence.name": "COSTLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborActual": {
+          "@cds.persistence.name": "COSTLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborPlanned": {
+          "@cds.persistence.name": "HOURSLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborActual": {
+          "@cds.persistence.name": "HOURSLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialPlanned": {
+          "@cds.persistence.name": "COSTMATERIALPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialActual": {
+          "@cds.persistence.name": "COSTMATERIALACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentPlanned": {
+          "@cds.persistence.name": "COSTEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentActual": {
+          "@cds.persistence.name": "COSTEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentPlanned": {
+          "@cds.persistence.name": "HOURSEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentActual": {
+          "@cds.persistence.name": "HOURSEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costSubcontractorPlanned": {
+          "@cds.persistence.name": "COSTSUBCONTRACTORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costSubcontractorActual": {
+          "@cds.persistence.name": "COSTSUBCONTRACTORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "planVersion_ID": {
+          "@cds.persistence.name": "PLANVERSION_ID",
+          "@odata.foreignKey4": "planVersion",
+          "type": "cds.UUID"
+        },
+        "location_ID": {
+          "@cds.persistence.name": "LOCATION_ID",
+          "@odata.foreignKey4": "location",
+          "type": "cds.UUID"
+        },
+        "task_ID": {
+          "@cds.persistence.name": "TASK_ID",
+          "@odata.foreignKey4": "task",
+          "type": "cds.UUID"
+        },
+        "shift_ID": {
+          "@cds.persistence.name": "SHIFT_ID",
+          "@odata.foreignKey4": "shift",
+          "type": "cds.UUID"
+        }
+      }
+    },
     "localized.my.site.cockpit.SpecialDates": {
       "kind": "entity",
       "@cds.persistence.name": "LOCALIZED_MY_SITE_COCKPIT_SPECIALDATES",
@@ -6344,8 +6947,6 @@
     },
     "localized.my.site.cockpit.Tasks": {
       "kind": "entity",
-      "@Capabilities.SearchRestrictions.Searchable": true,
-      "@Search.defaultSearchElement": "shortText",
       "@cds.persistence.name": "LOCALIZED_MY_SITE_COCKPIT_TASKS",
       "@odata.draft.enabled": false,
       "query": {
@@ -6551,19 +7152,6 @@
             }
           ]
         },
-        "pulseStep": {
-          "@cds.persistence.name": "PULSESTEP",
-          "type": "cds.Association",
-          "target": "localized.my.site.cockpit.PulseSteps",
-          "keys": [
-            {
-              "ref": [
-                "ID"
-              ],
-              "$generatedFieldName": "pulseStep_ID"
-            }
-          ]
-        },
         "UoM": {
           "@cds.persistence.name": "UOM",
           "type": "cds.Association",
@@ -6599,8 +7187,26 @@
           "precision": 10,
           "scale": 3
         },
+        "actualQuantity": {
+          "@cds.persistence.name": "ACTUALQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
         "price": {
           "@cds.persistence.name": "PRICE",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "plannedTotalPrice": {
+          "@cds.persistence.name": "PLANNEDTOTALPRICE",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "actualTotalPrice": {
+          "@cds.persistence.name": "ACTUALTOTALPRICE",
           "type": "cds.Decimal",
           "precision": 10,
           "scale": 3
@@ -6809,8 +7415,8 @@
             }
           }
         },
-        "buffer": {
-          "@cds.persistence.name": "BUFFER",
+        "pinned": {
+          "@cds.persistence.name": "PINNED",
           "type": "cds.Boolean"
         },
         "company": {
@@ -6892,6 +7498,78 @@
             }
           ]
         },
+        "costPlanned": {
+          "@cds.persistence.name": "COSTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costActual": {
+          "@cds.persistence.name": "COSTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborPlanned": {
+          "@cds.persistence.name": "COSTLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborActual": {
+          "@cds.persistence.name": "COSTLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborPlanned": {
+          "@cds.persistence.name": "HOURSLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborActual": {
+          "@cds.persistence.name": "HOURSLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialPlanned": {
+          "@cds.persistence.name": "COSTMATERIALPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialActual": {
+          "@cds.persistence.name": "COSTMATERIALACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentPlanned": {
+          "@cds.persistence.name": "COSTEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentActual": {
+          "@cds.persistence.name": "COSTEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentPlanned": {
+          "@cds.persistence.name": "HOURSEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentActual": {
+          "@cds.persistence.name": "HOURSEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
         "texts": {
           "@cds.persistence.name": "TEXTS",
           "type": "cds.Composition",
@@ -6955,11 +7633,6 @@
         "recipe_ID": {
           "@cds.persistence.name": "RECIPE_ID",
           "@odata.foreignKey4": "recipe",
-          "type": "cds.UUID"
-        },
-        "pulseStep_ID": {
-          "@cds.persistence.name": "PULSESTEP_ID",
-          "@odata.foreignKey4": "pulseStep",
           "type": "cds.UUID"
         },
         "UoM_ID": {
@@ -7124,6 +7797,19 @@
             }
           ]
         },
+        "timesheet": {
+          "@cds.persistence.name": "TIMESHEET",
+          "type": "cds.Association",
+          "target": "localized.my.site.cockpit.Timesheets",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "timesheet_ID"
+            }
+          ]
+        },
         "workingDate": {
           "@cds.persistence.name": "WORKINGDATE",
           "type": "cds.DateTime"
@@ -7179,14 +7865,6 @@
           "precision": 10,
           "scale": 3
         },
-        "approved": {
-          "@cds.persistence.name": "APPROVED",
-          "type": "cds.Boolean"
-        },
-        "transferred": {
-          "@cds.persistence.name": "TRANSFERRED",
-          "type": "cds.Boolean"
-        },
         "project_ID": {
           "@cds.persistence.name": "PROJECT_ID",
           "@odata.foreignKey4": "project",
@@ -7200,6 +7878,11 @@
         "task_ID": {
           "@cds.persistence.name": "TASK_ID",
           "@odata.foreignKey4": "task",
+          "type": "cds.UUID"
+        },
+        "timesheet_ID": {
+          "@cds.persistence.name": "TIMESHEET_ID",
+          "@odata.foreignKey4": "timesheet",
           "type": "cds.UUID"
         },
         "shiftPart_ID": {
@@ -7411,6 +8094,193 @@
         "project_ID": {
           "@cds.persistence.name": "PROJECT_ID",
           "@odata.foreignKey4": "project",
+          "type": "cds.UUID"
+        }
+      }
+    },
+    "localized.my.site.cockpit.Timesheets": {
+      "kind": "entity",
+      "@cds.persistence.name": "LOCALIZED_MY_SITE_COCKPIT_TIMESHEETS",
+      "@odata.draft.enabled": false,
+      "query": {
+        "SELECT": {
+          "from": {
+            "ref": [
+              "my.site.cockpit.Timesheets"
+            ],
+            "as": "L"
+          },
+          "columns": [
+            "*"
+          ]
+        }
+      },
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "project": {
+          "@cds.persistence.name": "PROJECT",
+          "type": "cds.Association",
+          "target": "localized.my.site.cockpit.Projects",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "project_ID"
+            }
+          ]
+        },
+        "person": {
+          "@cds.persistence.name": "PERSON",
+          "type": "cds.Association",
+          "target": "localized.my.site.cockpit.Persons",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "person_ID"
+            }
+          ]
+        },
+        "workingDate": {
+          "@cds.persistence.name": "WORKINGDATE",
+          "type": "cds.DateTime"
+        },
+        "hoursWorked": {
+          "@cds.persistence.name": "HOURSWORKED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursShift": {
+          "@cds.persistence.name": "HOURSSHIFT",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costWorking": {
+          "@cds.persistence.name": "COSTWORKING",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costShift": {
+          "@cds.persistence.name": "COSTSHIFT",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "approved": {
+          "@cds.persistence.name": "APPROVED",
+          "type": "cds.Boolean"
+        },
+        "transferred": {
+          "@cds.persistence.name": "TRANSFERRED",
+          "type": "cds.Boolean"
+        },
+        "timeSheetEntries": {
+          "@cds.persistence.name": "TIMESHEETENTRIES",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "localized.my.site.cockpit.TimeSheetEntries",
+          "on": [
+            {
+              "ref": [
+                "timeSheetEntries",
+                "timesheet"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "project_ID": {
+          "@cds.persistence.name": "PROJECT_ID",
+          "@odata.foreignKey4": "project",
+          "type": "cds.UUID"
+        },
+        "person_ID": {
+          "@cds.persistence.name": "PERSON_ID",
+          "@odata.foreignKey4": "person",
           "type": "cds.UUID"
         }
       }
@@ -11394,17 +12264,17 @@
             }
           ]
         },
-        "timeSheetEntries": {
-          "@cds.persistence.name": "TIMESHEETENTRIES",
+        "timesheets": {
+          "@cds.persistence.name": "TIMESHEETS",
           "type": "cds.Composition",
           "cardinality": {
             "max": "*"
           },
-          "target": "localized.scService.TimeSheetEntries",
+          "target": "localized.scService.Timesheets",
           "on": [
             {
               "ref": [
-                "timeSheetEntries",
+                "timesheets",
                 "person"
               ]
             },
@@ -11620,6 +12490,7 @@
           ]
         },
         "pic": {
+          "@Core.MediaType": "image/png",
           "@cds.persistence.name": "PIC",
           "type": "cds.LargeBinary"
         },
@@ -11662,6 +12533,228 @@
         "problem_ID": {
           "@cds.persistence.name": "PROBLEM_ID",
           "@odata.foreignKey4": "problem",
+          "type": "cds.UUID"
+        }
+      }
+    },
+    "localized.scService.PlanVersions": {
+      "kind": "entity",
+      "@cds.persistence.name": "LOCALIZED_SCSERVICE_PLANVERSIONS",
+      "@odata.draft.enabled": false,
+      "query": {
+        "SELECT": {
+          "from": {
+            "ref": [
+              "localized.my.site.cockpit.PlanVersions"
+            ]
+          }
+        }
+      },
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "project": {
+          "@cds.persistence.name": "PROJECT",
+          "type": "cds.Association",
+          "target": "localized.scService.Projects",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "project_ID"
+            }
+          ]
+        },
+        "snapshotDate": {
+          "@cds.persistence.name": "SNAPSHOTDATE",
+          "type": "cds.DateTime"
+        },
+        "versionNumber": {
+          "@cds.persistence.name": "VERSIONNUMBER",
+          "type": "cds.String",
+          "length": 50
+        },
+        "description": {
+          "@Core.Computed": true,
+          "@cds.persistence.name": "DESCRIPTION",
+          "localized": true,
+          "type": "cds.String",
+          "length": 500
+        },
+        "useCase": {
+          "@cds.persistence.name": "USECASE",
+          "type": "cds.Integer",
+          "enum": {
+            "daily": {
+              "val": 0
+            },
+            "weekly": {
+              "val": 1
+            },
+            "monthly": {
+              "val": 2
+            },
+            "longterm": {
+              "val": 3
+            }
+          }
+        },
+        "snapshotTasks": {
+          "@cds.persistence.name": "SNAPSHOTTASKS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "localized.scService.SnapshotTasks",
+          "on": [
+            {
+              "ref": [
+                "snapshotTasks",
+                "planVersion"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "snapshotsComplete": {
+          "@cds.persistence.name": "SNAPSHOTSCOMPLETE",
+          "type": "cds.Boolean"
+        },
+        "texts": {
+          "@cds.persistence.name": "TEXTS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "scService.PlanVersions_texts",
+          "on": [
+            {
+              "ref": [
+                "texts",
+                "ID"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "ID"
+              ]
+            }
+          ]
+        },
+        "localized": {
+          "@cds.persistence.name": "LOCALIZED",
+          "type": "cds.Association",
+          "target": "scService.PlanVersions_texts",
+          "on": [
+            {
+              "ref": [
+                "localized",
+                "ID"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "ID"
+              ]
+            },
+            "and",
+            {
+              "ref": [
+                "localized",
+                "locale"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$user",
+                "locale"
+              ]
+            }
+          ]
+        },
+        "project_ID": {
+          "@cds.persistence.name": "PROJECT_ID",
+          "@odata.foreignKey4": "project",
           "type": "cds.UUID"
         }
       }
@@ -12678,6 +13771,28 @@
             {
               "ref": [
                 "users",
+                "project"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "planVersions": {
+          "@cds.persistence.name": "PLANVERSIONS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "localized.scService.PlanVersions",
+          "on": [
+            {
+              "ref": [
+                "planVersions",
                 "project"
               ]
             },
@@ -14474,6 +15589,337 @@
         }
       }
     },
+    "localized.scService.SnapshotTasks": {
+      "kind": "entity",
+      "@cds.persistence.name": "LOCALIZED_SCSERVICE_SNAPSHOTTASKS",
+      "@odata.draft.enabled": false,
+      "query": {
+        "SELECT": {
+          "from": {
+            "ref": [
+              "localized.my.site.cockpit.SnapshotTasks"
+            ]
+          }
+        }
+      },
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "planVersion": {
+          "@cds.persistence.name": "PLANVERSION",
+          "type": "cds.Association",
+          "target": "localized.scService.PlanVersions",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "planVersion_ID"
+            }
+          ]
+        },
+        "location": {
+          "@cds.persistence.name": "LOCATION",
+          "type": "cds.Association",
+          "target": "localized.scService.Locations",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "location_ID"
+            }
+          ]
+        },
+        "task": {
+          "@cds.persistence.name": "TASK",
+          "type": "cds.Association",
+          "target": "localized.scService.Tasks",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "task_ID"
+            }
+          ]
+        },
+        "shift": {
+          "@cds.persistence.name": "SHIFT",
+          "type": "cds.Association",
+          "target": "localized.scService.Shifts",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "shift_ID"
+            }
+          ]
+        },
+        "plannedStart": {
+          "@cds.persistence.name": "PLANNEDSTART",
+          "type": "cds.DateTime"
+        },
+        "plannedEnd": {
+          "@cds.persistence.name": "PLANNEDEND",
+          "type": "cds.DateTime"
+        },
+        "estimatedEnd": {
+          "@cds.persistence.name": "ESTIMATEDEND",
+          "type": "cds.DateTime"
+        },
+        "actualStart": {
+          "@cds.persistence.name": "ACTUALSTART",
+          "type": "cds.DateTime"
+        },
+        "actualEnd": {
+          "@cds.persistence.name": "ACTUALEND",
+          "type": "cds.DateTime"
+        },
+        "stoppedAt": {
+          "@cds.persistence.name": "STOPPEDAT",
+          "type": "cds.DateTime"
+        },
+        "stopDuration": {
+          "@cds.persistence.name": "STOPDURATION",
+          "type": "cds.Integer"
+        },
+        "waitDuration": {
+          "@cds.persistence.name": "WAITDURATION",
+          "type": "cds.Integer"
+        },
+        "status": {
+          "@cds.persistence.name": "STATUS",
+          "type": "cds.Integer",
+          "enum": {
+            "planned": {
+              "val": 0
+            },
+            "committed": {
+              "val": 1
+            },
+            "started": {
+              "val": 2
+            },
+            "stopped": {
+              "val": 3
+            },
+            "completed": {
+              "val": 4
+            },
+            "approved": {
+              "val": 5
+            }
+          }
+        },
+        "plannedQuantity": {
+          "@cds.persistence.name": "PLANNEDQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "actualQuantity": {
+          "@cds.persistence.name": "ACTUALQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "plannedProductivity": {
+          "@cds.persistence.name": "PLANNEDPRODUCTIVITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "productivityFactor": {
+          "@cds.persistence.name": "PRODUCTIVITYFACTOR",
+          "type": "cds.Decimal",
+          "precision": 5,
+          "scale": 3
+        },
+        "currentProductivity": {
+          "@cds.persistence.name": "CURRENTPRODUCTIVITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costPlanned": {
+          "@cds.persistence.name": "COSTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costActual": {
+          "@cds.persistence.name": "COSTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborPlanned": {
+          "@cds.persistence.name": "COSTLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborActual": {
+          "@cds.persistence.name": "COSTLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborPlanned": {
+          "@cds.persistence.name": "HOURSLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborActual": {
+          "@cds.persistence.name": "HOURSLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialPlanned": {
+          "@cds.persistence.name": "COSTMATERIALPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialActual": {
+          "@cds.persistence.name": "COSTMATERIALACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentPlanned": {
+          "@cds.persistence.name": "COSTEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentActual": {
+          "@cds.persistence.name": "COSTEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentPlanned": {
+          "@cds.persistence.name": "HOURSEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentActual": {
+          "@cds.persistence.name": "HOURSEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costSubcontractorPlanned": {
+          "@cds.persistence.name": "COSTSUBCONTRACTORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costSubcontractorActual": {
+          "@cds.persistence.name": "COSTSUBCONTRACTORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "planVersion_ID": {
+          "@cds.persistence.name": "PLANVERSION_ID",
+          "@odata.foreignKey4": "planVersion",
+          "type": "cds.UUID"
+        },
+        "location_ID": {
+          "@cds.persistence.name": "LOCATION_ID",
+          "@odata.foreignKey4": "location",
+          "type": "cds.UUID"
+        },
+        "task_ID": {
+          "@cds.persistence.name": "TASK_ID",
+          "@odata.foreignKey4": "task",
+          "type": "cds.UUID"
+        },
+        "shift_ID": {
+          "@cds.persistence.name": "SHIFT_ID",
+          "@odata.foreignKey4": "shift",
+          "type": "cds.UUID"
+        }
+      }
+    },
     "localized.scService.SpecialDates": {
       "kind": "entity",
       "@cds.persistence.name": "LOCALIZED_SCSERVICE_SPECIALDATES",
@@ -14652,8 +16098,6 @@
     },
     "localized.scService.Tasks": {
       "kind": "entity",
-      "@Capabilities.SearchRestrictions.Searchable": true,
-      "@Search.defaultSearchElement": "shortText",
       "@cds.persistence.name": "LOCALIZED_SCSERVICE_TASKS",
       "@odata.draft.enabled": false,
       "query": {
@@ -14798,19 +16242,6 @@
             }
           ]
         },
-        "pulseStep": {
-          "@cds.persistence.name": "PULSESTEP",
-          "type": "cds.Association",
-          "target": "localized.scService.PulseSteps",
-          "keys": [
-            {
-              "ref": [
-                "ID"
-              ],
-              "$generatedFieldName": "pulseStep_ID"
-            }
-          ]
-        },
         "UoM": {
           "@cds.persistence.name": "UOM",
           "type": "cds.Association",
@@ -14846,8 +16277,26 @@
           "precision": 10,
           "scale": 3
         },
+        "actualQuantity": {
+          "@cds.persistence.name": "ACTUALQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
         "price": {
           "@cds.persistence.name": "PRICE",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "plannedTotalPrice": {
+          "@cds.persistence.name": "PLANNEDTOTALPRICE",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "actualTotalPrice": {
+          "@cds.persistence.name": "ACTUALTOTALPRICE",
           "type": "cds.Decimal",
           "precision": 10,
           "scale": 3
@@ -15056,8 +16505,8 @@
             }
           }
         },
-        "buffer": {
-          "@cds.persistence.name": "BUFFER",
+        "pinned": {
+          "@cds.persistence.name": "PINNED",
           "type": "cds.Boolean"
         },
         "company": {
@@ -15139,6 +16588,78 @@
             }
           ]
         },
+        "costPlanned": {
+          "@cds.persistence.name": "COSTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costActual": {
+          "@cds.persistence.name": "COSTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborPlanned": {
+          "@cds.persistence.name": "COSTLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborActual": {
+          "@cds.persistence.name": "COSTLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborPlanned": {
+          "@cds.persistence.name": "HOURSLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborActual": {
+          "@cds.persistence.name": "HOURSLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialPlanned": {
+          "@cds.persistence.name": "COSTMATERIALPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialActual": {
+          "@cds.persistence.name": "COSTMATERIALACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentPlanned": {
+          "@cds.persistence.name": "COSTEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentActual": {
+          "@cds.persistence.name": "COSTEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentPlanned": {
+          "@cds.persistence.name": "HOURSEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentActual": {
+          "@cds.persistence.name": "HOURSEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
         "texts": {
           "@cds.persistence.name": "TEXTS",
           "type": "cds.Composition",
@@ -15202,11 +16723,6 @@
         "recipe_ID": {
           "@cds.persistence.name": "RECIPE_ID",
           "@odata.foreignKey4": "recipe",
-          "type": "cds.UUID"
-        },
-        "pulseStep_ID": {
-          "@cds.persistence.name": "PULSESTEP_ID",
-          "@odata.foreignKey4": "pulseStep",
           "type": "cds.UUID"
         },
         "UoM_ID": {
@@ -15367,6 +16883,19 @@
             }
           ]
         },
+        "timesheet": {
+          "@cds.persistence.name": "TIMESHEET",
+          "type": "cds.Association",
+          "target": "localized.scService.Timesheets",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "timesheet_ID"
+            }
+          ]
+        },
         "workingDate": {
           "@cds.persistence.name": "WORKINGDATE",
           "type": "cds.DateTime"
@@ -15422,14 +16951,6 @@
           "precision": 10,
           "scale": 3
         },
-        "approved": {
-          "@cds.persistence.name": "APPROVED",
-          "type": "cds.Boolean"
-        },
-        "transferred": {
-          "@cds.persistence.name": "TRANSFERRED",
-          "type": "cds.Boolean"
-        },
         "project_ID": {
           "@cds.persistence.name": "PROJECT_ID",
           "@odata.foreignKey4": "project",
@@ -15443,6 +16964,11 @@
         "task_ID": {
           "@cds.persistence.name": "TASK_ID",
           "@odata.foreignKey4": "task",
+          "type": "cds.UUID"
+        },
+        "timesheet_ID": {
+          "@cds.persistence.name": "TIMESHEET_ID",
+          "@odata.foreignKey4": "timesheet",
           "type": "cds.UUID"
         },
         "shiftPart_ID": {
@@ -15631,6 +17157,189 @@
         "project_ID": {
           "@cds.persistence.name": "PROJECT_ID",
           "@odata.foreignKey4": "project",
+          "type": "cds.UUID"
+        }
+      }
+    },
+    "localized.scService.Timesheets": {
+      "kind": "entity",
+      "@cds.persistence.name": "LOCALIZED_SCSERVICE_TIMESHEETS",
+      "@odata.draft.enabled": false,
+      "query": {
+        "SELECT": {
+          "from": {
+            "ref": [
+              "localized.my.site.cockpit.Timesheets"
+            ]
+          }
+        }
+      },
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "project": {
+          "@cds.persistence.name": "PROJECT",
+          "type": "cds.Association",
+          "target": "localized.scService.Projects",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "project_ID"
+            }
+          ]
+        },
+        "person": {
+          "@cds.persistence.name": "PERSON",
+          "type": "cds.Association",
+          "target": "localized.scService.Persons",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "person_ID"
+            }
+          ]
+        },
+        "workingDate": {
+          "@cds.persistence.name": "WORKINGDATE",
+          "type": "cds.DateTime"
+        },
+        "hoursWorked": {
+          "@cds.persistence.name": "HOURSWORKED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursShift": {
+          "@cds.persistence.name": "HOURSSHIFT",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costWorking": {
+          "@cds.persistence.name": "COSTWORKING",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costShift": {
+          "@cds.persistence.name": "COSTSHIFT",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "approved": {
+          "@cds.persistence.name": "APPROVED",
+          "type": "cds.Boolean"
+        },
+        "transferred": {
+          "@cds.persistence.name": "TRANSFERRED",
+          "type": "cds.Boolean"
+        },
+        "timeSheetEntries": {
+          "@cds.persistence.name": "TIMESHEETENTRIES",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "localized.scService.TimeSheetEntries",
+          "on": [
+            {
+              "ref": [
+                "timeSheetEntries",
+                "timesheet"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "project_ID": {
+          "@cds.persistence.name": "PROJECT_ID",
+          "@odata.foreignKey4": "project",
+          "type": "cds.UUID"
+        },
+        "person_ID": {
+          "@cds.persistence.name": "PERSON_ID",
+          "@odata.foreignKey4": "person",
           "type": "cds.UUID"
         }
       }
@@ -19087,17 +20796,17 @@
             }
           ]
         },
-        "timeSheetEntries": {
-          "@cds.persistence.name": "TIMESHEETENTRIES",
+        "timesheets": {
+          "@cds.persistence.name": "TIMESHEETS",
           "type": "cds.Composition",
           "cardinality": {
             "max": "*"
           },
-          "target": "my.site.cockpit.TimeSheetEntries",
+          "target": "my.site.cockpit.Timesheets",
           "on": [
             {
               "ref": [
-                "timeSheetEntries",
+                "timesheets",
                 "person"
               ]
             },
@@ -19332,6 +21041,7 @@
           ]
         },
         "pic": {
+          "@Core.MediaType": "image/png",
           "@cds.persistence.name": "PIC",
           "type": "cds.LargeBinary"
         },
@@ -19375,6 +21085,246 @@
           "@cds.persistence.name": "PROBLEM_ID",
           "@odata.foreignKey4": "problem",
           "type": "cds.UUID"
+        }
+      }
+    },
+    "my.site.cockpit.PlanVersions": {
+      "kind": "entity",
+      "@cds.persistence.name": "MY_SITE_COCKPIT_PLANVERSIONS",
+      "includes": [
+        "managed"
+      ],
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "project": {
+          "@cds.persistence.name": "PROJECT",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.Projects",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "project_ID"
+            }
+          ]
+        },
+        "snapshotDate": {
+          "@cds.persistence.name": "SNAPSHOTDATE",
+          "type": "cds.DateTime"
+        },
+        "versionNumber": {
+          "@cds.persistence.name": "VERSIONNUMBER",
+          "type": "cds.String",
+          "length": 50
+        },
+        "description": {
+          "@cds.persistence.name": "DESCRIPTION",
+          "localized": true,
+          "type": "cds.String",
+          "length": 500
+        },
+        "useCase": {
+          "@cds.persistence.name": "USECASE",
+          "type": "cds.Integer",
+          "enum": {
+            "daily": {
+              "val": 0
+            },
+            "weekly": {
+              "val": 1
+            },
+            "monthly": {
+              "val": 2
+            },
+            "longterm": {
+              "val": 3
+            }
+          }
+        },
+        "snapshotTasks": {
+          "@cds.persistence.name": "SNAPSHOTTASKS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "my.site.cockpit.SnapshotTasks",
+          "on": [
+            {
+              "ref": [
+                "snapshotTasks",
+                "planVersion"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "snapshotsComplete": {
+          "@cds.persistence.name": "SNAPSHOTSCOMPLETE",
+          "type": "cds.Boolean"
+        },
+        "texts": {
+          "@cds.persistence.name": "TEXTS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "my.site.cockpit.PlanVersions_texts",
+          "on": [
+            {
+              "ref": [
+                "texts",
+                "ID"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "ID"
+              ]
+            }
+          ]
+        },
+        "localized": {
+          "@cds.persistence.name": "LOCALIZED",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.PlanVersions_texts",
+          "on": [
+            {
+              "ref": [
+                "localized",
+                "ID"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "ID"
+              ]
+            },
+            "and",
+            {
+              "ref": [
+                "localized",
+                "locale"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$user",
+                "locale"
+              ]
+            }
+          ]
+        },
+        "project_ID": {
+          "@cds.persistence.name": "PROJECT_ID",
+          "@odata.foreignKey4": "project",
+          "type": "cds.UUID"
+        }
+      }
+    },
+    "my.site.cockpit.PlanVersions_texts": {
+      "kind": "entity",
+      "@cds.autoexpose": true,
+      "@cds.persistence.name": "MY_SITE_COCKPIT_PLANVERSIONS_TEXTS",
+      "@odata.draft.enabled": false,
+      "elements": {
+        "locale": {
+          "@cds.persistence.name": "LOCALE",
+          "key": true,
+          "type": "cds.String",
+          "length": 14
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "@odata.containment.ignore": true,
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "description": {
+          "@cds.persistence.name": "DESCRIPTION",
+          "localized": false,
+          "type": "cds.String",
+          "length": 500
         }
       }
     },
@@ -20444,6 +22394,28 @@
             {
               "ref": [
                 "users",
+                "project"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "planVersions": {
+          "@cds.persistence.name": "PLANVERSIONS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "my.site.cockpit.PlanVersions",
+          "on": [
+            {
+              "ref": [
+                "planVersions",
                 "project"
               ]
             },
@@ -22341,6 +24313,330 @@
         }
       }
     },
+    "my.site.cockpit.SnapshotTasks": {
+      "kind": "entity",
+      "@cds.persistence.name": "MY_SITE_COCKPIT_SNAPSHOTTASKS",
+      "includes": [
+        "managed"
+      ],
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "planVersion": {
+          "@cds.persistence.name": "PLANVERSION",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.PlanVersions",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "planVersion_ID"
+            }
+          ]
+        },
+        "location": {
+          "@cds.persistence.name": "LOCATION",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.Locations",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "location_ID"
+            }
+          ]
+        },
+        "task": {
+          "@cds.persistence.name": "TASK",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.Tasks",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "task_ID"
+            }
+          ]
+        },
+        "shift": {
+          "@cds.persistence.name": "SHIFT",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.Shifts",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "shift_ID"
+            }
+          ]
+        },
+        "plannedStart": {
+          "@cds.persistence.name": "PLANNEDSTART",
+          "type": "cds.DateTime"
+        },
+        "plannedEnd": {
+          "@cds.persistence.name": "PLANNEDEND",
+          "type": "cds.DateTime"
+        },
+        "estimatedEnd": {
+          "@cds.persistence.name": "ESTIMATEDEND",
+          "type": "cds.DateTime"
+        },
+        "actualStart": {
+          "@cds.persistence.name": "ACTUALSTART",
+          "type": "cds.DateTime"
+        },
+        "actualEnd": {
+          "@cds.persistence.name": "ACTUALEND",
+          "type": "cds.DateTime"
+        },
+        "stoppedAt": {
+          "@cds.persistence.name": "STOPPEDAT",
+          "type": "cds.DateTime"
+        },
+        "stopDuration": {
+          "@cds.persistence.name": "STOPDURATION",
+          "type": "cds.Integer"
+        },
+        "waitDuration": {
+          "@cds.persistence.name": "WAITDURATION",
+          "type": "cds.Integer"
+        },
+        "status": {
+          "@cds.persistence.name": "STATUS",
+          "type": "cds.Integer",
+          "enum": {
+            "planned": {
+              "val": 0
+            },
+            "committed": {
+              "val": 1
+            },
+            "started": {
+              "val": 2
+            },
+            "stopped": {
+              "val": 3
+            },
+            "completed": {
+              "val": 4
+            },
+            "approved": {
+              "val": 5
+            }
+          }
+        },
+        "plannedQuantity": {
+          "@cds.persistence.name": "PLANNEDQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "actualQuantity": {
+          "@cds.persistence.name": "ACTUALQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "plannedProductivity": {
+          "@cds.persistence.name": "PLANNEDPRODUCTIVITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "productivityFactor": {
+          "@cds.persistence.name": "PRODUCTIVITYFACTOR",
+          "type": "cds.Decimal",
+          "precision": 5,
+          "scale": 3
+        },
+        "currentProductivity": {
+          "@cds.persistence.name": "CURRENTPRODUCTIVITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costPlanned": {
+          "@cds.persistence.name": "COSTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costActual": {
+          "@cds.persistence.name": "COSTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborPlanned": {
+          "@cds.persistence.name": "COSTLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborActual": {
+          "@cds.persistence.name": "COSTLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborPlanned": {
+          "@cds.persistence.name": "HOURSLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborActual": {
+          "@cds.persistence.name": "HOURSLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialPlanned": {
+          "@cds.persistence.name": "COSTMATERIALPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialActual": {
+          "@cds.persistence.name": "COSTMATERIALACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentPlanned": {
+          "@cds.persistence.name": "COSTEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentActual": {
+          "@cds.persistence.name": "COSTEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentPlanned": {
+          "@cds.persistence.name": "HOURSEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentActual": {
+          "@cds.persistence.name": "HOURSEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costSubcontractorPlanned": {
+          "@cds.persistence.name": "COSTSUBCONTRACTORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costSubcontractorActual": {
+          "@cds.persistence.name": "COSTSUBCONTRACTORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "planVersion_ID": {
+          "@cds.persistence.name": "PLANVERSION_ID",
+          "@odata.foreignKey4": "planVersion",
+          "type": "cds.UUID"
+        },
+        "location_ID": {
+          "@cds.persistence.name": "LOCATION_ID",
+          "@odata.foreignKey4": "location",
+          "type": "cds.UUID"
+        },
+        "task_ID": {
+          "@cds.persistence.name": "TASK_ID",
+          "@odata.foreignKey4": "task",
+          "type": "cds.UUID"
+        },
+        "shift_ID": {
+          "@cds.persistence.name": "SHIFT_ID",
+          "@odata.foreignKey4": "shift",
+          "type": "cds.UUID"
+        }
+      }
+    },
     "my.site.cockpit.SpecialDates": {
       "kind": "entity",
       "@cds.persistence.name": "MY_SITE_COCKPIT_SPECIALDATES",
@@ -22537,8 +24833,6 @@
     },
     "my.site.cockpit.Tasks": {
       "kind": "entity",
-      "@Capabilities.SearchRestrictions.Searchable": true,
-      "@Search.defaultSearchElement": "shortText",
       "@cds.persistence.name": "MY_SITE_COCKPIT_TASKS",
       "includes": [
         "managed"
@@ -22673,19 +24967,6 @@
             }
           ]
         },
-        "pulseStep": {
-          "@cds.persistence.name": "PULSESTEP",
-          "type": "cds.Association",
-          "target": "my.site.cockpit.PulseSteps",
-          "keys": [
-            {
-              "ref": [
-                "ID"
-              ],
-              "$generatedFieldName": "pulseStep_ID"
-            }
-          ]
-        },
         "UoM": {
           "@cds.persistence.name": "UOM",
           "type": "cds.Association",
@@ -22721,8 +25002,26 @@
           "precision": 10,
           "scale": 3
         },
+        "actualQuantity": {
+          "@cds.persistence.name": "ACTUALQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
         "price": {
           "@cds.persistence.name": "PRICE",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "plannedTotalPrice": {
+          "@cds.persistence.name": "PLANNEDTOTALPRICE",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "actualTotalPrice": {
+          "@cds.persistence.name": "ACTUALTOTALPRICE",
           "type": "cds.Decimal",
           "precision": 10,
           "scale": 3
@@ -22931,8 +25230,8 @@
             }
           }
         },
-        "buffer": {
-          "@cds.persistence.name": "BUFFER",
+        "pinned": {
+          "@cds.persistence.name": "PINNED",
           "type": "cds.Boolean"
         },
         "company": {
@@ -23014,6 +25313,78 @@
             }
           ]
         },
+        "costPlanned": {
+          "@cds.persistence.name": "COSTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costActual": {
+          "@cds.persistence.name": "COSTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborPlanned": {
+          "@cds.persistence.name": "COSTLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborActual": {
+          "@cds.persistence.name": "COSTLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborPlanned": {
+          "@cds.persistence.name": "HOURSLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborActual": {
+          "@cds.persistence.name": "HOURSLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialPlanned": {
+          "@cds.persistence.name": "COSTMATERIALPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialActual": {
+          "@cds.persistence.name": "COSTMATERIALACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentPlanned": {
+          "@cds.persistence.name": "COSTEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentActual": {
+          "@cds.persistence.name": "COSTEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentPlanned": {
+          "@cds.persistence.name": "HOURSEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentActual": {
+          "@cds.persistence.name": "HOURSEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
         "texts": {
           "@cds.persistence.name": "TEXTS",
           "type": "cds.Composition",
@@ -23077,11 +25448,6 @@
         "recipe_ID": {
           "@cds.persistence.name": "RECIPE_ID",
           "@odata.foreignKey4": "recipe",
-          "type": "cds.UUID"
-        },
-        "pulseStep_ID": {
-          "@cds.persistence.name": "PULSESTEP_ID",
-          "@odata.foreignKey4": "pulseStep",
           "type": "cds.UUID"
         },
         "UoM_ID": {
@@ -23274,6 +25640,19 @@
             }
           ]
         },
+        "timesheet": {
+          "@cds.persistence.name": "TIMESHEET",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.Timesheets",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "timesheet_ID"
+            }
+          ]
+        },
         "workingDate": {
           "@cds.persistence.name": "WORKINGDATE",
           "type": "cds.DateTime"
@@ -23329,14 +25708,6 @@
           "precision": 10,
           "scale": 3
         },
-        "approved": {
-          "@cds.persistence.name": "APPROVED",
-          "type": "cds.Boolean"
-        },
-        "transferred": {
-          "@cds.persistence.name": "TRANSFERRED",
-          "type": "cds.Boolean"
-        },
         "project_ID": {
           "@cds.persistence.name": "PROJECT_ID",
           "@odata.foreignKey4": "project",
@@ -23350,6 +25721,11 @@
         "task_ID": {
           "@cds.persistence.name": "TASK_ID",
           "@odata.foreignKey4": "task",
+          "type": "cds.UUID"
+        },
+        "timesheet_ID": {
+          "@cds.persistence.name": "TIMESHEET_ID",
+          "@odata.foreignKey4": "timesheet",
           "type": "cds.UUID"
         },
         "shiftPart_ID": {
@@ -23558,6 +25934,182 @@
           "type": "cds.String",
           "length": 50,
           "notNull": true
+        }
+      }
+    },
+    "my.site.cockpit.Timesheets": {
+      "kind": "entity",
+      "@cds.persistence.name": "MY_SITE_COCKPIT_TIMESHEETS",
+      "includes": [
+        "managed"
+      ],
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "project": {
+          "@cds.persistence.name": "PROJECT",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.Projects",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "project_ID"
+            }
+          ]
+        },
+        "person": {
+          "@cds.persistence.name": "PERSON",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.Persons",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "person_ID"
+            }
+          ]
+        },
+        "workingDate": {
+          "@cds.persistence.name": "WORKINGDATE",
+          "type": "cds.DateTime"
+        },
+        "hoursWorked": {
+          "@cds.persistence.name": "HOURSWORKED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursShift": {
+          "@cds.persistence.name": "HOURSSHIFT",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costWorking": {
+          "@cds.persistence.name": "COSTWORKING",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costShift": {
+          "@cds.persistence.name": "COSTSHIFT",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "approved": {
+          "@cds.persistence.name": "APPROVED",
+          "type": "cds.Boolean"
+        },
+        "transferred": {
+          "@cds.persistence.name": "TRANSFERRED",
+          "type": "cds.Boolean"
+        },
+        "timeSheetEntries": {
+          "@cds.persistence.name": "TIMESHEETENTRIES",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "my.site.cockpit.TimeSheetEntries",
+          "on": [
+            {
+              "ref": [
+                "timeSheetEntries",
+                "timesheet"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "project_ID": {
+          "@cds.persistence.name": "PROJECT_ID",
+          "@odata.foreignKey4": "project",
+          "type": "cds.UUID"
+        },
+        "person_ID": {
+          "@cds.persistence.name": "PERSON_ID",
+          "@odata.foreignKey4": "person",
+          "type": "cds.UUID"
         }
       }
     },
@@ -27857,17 +30409,17 @@
             }
           ]
         },
-        "timeSheetEntries": {
-          "@cds.persistence.name": "TIMESHEETENTRIES",
+        "timesheets": {
+          "@cds.persistence.name": "TIMESHEETS",
           "type": "cds.Composition",
           "cardinality": {
             "max": "*"
           },
-          "target": "scService.TimeSheetEntries",
+          "target": "scService.Timesheets",
           "on": [
             {
               "ref": [
-                "timeSheetEntries",
+                "timesheets",
                 "person"
               ]
             },
@@ -28119,6 +30671,7 @@
           ]
         },
         "pic": {
+          "@Core.MediaType": "image/png",
           "@cds.persistence.name": "PIC",
           "type": "cds.LargeBinary"
         },
@@ -28165,6 +30718,263 @@
         }
       },
       "$syntax": "projection"
+    },
+    "scService.PlanVersions": {
+      "kind": "entity",
+      "@cds.persistence.name": "SCSERVICE_PLANVERSIONS",
+      "query": {
+        "SELECT": {
+          "from": {
+            "ref": [
+              "my.site.cockpit.PlanVersions"
+            ]
+          }
+        }
+      },
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "project": {
+          "@cds.persistence.name": "PROJECT",
+          "type": "cds.Association",
+          "target": "scService.Projects",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "project_ID"
+            }
+          ]
+        },
+        "snapshotDate": {
+          "@cds.persistence.name": "SNAPSHOTDATE",
+          "type": "cds.DateTime"
+        },
+        "versionNumber": {
+          "@cds.persistence.name": "VERSIONNUMBER",
+          "type": "cds.String",
+          "length": 50
+        },
+        "description": {
+          "@cds.persistence.name": "DESCRIPTION",
+          "localized": true,
+          "type": "cds.String",
+          "length": 500
+        },
+        "useCase": {
+          "@cds.persistence.name": "USECASE",
+          "type": "cds.Integer",
+          "enum": {
+            "daily": {
+              "val": 0
+            },
+            "weekly": {
+              "val": 1
+            },
+            "monthly": {
+              "val": 2
+            },
+            "longterm": {
+              "val": 3
+            }
+          }
+        },
+        "snapshotTasks": {
+          "@cds.persistence.name": "SNAPSHOTTASKS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "scService.SnapshotTasks",
+          "on": [
+            {
+              "ref": [
+                "snapshotTasks",
+                "planVersion"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "snapshotsComplete": {
+          "@cds.persistence.name": "SNAPSHOTSCOMPLETE",
+          "type": "cds.Boolean"
+        },
+        "texts": {
+          "@cds.persistence.name": "TEXTS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "scService.PlanVersions_texts",
+          "on": [
+            {
+              "ref": [
+                "texts",
+                "ID"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "ID"
+              ]
+            }
+          ]
+        },
+        "localized": {
+          "@cds.persistence.name": "LOCALIZED",
+          "type": "cds.Association",
+          "target": "scService.PlanVersions_texts",
+          "on": [
+            {
+              "ref": [
+                "localized",
+                "ID"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "ID"
+              ]
+            },
+            "and",
+            {
+              "ref": [
+                "localized",
+                "locale"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$user",
+                "locale"
+              ]
+            }
+          ]
+        },
+        "project_ID": {
+          "@cds.persistence.name": "PROJECT_ID",
+          "@odata.foreignKey4": "project",
+          "type": "cds.UUID"
+        }
+      },
+      "$syntax": "projection"
+    },
+    "scService.PlanVersions_texts": {
+      "kind": "entity",
+      "@cds.autoexpose": true,
+      "@cds.autoexposed": true,
+      "@cds.persistence.name": "SCSERVICE_PLANVERSIONS_TEXTS",
+      "@odata.draft.enabled": false,
+      "query": {
+        "SELECT": {
+          "from": {
+            "ref": [
+              "my.site.cockpit.PlanVersions_texts"
+            ]
+          }
+        }
+      },
+      "elements": {
+        "locale": {
+          "@cds.persistence.name": "LOCALE",
+          "key": true,
+          "type": "cds.String",
+          "length": 14
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "@odata.containment.ignore": true,
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "description": {
+          "@cds.persistence.name": "DESCRIPTION",
+          "localized": false,
+          "type": "cds.String",
+          "length": 500
+        }
+      }
     },
     "scService.ProblemCards": {
       "kind": "entity",
@@ -29292,6 +32102,28 @@
             {
               "ref": [
                 "users",
+                "project"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "planVersions": {
+          "@cds.persistence.name": "PLANVERSIONS",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "scService.PlanVersions",
+          "on": [
+            {
+              "ref": [
+                "planVersions",
                 "project"
               ]
             },
@@ -31320,6 +34152,337 @@
       },
       "$syntax": "projection"
     },
+    "scService.SnapshotTasks": {
+      "kind": "entity",
+      "@cds.persistence.name": "SCSERVICE_SNAPSHOTTASKS",
+      "query": {
+        "SELECT": {
+          "from": {
+            "ref": [
+              "my.site.cockpit.SnapshotTasks"
+            ]
+          }
+        }
+      },
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "planVersion": {
+          "@cds.persistence.name": "PLANVERSION",
+          "type": "cds.Association",
+          "target": "scService.PlanVersions",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "planVersion_ID"
+            }
+          ]
+        },
+        "location": {
+          "@cds.persistence.name": "LOCATION",
+          "type": "cds.Association",
+          "target": "scService.Locations",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "location_ID"
+            }
+          ]
+        },
+        "task": {
+          "@cds.persistence.name": "TASK",
+          "type": "cds.Association",
+          "target": "scService.Tasks",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "task_ID"
+            }
+          ]
+        },
+        "shift": {
+          "@cds.persistence.name": "SHIFT",
+          "type": "cds.Association",
+          "target": "scService.Shifts",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "shift_ID"
+            }
+          ]
+        },
+        "plannedStart": {
+          "@cds.persistence.name": "PLANNEDSTART",
+          "type": "cds.DateTime"
+        },
+        "plannedEnd": {
+          "@cds.persistence.name": "PLANNEDEND",
+          "type": "cds.DateTime"
+        },
+        "estimatedEnd": {
+          "@cds.persistence.name": "ESTIMATEDEND",
+          "type": "cds.DateTime"
+        },
+        "actualStart": {
+          "@cds.persistence.name": "ACTUALSTART",
+          "type": "cds.DateTime"
+        },
+        "actualEnd": {
+          "@cds.persistence.name": "ACTUALEND",
+          "type": "cds.DateTime"
+        },
+        "stoppedAt": {
+          "@cds.persistence.name": "STOPPEDAT",
+          "type": "cds.DateTime"
+        },
+        "stopDuration": {
+          "@cds.persistence.name": "STOPDURATION",
+          "type": "cds.Integer"
+        },
+        "waitDuration": {
+          "@cds.persistence.name": "WAITDURATION",
+          "type": "cds.Integer"
+        },
+        "status": {
+          "@cds.persistence.name": "STATUS",
+          "type": "cds.Integer",
+          "enum": {
+            "planned": {
+              "val": 0
+            },
+            "committed": {
+              "val": 1
+            },
+            "started": {
+              "val": 2
+            },
+            "stopped": {
+              "val": 3
+            },
+            "completed": {
+              "val": 4
+            },
+            "approved": {
+              "val": 5
+            }
+          }
+        },
+        "plannedQuantity": {
+          "@cds.persistence.name": "PLANNEDQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "actualQuantity": {
+          "@cds.persistence.name": "ACTUALQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "plannedProductivity": {
+          "@cds.persistence.name": "PLANNEDPRODUCTIVITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "productivityFactor": {
+          "@cds.persistence.name": "PRODUCTIVITYFACTOR",
+          "type": "cds.Decimal",
+          "precision": 5,
+          "scale": 3
+        },
+        "currentProductivity": {
+          "@cds.persistence.name": "CURRENTPRODUCTIVITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costPlanned": {
+          "@cds.persistence.name": "COSTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costActual": {
+          "@cds.persistence.name": "COSTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborPlanned": {
+          "@cds.persistence.name": "COSTLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborActual": {
+          "@cds.persistence.name": "COSTLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborPlanned": {
+          "@cds.persistence.name": "HOURSLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborActual": {
+          "@cds.persistence.name": "HOURSLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialPlanned": {
+          "@cds.persistence.name": "COSTMATERIALPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialActual": {
+          "@cds.persistence.name": "COSTMATERIALACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentPlanned": {
+          "@cds.persistence.name": "COSTEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentActual": {
+          "@cds.persistence.name": "COSTEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentPlanned": {
+          "@cds.persistence.name": "HOURSEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentActual": {
+          "@cds.persistence.name": "HOURSEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costSubcontractorPlanned": {
+          "@cds.persistence.name": "COSTSUBCONTRACTORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costSubcontractorActual": {
+          "@cds.persistence.name": "COSTSUBCONTRACTORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "planVersion_ID": {
+          "@cds.persistence.name": "PLANVERSION_ID",
+          "@odata.foreignKey4": "planVersion",
+          "type": "cds.UUID"
+        },
+        "location_ID": {
+          "@cds.persistence.name": "LOCATION_ID",
+          "@odata.foreignKey4": "location",
+          "type": "cds.UUID"
+        },
+        "task_ID": {
+          "@cds.persistence.name": "TASK_ID",
+          "@odata.foreignKey4": "task",
+          "type": "cds.UUID"
+        },
+        "shift_ID": {
+          "@cds.persistence.name": "SHIFT_ID",
+          "@odata.foreignKey4": "shift",
+          "type": "cds.UUID"
+        }
+      },
+      "$syntax": "projection"
+    },
     "scService.SpecialDates": {
       "kind": "entity",
       "@cds.persistence.name": "SCSERVICE_SPECIALDATES",
@@ -31533,8 +34696,6 @@
     },
     "scService.Tasks": {
       "kind": "entity",
-      "@Capabilities.SearchRestrictions.Searchable": true,
-      "@Search.defaultSearchElement": "shortText",
       "@cds.persistence.name": "SCSERVICE_TASKS",
       "query": {
         "SELECT": {
@@ -31675,19 +34836,6 @@
             }
           ]
         },
-        "pulseStep": {
-          "@cds.persistence.name": "PULSESTEP",
-          "type": "cds.Association",
-          "target": "scService.PulseSteps",
-          "keys": [
-            {
-              "ref": [
-                "ID"
-              ],
-              "$generatedFieldName": "pulseStep_ID"
-            }
-          ]
-        },
         "UoM": {
           "@cds.persistence.name": "UOM",
           "type": "cds.Association",
@@ -31723,8 +34871,26 @@
           "precision": 10,
           "scale": 3
         },
+        "actualQuantity": {
+          "@cds.persistence.name": "ACTUALQUANTITY",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
         "price": {
           "@cds.persistence.name": "PRICE",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "plannedTotalPrice": {
+          "@cds.persistence.name": "PLANNEDTOTALPRICE",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "actualTotalPrice": {
+          "@cds.persistence.name": "ACTUALTOTALPRICE",
           "type": "cds.Decimal",
           "precision": 10,
           "scale": 3
@@ -31933,8 +35099,8 @@
             }
           }
         },
-        "buffer": {
-          "@cds.persistence.name": "BUFFER",
+        "pinned": {
+          "@cds.persistence.name": "PINNED",
           "type": "cds.Boolean"
         },
         "company": {
@@ -32016,6 +35182,78 @@
             }
           ]
         },
+        "costPlanned": {
+          "@cds.persistence.name": "COSTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costActual": {
+          "@cds.persistence.name": "COSTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborPlanned": {
+          "@cds.persistence.name": "COSTLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costLaborActual": {
+          "@cds.persistence.name": "COSTLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborPlanned": {
+          "@cds.persistence.name": "HOURSLABORPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursLaborActual": {
+          "@cds.persistence.name": "HOURSLABORACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialPlanned": {
+          "@cds.persistence.name": "COSTMATERIALPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costMaterialActual": {
+          "@cds.persistence.name": "COSTMATERIALACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentPlanned": {
+          "@cds.persistence.name": "COSTEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costEquipmentActual": {
+          "@cds.persistence.name": "COSTEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentPlanned": {
+          "@cds.persistence.name": "HOURSEQUIPMENTPLANNED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursEquipmentActual": {
+          "@cds.persistence.name": "HOURSEQUIPMENTACTUAL",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
         "texts": {
           "@cds.persistence.name": "TEXTS",
           "type": "cds.Composition",
@@ -32079,11 +35317,6 @@
         "recipe_ID": {
           "@cds.persistence.name": "RECIPE_ID",
           "@odata.foreignKey4": "recipe",
-          "type": "cds.UUID"
-        },
-        "pulseStep_ID": {
-          "@cds.persistence.name": "PULSESTEP_ID",
-          "@odata.foreignKey4": "pulseStep",
           "type": "cds.UUID"
         },
         "UoM_ID": {
@@ -32293,6 +35526,19 @@
             }
           ]
         },
+        "timesheet": {
+          "@cds.persistence.name": "TIMESHEET",
+          "type": "cds.Association",
+          "target": "scService.Timesheets",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "timesheet_ID"
+            }
+          ]
+        },
         "workingDate": {
           "@cds.persistence.name": "WORKINGDATE",
           "type": "cds.DateTime"
@@ -32348,14 +35594,6 @@
           "precision": 10,
           "scale": 3
         },
-        "approved": {
-          "@cds.persistence.name": "APPROVED",
-          "type": "cds.Boolean"
-        },
-        "transferred": {
-          "@cds.persistence.name": "TRANSFERRED",
-          "type": "cds.Boolean"
-        },
         "project_ID": {
           "@cds.persistence.name": "PROJECT_ID",
           "@odata.foreignKey4": "project",
@@ -32369,6 +35607,11 @@
         "task_ID": {
           "@cds.persistence.name": "TASK_ID",
           "@odata.foreignKey4": "task",
+          "type": "cds.UUID"
+        },
+        "timesheet_ID": {
+          "@cds.persistence.name": "TIMESHEET_ID",
+          "@odata.foreignKey4": "timesheet",
           "type": "cds.UUID"
         },
         "shiftPart_ID": {
@@ -32597,6 +35840,189 @@
           "notNull": true
         }
       }
+    },
+    "scService.Timesheets": {
+      "kind": "entity",
+      "@cds.persistence.name": "SCSERVICE_TIMESHEETS",
+      "query": {
+        "SELECT": {
+          "from": {
+            "ref": [
+              "my.site.cockpit.Timesheets"
+            ]
+          }
+        }
+      },
+      "elements": {
+        "createdAt": {
+          "@Common.Label": "{i18n>CreatedAt}",
+          "@Core.Computed": true,
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "CREATEDAT",
+          "@odata.on.insert": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "createdBy": {
+          "@Common.Label": "{i18n>CreatedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@Core.Immutable": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "CREATEDBY",
+          "@odata.on.insert": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "modifiedAt": {
+          "@Common.Label": "{i18n>ChangedAt}",
+          "@Core.Computed": true,
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$now"
+          },
+          "@cds.on.update": {
+            "=": "$now"
+          },
+          "@cds.persistence.name": "MODIFIEDAT",
+          "@odata.on.update": {
+            "#": "now"
+          },
+          "@readonly": true,
+          "type": "cds.Timestamp"
+        },
+        "modifiedBy": {
+          "@Common.Label": "{i18n>ChangedBy}",
+          "@Core.Computed": true,
+          "@Core.Description": "{i18n>UserID.Description}",
+          "@UI.HiddenFilter": true,
+          "@cds.on.insert": {
+            "=": "$user"
+          },
+          "@cds.on.update": {
+            "=": "$user"
+          },
+          "@cds.persistence.name": "MODIFIEDBY",
+          "@odata.on.update": {
+            "#": "user"
+          },
+          "@readonly": true,
+          "type": "cds.String",
+          "length": 255
+        },
+        "ID": {
+          "@cds.persistence.name": "ID",
+          "key": true,
+          "type": "cds.UUID"
+        },
+        "project": {
+          "@cds.persistence.name": "PROJECT",
+          "type": "cds.Association",
+          "target": "scService.Projects",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "project_ID"
+            }
+          ]
+        },
+        "person": {
+          "@cds.persistence.name": "PERSON",
+          "type": "cds.Association",
+          "target": "scService.Persons",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "person_ID"
+            }
+          ]
+        },
+        "workingDate": {
+          "@cds.persistence.name": "WORKINGDATE",
+          "type": "cds.DateTime"
+        },
+        "hoursWorked": {
+          "@cds.persistence.name": "HOURSWORKED",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "hoursShift": {
+          "@cds.persistence.name": "HOURSSHIFT",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costWorking": {
+          "@cds.persistence.name": "COSTWORKING",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "costShift": {
+          "@cds.persistence.name": "COSTSHIFT",
+          "type": "cds.Decimal",
+          "precision": 10,
+          "scale": 3
+        },
+        "approved": {
+          "@cds.persistence.name": "APPROVED",
+          "type": "cds.Boolean"
+        },
+        "transferred": {
+          "@cds.persistence.name": "TRANSFERRED",
+          "type": "cds.Boolean"
+        },
+        "timeSheetEntries": {
+          "@cds.persistence.name": "TIMESHEETENTRIES",
+          "type": "cds.Composition",
+          "cardinality": {
+            "max": "*"
+          },
+          "target": "scService.TimeSheetEntries",
+          "on": [
+            {
+              "ref": [
+                "timeSheetEntries",
+                "timesheet"
+              ]
+            },
+            "=",
+            {
+              "ref": [
+                "$self"
+              ]
+            }
+          ]
+        },
+        "project_ID": {
+          "@cds.persistence.name": "PROJECT_ID",
+          "@odata.foreignKey4": "project",
+          "type": "cds.UUID"
+        },
+        "person_ID": {
+          "@cds.persistence.name": "PERSON_ID",
+          "@odata.foreignKey4": "person",
+          "type": "cds.UUID"
+        }
+      },
+      "$syntax": "projection"
     },
     "scService.UoMs": {
       "kind": "entity",

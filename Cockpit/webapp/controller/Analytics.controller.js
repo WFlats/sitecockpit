@@ -3,12 +3,18 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
+	"sap/ui/model/Sorter",
 	"sap/ui/Device",
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
 	"sap/m/library",
-	"sap/base/Log"
-], function (BaseController, JSONModel, Filter, FilterOperator, Device, MessageToast, MessageBox, mobileLibrary, Log) {
+	"sap/base/Log",
+	"sap/viz/ui5/data/FlattenedDataset",
+	"sap/viz/ui5/controls/common/feeds/FeedItem",
+	"sap/viz/ui5/format/ChartFormatter"
+], function (BaseController, JSONModel, Filter, FilterOperator, Sorter, Device, MessageToast, MessageBox, mobileLibrary, Log,
+	FlattenedDataset,
+	FeedItem, ChartFormatter) {
 	"use strict";
 
 	return BaseController.extend("cockpit.Cockpit.controller.Analytics", {
@@ -37,14 +43,6 @@ sap.ui.define([
 				oLocationBC = oModel.createBindingContext(sLocationPath),
 				sTitle = this.getResourceBundle().getText("analyticsTitle"),
 				oWorkTimeModel = this.getModel("workTimeModel"),
-				sPlanVersionPath,
-				oPlanVersionBC,
-				sTooltip,
-				sResourceClass,
-				oStart,
-				oEnd,
-				oMaxDate,
-				oActualDate,
 				that = this;
 
 			// fill the work times model only once
@@ -70,7 +68,27 @@ sap.ui.define([
 			this.getModel("analyticsModel").setProperty("/locationID", sLocationID);
 			sTitle += " " + oLocationBC.getProperty("code") + " - " + oLocationBC.getProperty("description");
 			this.getModel("analyticsModel").setProperty("/analyticsTitle", sTitle);
-			// set the info to select a plan version first
+
+			if (this.getModel("analyticsModel").getProperty("/cumulative")) {
+				this._setViewForForecast(sLocationID);
+			} else {
+				this._setViewForPeriod(sLocationID);
+			}
+		},
+
+		_setViewForPeriod: function (sLocationID) {
+			var oModel = this.getModel(),
+				sPlanVersionPath = "/" + oModel.createKey("PlanVersions", {
+					ID: this.getModel("appView").getProperty("/planVersionID")
+				}),
+				oPlanVersionBC = oModel.createBindingContext(sPlanVersionPath),
+				sResourceClass = this.byId("resourceSelect").getSelectedKey(),
+				oMaxDate,
+				oActualDate,
+				sTooltip,
+				sOldTooltip;
+
+			// set the info to select a plan version first if not selected
 			if (!this.getModel("appView").getProperty("/planVersionID")) {
 				this.getModel("analyticsModel").setProperty("/chartTitle", this.getResourceBundle().getText("planVersionNotSelected"));
 				this.byId("planLabel").setVisible(false);
@@ -80,17 +98,14 @@ sap.ui.define([
 				this.byId("resourceSelect").setVisible(false);
 				return;
 			}
+
 			this.getModel("analyticsModel").setProperty("/chartTitle", "");
 			this.byId("planLabel").setVisible(true);
 			this.byId("planDatePicker").setVisible(true);
 			this.byId("actualLabel").setVisible(true);
 			this.byId("actualDatePicker").setVisible(true);
+			this.byId("actualDatePicker").setEnabled(true);
 			this.byId("resourceSelect").setVisible(true);
-
-			sPlanVersionPath = "/" + oModel.createKey("PlanVersions", {
-				ID: this.getModel("appView").getProperty("/planVersionID")
-			});
-			oPlanVersionBC = oModel.createBindingContext(sPlanVersionPath);
 			this.byId("planDatePicker").setDateValue(oPlanVersionBC.getProperty("snapshotDate"));
 			// actual date must be later than plan Date and not in the future
 			this.byId("actualDatePicker").setMinDate(oPlanVersionBC.getProperty("snapshotDate"));
@@ -135,29 +150,39 @@ sap.ui.define([
 			default:
 				sTooltip = "Error: Unknown type of plan version";
 			}
-			//this.getModel("analyticsModel").setProperty("/chartTitle", sVersionTitle);
+			sOldTooltip = this.byId("planDatePicker").getTooltip();
+			if (!sOldTooltip || sOldTooltip !== sTooltip) {
+				// detect from the tooltip if the plan version was changed
+				// navigation from master should not change the actual date, plan verson change should
+				this.byId("actualDatePicker").setDateValue(oMaxDate);
+			}
 			this.byId("planDatePicker").setTooltip(sTooltip);
-			oStart = this.byId("planDatePicker").getDateValue();
-			oEnd = this.byId("actualDatePicker").getDateValue();
-			sResourceClass = this.byId("resourceSelect").getSelectedKey();
-			this.getModel("analyticsModel").setProperty("/busy", true);
-			this.getPlannedValues(sLocationID, oPlanVersionBC.getProperty("ID"), sResourceClass, oStart, oEnd)
-				.then(function (mPlannedValue) {
-					that.getActualValues(sLocationID, sResourceClass, oStart, oEnd)
-						.then(function (oActualValues) {
-							that.setDataModel(mPlannedValue, oActualValues.earned, oActualValues.actual, sResourceClass);
-							that.getModel("analyticsModel").setProperty("/busy", false);
-						});
-				});
+
+			this._displayPeriodChart(sLocationID, oPlanVersionBC.getProperty("ID"), sResourceClass,
+				oPlanVersionBC.getProperty("snapshotDate"), this.byId("actualDatePicker").getDateValue());
 		},
 
-		onResourceOrDateChange: function () {
-			var sResourceClass = this.byId("resourceSelect").getSelectedKey(),
-				sLocationID = this.getModel("analyticsModel").getProperty("/locationID"),
-				sPlanVersionID = this.getModel("appView").getProperty("/planVersionID"),
-				oStart = this.byId("planDatePicker").getDateValue(),
-				oEnd = this.byId("actualDatePicker").getDateValue(),
-				that = this;
+		_setViewForForecast: function (sLocationID) {
+			var sResourceClass = this.byId("resourceSelect").getSelectedKey();
+
+			//this.getModel("appView").setProperty("/planVersionID", "");
+
+			this.getModel("analyticsModel").setProperty("/chartTitle", "");
+			this.byId("planLabel").setVisible(true);
+			this.byId("planDatePicker").setVisible(true);
+			this.byId("actualLabel").setVisible(true);
+			this.byId("actualDatePicker").setMinDate(new Date("1970-01-01"));
+			this.byId("actualDatePicker").setMaxDate(new Date("9999-12-31"));
+			this.byId("actualDatePicker").setVisible(true);
+			this.byId("actualDatePicker").setEnabled(false);
+			this.byId("resourceSelect").setVisible(true);
+			this.byId("planDatePicker").setTooltip("");
+
+			this._displayCumulatedChart(sLocationID, sResourceClass);
+		},
+
+		_displayPeriodChart: function (sLocationID, sPlanVersionID, sResourceClass, oStart, oEnd) {
+			var that = this;
 
 			this.getModel("analyticsModel").setProperty("/busy", true);
 			this.getPlannedValues(sLocationID, sPlanVersionID, sResourceClass, oStart, oEnd)
@@ -170,6 +195,123 @@ sap.ui.define([
 				});
 		},
 
+		_displayCumulatedChart: function (sLocationID, sResourceClass) {
+			var that = this;
+
+			this.getModel("analyticsModel").setProperty("/busy", true);
+			this._getEarliestStart(sLocationID).then(function (oStart) {
+				that.byId("planDatePicker").setDateValue(oStart);
+				that._getLatestEnd(sLocationID).then(function (oEnd) {
+					that.byId("actualDatePicker").setDateValue(oEnd);
+					that.getPlannedAndActualValues(sLocationID, sResourceClass, oStart, oEnd)
+						.then(function (oActualValues) {
+							that.setCumulativeDataModel();
+							that.getModel("analyticsModel").setProperty("/busy", false);
+						});
+				});
+			});
+		},
+
+		_getEarliestStart: function (sLocationID) {
+			var oModel = this.getModel(),
+				myArrayMin = function (arr) {
+					var len = arr.length;
+					var min = Infinity;
+					while (len--) {
+						if (arr[len].actualStart && arr[len].actualStart.getTime() < min) {
+							min = arr[len].actualStart.getTime();
+						}
+					}
+					return new Date(min);
+				};
+
+			return new Promise(function (resolve, reject) {
+				oModel.read("/Tasks", {
+					filters: [new Filter("location_ID", FilterOperator.EQ, sLocationID)],
+					sorter: new Sorter("actualStart", false),
+					urlParameters: {
+						$top: 100 // revisit
+					},
+					success: function (oData) {
+						if (oData && oData.results.length > 0) {
+							resolve(myArrayMin(oData.results)); // revisit
+							//resolve(oData.results[0].actualStart);
+						} else {
+							resolve(undefined);
+						}
+					},
+					error: function (oError) {
+						Log.error("Error finding the first task start of the location");
+						resolve(undefined);
+					}
+				});
+			});
+		},
+
+		_getLatestEnd: function (sLocationID) {
+			var oModel = this.getModel(),
+				myArrayMax = function (arr) {
+					var len = arr.length;
+					var max = -Infinity;
+					while (len--) {
+						if (arr[len].estimatedEnd.getTime() > max) {
+							max = arr[len].estimatedEnd.getTime();
+						}
+					}
+					return new Date(max);
+				};
+
+			return new Promise(function (resolve, reject) {
+				oModel.read("/Tasks", {
+					filters: [new Filter("location_ID", FilterOperator.EQ, sLocationID)],
+					sorter: new Sorter("estimatedEnd", true),
+					urlParameters: {
+						$top: 100 // revisit
+					},
+					success: function (oData) {
+						if (oData && oData.results.length > 0) {
+							resolve(myArrayMax(oData.results)); // revisit: sorting not working
+							//resolve(oData.results[0].estimatedEnd);
+						} else {
+							resolve(undefined);
+						}
+					},
+					error: function (oError) {
+						Log.error("Error finding the last task end of the location");
+						resolve(undefined);
+					}
+				});
+			});
+		},
+
+		onResourceOrDateChange: function () {
+			var sResourceClass = this.byId("resourceSelect").getSelectedKey(),
+				sLocationID = this.getModel("analyticsModel").getProperty("/locationID"),
+				sPlanVersionID = this.getModel("appView").getProperty("/planVersionID"),
+				oStart = this.byId("planDatePicker").getDateValue(),
+				oEnd = this.byId("actualDatePicker").getDateValue();
+
+			if (this.getModel("analyticsModel").getProperty("/cumulative")) {
+				this._displayCumulatedChart(sLocationID, sResourceClass);
+			} else {
+				this._displayPeriodChart(sLocationID, sPlanVersionID, sResourceClass, oStart, oEnd);
+			}
+		},
+
+		onChartSwitch: function (oEvent) {
+			var sLocationID = this.getModel("analyticsModel").getProperty("/locationID");
+
+			if (oEvent.getParameter("pressed")) {
+				oEvent.getSource().setIcon("sap-icon://line-chart-dual-axis");
+				oEvent.getSource().setTooltip(this.getResourceBundle().getText("chartSwitchToEVM"));
+				this._setViewForForecast(sLocationID);
+			} else {
+				oEvent.getSource().setIcon("sap-icon://column-chart-dual-axis");
+				oEvent.getSource().setTooltip(this.getResourceBundle().getText("chartSwitch"));
+				this._setViewForPeriod(sLocationID);
+			}
+		},
+
 		getPlannedValues: function (sLocationID, sPlanVersionID, sResourceClass, oStart, oEnd) {
 			var oModel = this.getModel(),
 				aFilters = [
@@ -178,7 +320,6 @@ sap.ui.define([
 					new Filter("plannedStart", FilterOperator.LT, oEnd),
 					new Filter("estimatedEnd", FilterOperator.GT, oStart)
 				],
-				iDecimals = (sResourceClass === "2" || sResourceClass === "5") ? 2 : 0,
 				that = this;
 
 			return new Promise(function (resolve, reject) {
@@ -237,13 +378,95 @@ sap.ui.define([
 					new Filter("actualStart", FilterOperator.LT, oEnd),
 					new Filter("estimatedEnd", FilterOperator.GT, oStart)
 				],
-				iDecimals = (sResourceClass === "2" || sResourceClass === "5") ? 2 : 0,
 				that = this;
 
 			return new Promise(function (resolve, reject) {
 				oModel.read("/Tasks", {
 					filters: aFilters,
 					and: true,
+					success: function (oData) {
+						var oActuals = {
+							earned: 0,
+							actual: 0
+						};
+						if (oData && oData.results.length > 0) {
+							oData.results.forEach(function (oTask) {
+								// actualQuantity = undefined if no measurement made
+								var mEarnedValueFactor = that._getFactorOfActualWorkWithinPeriod(oTask, oStart, oEnd);
+								switch (sResourceClass) {
+								case "0": // total cost
+									oActuals.earned += Number(oTask.costPlanned) * mEarnedValueFactor;
+									oActuals.actual += Number(oTask.costActual) * mEarnedValueFactor;
+									break;
+								case "1": // labor cost
+									oActuals.earned += Number(oTask.costLaborPlanned) * mEarnedValueFactor;
+									oActuals.actual += Number(oTask.costLaborActual) * mEarnedValueFactor;
+									break;
+								case "2": // labor hours
+									oActuals.earned += Number(oTask.hoursLaborPlanned) * mEarnedValueFactor;
+									oActuals.actual += Number(oTask.hoursLaborActual) * mEarnedValueFactor;
+									break;
+								case "3": // material cost
+									oActuals.earned += Number(oTask.costMaterialPlanned) * mEarnedValueFactor;
+									oActuals.actual += Number(oTask.costMaterialActual) * mEarnedValueFactor;
+									break;
+								case "4": // Equipment cost
+									oActuals.earned += Number(oTask.costEquipmentPlanned) * mEarnedValueFactor;
+									oActuals.actual += Number(oTask.costEquipmentActual) * mEarnedValueFactor;
+									break;
+								case "5": // Equipment hours
+									oActuals.earned += Number(oTask.hoursEquipmentPlanned) * mEarnedValueFactor;
+									oActuals.actual += Number(oTask.hoursEquipmentActual) * mEarnedValueFactor;
+									break;
+								case "6": // subcontract cost
+									oActuals.earned += Number(oTask.plannedTotalPrice) * mEarnedValueFactor;
+									oActuals.actual += Number(oTask.actualTotalPrice) * mEarnedValueFactor;
+									break;
+								default:
+									oActuals.earned += 0;
+									oActuals.actual += 0;
+								}
+							});
+							resolve(oActuals);
+						} else {
+							resolve(oActuals);
+						}
+					},
+					error: function (oError) {
+						Log.error("Error reading Tasks");
+						reject();
+					}
+				});
+			});
+		},
+
+		getPlannedAndActualValues: function (sLocationID, sResourceClass, oStart, oEnd) {
+			// reads tasks only, no snapshots
+			var oModel = this.getModel(),
+				aActualFilters = new Filter({
+					filters: [
+						new Filter("location_ID", FilterOperator.EQ, sLocationID),
+						new Filter("status", FilterOperator.GE, 2),
+						new Filter("actualStart", FilterOperator.LT, oEnd),
+						new Filter("estimatedEnd", FilterOperator.GT, oStart)
+					],
+					and: true
+				}),
+				aPlannedFilters = new Filter({
+					filters: [
+						new Filter("location_ID", FilterOperator.EQ, sLocationID),
+						new Filter("status", FilterOperator.GE, 2),
+						new Filter("plannedStart", FilterOperator.LT, oEnd),
+						new Filter("estimatedEnd", FilterOperator.GT, oStart)
+					],
+					and: true
+				}),
+				that = this;
+
+			return new Promise(function (resolve, reject) {
+				oModel.read("/Tasks", {
+					filters: [aActualFilters, aPlannedFilters],
+					and: false,
 					success: function (oData) {
 						var oActuals = {
 							earned: 0,
@@ -357,7 +580,8 @@ sap.ui.define([
 				analyticsTitle: "",
 				chartTitle: "",
 				locationID: "",
-				selectedPlanVersionID: ""
+				selectedPlanVersionID: "",
+				cumulative: false
 			});
 		},
 
@@ -412,7 +636,42 @@ sap.ui.define([
 				}),
 				oVizFrame = this.byId("chartContainerVizFrame");
 
-			this.byId("chartContainerVizFrame").setModel(oJSONModel);
+			oVizFrame.destroyDataset();
+			oVizFrame.destroyFeeds();
+			oVizFrame.setVizType("column");
+
+			oVizFrame.setModel(oJSONModel);
+			if (pv === 0 && ev === 0 && ac === 0) {
+				return; // called by onInit, i.e. oModel not available yet
+				// but oVizFrame model must be set or it throws errors
+			}
+			var oData = {
+				"dimensions": [{
+					"name": "Values",
+					"value": "{Value}"
+				}],
+				"measures": [{
+					"name": "PV",
+					"value": "{PV}"
+				}, {
+					"name": "EV",
+					"value": "{EV}"
+				}, {
+					"name": "AC",
+					"value": "{AC}"
+				}, {
+					"name": "CV",
+					"value": "{CV}"
+				}, {
+					"name": "SV",
+					"value": "{SV}"
+				}],
+				data: {
+					path: "/Values"
+				}
+			};
+			var oDataset = new FlattenedDataset(oData);
+			oVizFrame.setDataset(oDataset);
 			oVizFrame.setVizProperties({
 				title: {
 					text: sTitle
@@ -422,27 +681,118 @@ sap.ui.define([
 					showTotal: true
 				}
 			});
-			if (pv === 0 && ev === 0 && ac === 0) {
-				return; // called by onInit, i.e. oModel not available yet
-			}
+			var oFeedValueAxis = new FeedItem({
+				"uid": "valueAxis",
+				"type": "Measure",
+				"values": ["PV", "EV", "AC", "CV", "SV"]
+			});
+			var oFeedcategoryAxis = new FeedItem({
+				"uid": "categoryAxis",
+				"type": "Dimension",
+				"values": ["Values"]
+			});
+			oVizFrame.addFeed(oFeedValueAxis);
+			oVizFrame.addFeed(oFeedcategoryAxis);
+
+			var aMeasures = oVizFrame.getDataset().getAggregation("measures"),
+				sUnit;
 			if (rc === "2" || rc === "5") { // labor or equipment hours
-				this.byId("mD1").setUnit(this.getResourceBundle().getText("hours"));
-				this.byId("mD2").setUnit(this.getResourceBundle().getText("hours"));
-				this.byId("mD3").setUnit(this.getResourceBundle().getText("hours"));
-				this.byId("mD4").setUnit(this.getResourceBundle().getText("hours"));
-				this.byId("mD5").setUnit(this.getResourceBundle().getText("hours"));
+				sUnit = this.getResourceBundle().getText("hours");
 			} else {
 				var oModel = this.getModel(),
 					sProjectPath = "/" + oModel.createKey("Projects", {
 						ID: this.getModel("appView").getProperty("/selectedProjectID")
-					}),
-					sCurrencyCode = oModel.createBindingContext(sProjectPath).getProperty("currency_code");
-				this.byId("mD1").setUnit(sCurrencyCode);
-				this.byId("mD2").setUnit(sCurrencyCode);
-				this.byId("mD3").setUnit(sCurrencyCode);
-				this.byId("mD4").setUnit(sCurrencyCode);
-				this.byId("mD5").setUnit(sCurrencyCode);
+					});
+				sUnit = oModel.createBindingContext(sProjectPath).getProperty("currency_code");
 			}
+			for (var i = 0; i < aMeasures.length; i++) {
+				aMeasures[i].setUnit(sUnit);
+			}
+		},
+
+		setCumulativeDataModel: function () {
+			var oModel = this.getModel(),
+				sProjectPath = "/" + oModel.createKey("Projects", {
+					ID: this.getModel("appView").getProperty("/selectedProjectID")
+				}),
+				sCurrencyCode = oModel.createBindingContext(sProjectPath).getProperty("currency_code"),
+				sTitle = this.getResourceBundle().getText("forecastTitle", sCurrencyCode),
+				oJSONModel = new JSONModel({
+					"Values": [{
+						"Date": "2021-05-01",
+						"PV": "100",
+						"EV": "90",
+						"AC": "95"
+					}, {
+						"Date": "2021-06-01",
+						"PV": "200",
+						"EV": "180",
+						"AC": "190"
+					}, {
+						"Date": "2021-07-01",
+						"PV": "300",
+						"EV": "270",
+						"AC": "290"
+					}, {
+						"Date": "2021-08-01",
+						"PV": "500",
+						"EV": "470",
+						"AC": "590"
+					}]
+				}),
+				oVizFrame = this.byId("chartContainerVizFrame");
+
+			oVizFrame.destroyDataset();
+			oVizFrame.destroyFeeds();
+			oVizFrame.setVizType("timeseries_line");
+			oVizFrame.setModel(oJSONModel);
+			var oData = {
+				"dimensions": [{
+					"name": "Date",
+					"value": "{Date}",
+					"dataType": "date"
+				}],
+				"measures": [{
+					"name": "PV",
+					"value": "{PV}"
+				}, {
+					"name": "EV",
+					"value": "{EV}"
+				}, {
+					"name": "AC",
+					"value": "{AC}"
+				}],
+				data: {
+					path: "/Values"
+				}
+			};
+			var oDataset = new FlattenedDataset(oData);
+			oVizFrame.setDataset(oDataset);
+			oVizFrame.setVizProperties({
+				title: {
+					text: sTitle
+				},
+				dataLabel: {
+					visible: true,
+					showTotal: true
+				},
+				timeAxis: {
+					levels: ["month", "year"],
+					visible: true
+				}
+			});
+			var oFeedValueAxis = new FeedItem({
+				"uid": "valueAxis",
+				"type": "Measure",
+				"values": ["PV", "EV", "AC"]
+			});
+			var oFeedTimeAxis = new FeedItem({
+				"uid": "timeAxis",
+				"type": "Dimension",
+				"values": ["Date"]
+			});
+			oVizFrame.addFeed(oFeedValueAxis);
+			oVizFrame.addFeed(oFeedTimeAxis);
 		}
 
 	});

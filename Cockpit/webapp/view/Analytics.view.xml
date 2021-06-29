@@ -41,6 +41,8 @@
 				</content>
 				<toolbar>
 					<m:OverflowToolbar id="appToolbar">
+						<m:ToggleButton id="chartSelectButton" visible="true" icon="sap-icon://column-chart-dual-axis" press="onChartSwitch"
+							pressed="{analyticsModel>/cumulative}" tooltip="{i18n>chartSwitch}"></m:ToggleButton>
 						<m:Label id="planLabel" text="{i18n>fromLabel}" visible="false"/>
 						<m:DateTimePicker id="planDatePicker" displayFormat="short" editable="false" width="130px" visible="false"/>
 						<m:Label id="actualLabel" text="{i18n>toLabel}" visible="false"/>
