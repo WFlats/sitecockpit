@@ -30,7 +30,7 @@ sap.ui.define([
 			this.setModel(oViewModel, "analyticsModel");
 			this.getRouter().getRoute("Analytics").attachPatternMatched(this._onObjectMatched, this);
 
-			this.setDataModel(0, 0, 0, "1");
+			this.setPeriodChart(0, 0, 0, "1");
 		},
 
 		_onObjectMatched: function (oEvent) {
@@ -187,9 +187,9 @@ sap.ui.define([
 			this.getModel("analyticsModel").setProperty("/busy", true);
 			this.getPlannedValues(sLocationID, sPlanVersionID, sResourceClass, oStart, oEnd)
 				.then(function (mPlannedValue) {
-					that.getActualValues(sLocationID, sResourceClass, oStart, oEnd)
+					return that.getActualValues(sLocationID, sResourceClass, oStart, oEnd)
 						.then(function (oActualValues) {
-							that.setDataModel(mPlannedValue, oActualValues.earned, oActualValues.actual, sResourceClass);
+							that.setPeriodChart(mPlannedValue, oActualValues.earned, oActualValues.actual, sResourceClass);
 							that.getModel("analyticsModel").setProperty("/busy", false);
 						});
 				});
@@ -201,11 +201,11 @@ sap.ui.define([
 			this.getModel("analyticsModel").setProperty("/busy", true);
 			this._getEarliestStart(sLocationID).then(function (oStart) {
 				that.byId("planDatePicker").setDateValue(oStart);
-				that._getLatestEnd(sLocationID).then(function (oEnd) {
+				return that._getLatestEnd(sLocationID).then(function (oEnd) {
 					that.byId("actualDatePicker").setDateValue(oEnd);
-					that.getPlannedAndActualValues(sLocationID, sResourceClass, oStart, oEnd)
-						.then(function (oActualValues) {
-							that.setCumulativeDataModel();
+					return that._createPeriodValues(sLocationID, sResourceClass, oStart, oEnd)
+						.then(function (oChartValues) {
+							that.setCumulativeChart(oChartValues);
 							that.getModel("analyticsModel").setProperty("/busy", false);
 						});
 				});
@@ -443,6 +443,10 @@ sap.ui.define([
 		getPlannedAndActualValues: function (sLocationID, sResourceClass, oStart, oEnd) {
 			// reads tasks only, no snapshots
 			var oModel = this.getModel(),
+				// revisit: finds tasks either when actual data is within period or if planned data is within period
+				// but if a task was started in the next period but planned for the current it will not be found 
+				// because the status is >= 2
+				// solution: read with a planned filter excluding status filter (done), then skip potential duplicates
 				aActualFilters = new Filter({
 					filters: [
 						new Filter("location_ID", FilterOperator.EQ, sLocationID),
@@ -455,64 +459,77 @@ sap.ui.define([
 				aPlannedFilters = new Filter({
 					filters: [
 						new Filter("location_ID", FilterOperator.EQ, sLocationID),
-						new Filter("status", FilterOperator.GE, 2),
+						//new Filter("status", FilterOperator.LT, 2), revisit
 						new Filter("plannedStart", FilterOperator.LT, oEnd),
-						new Filter("estimatedEnd", FilterOperator.GT, oStart)
+						new Filter("plannedEnd", FilterOperator.GT, oStart)
 					],
 					and: true
 				}),
+				aCombinedFilter = [new Filter({
+					filters: [aActualFilters, aPlannedFilters],
+					and: false
+				})],
 				that = this;
 
 			return new Promise(function (resolve, reject) {
 				oModel.read("/Tasks", {
-					filters: [aActualFilters, aPlannedFilters],
-					and: false,
+					filters: aCombinedFilter,
 					success: function (oData) {
-						var oActuals = {
+						var oValues = {
+							planned: 0,
 							earned: 0,
 							actual: 0
 						};
 						if (oData && oData.results.length > 0) {
-							oData.results.forEach(function (oTask) {
+							oData.results.forEach(function (oTask) { // revisit: better reduce
 								// actualQuantity = undefined if no measurement made
 								var mEarnedValueFactor = that._getFactorOfActualWorkWithinPeriod(oTask, oStart, oEnd);
+								var mPlannedValueFactor = that._getFactorOfPlannedWorkWithinPeriodFromTask(oTask, oStart, oEnd);
 								switch (sResourceClass) {
 								case "0": // total cost
-									oActuals.earned += Number(oTask.costPlanned) * mEarnedValueFactor;
-									oActuals.actual += Number(oTask.costActual) * mEarnedValueFactor;
+									oValues.planned += Number(oTask.costPlanned) * mPlannedValueFactor;
+									oValues.earned += Number(oTask.costPlanned) * mEarnedValueFactor;
+									oValues.actual += Number(oTask.costActual) * mEarnedValueFactor;
 									break;
 								case "1": // labor cost
-									oActuals.earned += Number(oTask.costLaborPlanned) * mEarnedValueFactor;
-									oActuals.actual += Number(oTask.costLaborActual) * mEarnedValueFactor;
+									oValues.planned += Number(oTask.costLaborPlanned) * mPlannedValueFactor;
+									oValues.earned += Number(oTask.costLaborPlanned) * mEarnedValueFactor;
+									oValues.actual += Number(oTask.costLaborActual) * mEarnedValueFactor;
 									break;
 								case "2": // labor hours
-									oActuals.earned += Number(oTask.hoursLaborPlanned) * mEarnedValueFactor;
-									oActuals.actual += Number(oTask.hoursLaborActual) * mEarnedValueFactor;
+									oValues.planned += Number(oTask.hoursLaborPlanned) * mPlannedValueFactor;
+									oValues.earned += Number(oTask.hoursLaborPlanned) * mEarnedValueFactor;
+									oValues.actual += Number(oTask.hoursLaborActual) * mEarnedValueFactor;
 									break;
 								case "3": // material cost
-									oActuals.earned += Number(oTask.costMaterialPlanned) * mEarnedValueFactor;
-									oActuals.actual += Number(oTask.costMaterialActual) * mEarnedValueFactor;
+									oValues.planned += Number(oTask.costMaterialPlanned) * mPlannedValueFactor;
+									oValues.earned += Number(oTask.costMaterialPlanned) * mEarnedValueFactor;
+									oValues.actual += Number(oTask.costMaterialActual) * mEarnedValueFactor;
 									break;
 								case "4": // Equipment cost
-									oActuals.earned += Number(oTask.costEquipmentPlanned) * mEarnedValueFactor;
-									oActuals.actual += Number(oTask.costEquipmentActual) * mEarnedValueFactor;
+									oValues.planned += Number(oTask.costEquipmentPlanned) * mPlannedValueFactor;
+									oValues.earned += Number(oTask.costEquipmentPlanned) * mEarnedValueFactor;
+									oValues.actual += Number(oTask.costEquipmentActual) * mEarnedValueFactor;
 									break;
 								case "5": // Equipment hours
-									oActuals.earned += Number(oTask.hoursEquipmentPlanned) * mEarnedValueFactor;
-									oActuals.actual += Number(oTask.hoursEquipmentActual) * mEarnedValueFactor;
+									oValues.planned += Number(oTask.hoursEquipmentPlanned) * mPlannedValueFactor;
+									oValues.earned += Number(oTask.hoursEquipmentPlanned) * mEarnedValueFactor;
+									oValues.actual += Number(oTask.hoursEquipmentActual) * mEarnedValueFactor;
 									break;
 								case "6": // subcontract cost
-									oActuals.earned += Number(oTask.plannedTotalPrice) * mEarnedValueFactor;
-									oActuals.actual += Number(oTask.actualTotalPrice) * mEarnedValueFactor;
+									oValues.planned += Number(oTask.plannedTotalPrice) * mPlannedValueFactor;
+									oValues.earned += Number(oTask.plannedTotalPrice) * mEarnedValueFactor;
+									oValues.actual += Number(oTask.actualTotalPrice) * mEarnedValueFactor;
 									break;
 								default:
-									oActuals.earned += 0;
-									oActuals.actual += 0;
+									oValues.planned += 0;
+									oValues.earned += 0;
+									oValues.actual += 0;
 								}
 							});
-							resolve(oActuals);
+							resolve(oValues);
 						} else {
-							resolve(oActuals);
+							resolve(oValues);
 						}
 					},
 					error: function (oError) {
@@ -523,20 +540,53 @@ sap.ui.define([
 			});
 		},
 
+		_getFactorOfPlannedWorkWithinPeriodFromTask: function (oTask, oPeriodStart, oPeriodEnd) {
+			var oShift = this.getShiftFromID(oTask.shift_ID),
+				mHoursPlannedInPeriod,
+				mFactor;
+			if (oTask.plannedStart.getTime() >= oPeriodEnd.getTime()) { // end time can be adjusted by the user
+				return 0; // should not pass overlap filter
+			}
+			if (oTask.plannedEnd.getTime() <= oPeriodStart.getTime()) { // start and end planned before period
+				return 0;
+			}
+			if (oTask.plannedEnd.getTime() <= oPeriodEnd.getTime()) { // task ends within period
+				if (oTask.plannedStart.getTime() >= oPeriodStart.getTime()) { // start within period, full value
+					return 1;
+				} else { // start planned before period
+					mHoursPlannedInPeriod = this.getNetDurationHoursFromDates(oPeriodStart, oTask.plannedEnd, oShift);
+					mFactor = mHoursPlannedInPeriod / (oTask.quantity / oTask.plannedProductivity);
+					return mFactor;
+				}
+			}
+			// task ends after period end; value from start to period end
+			mHoursPlannedInPeriod = this.getNetDurationHoursFromDates(oTask.plannedStart, oPeriodEnd, oShift);
+			mFactor = mHoursPlannedInPeriod / (oTask.quantity / oTask.plannedProductivity);
+			return mFactor;
+		},
+
 		_getFactorOfPlannedWorkWithinPeriod: function (oSnapshotTask, oPeriodStart, oPeriodEnd) {
-			// oPeriodStart is always the date of the snapshot, i.e. all planned starts must be at period start or later
 			var oShift = this.getShiftFromID(oSnapshotTask.shift_ID),
 				mHoursPlannedInPeriod,
 				mFactor;
 			if (oSnapshotTask.plannedStart.getTime() >= oPeriodEnd.getTime()) { // end time can be adjusted by the user
+				return 0; // should not pass overlap filter
+			}
+			if (oSnapshotTask.plannedEnd.getTime() <= oPeriodStart.getTime()) { // start and end before period
 				return 0;
 			}
-			if (oSnapshotTask.estimatedEnd.getTime() <= oPeriodEnd.getTime()) { // task ends within period - full value
-				return 1;
+			if (oSnapshotTask.plannedEnd.getTime() <= oPeriodEnd.getTime()) { // task ends within period
+				if (oSnapshotTask.plannedStart.getTime() >= oPeriodStart.getTime()) { // start within period, full value
+					return 1;
+				} else { // start before period
+					mHoursPlannedInPeriod = this.getNetDurationHoursFromDates(oPeriodStart, oSnapshotTask.plannedEnd, oShift);
+					mFactor = mHoursPlannedInPeriod / (oSnapshotTask.plannedQuantity / oSnapshotTask.plannedProductivity);
+					return mFactor;
+				}
 			}
-			// value from start to period end
+			// task ends after period end; value from start to period end
 			mHoursPlannedInPeriod = this.getNetDurationHoursFromDates(oSnapshotTask.plannedStart, oPeriodEnd, oShift);
-			mFactor = mHoursPlannedInPeriod / oSnapshotTask.plannedQuantity / oSnapshotTask.plannedProductivity;
+			mFactor = mHoursPlannedInPeriod / (oSnapshotTask.plannedQuantity / oSnapshotTask.plannedProductivity);
 			return mFactor;
 		},
 
@@ -569,6 +619,60 @@ sap.ui.define([
 			}
 			mFactor = mHoursWorkedInPeriod / (oTask.quantity / oTask.currentProductivity); // quantity / productivity = duration
 			return mFactor;
+		},
+
+		_createPeriodValues: function (sLocationID, sResourceClass, oStart, oEnd) {
+			var aPeriodEndDates = [],
+				oPeriodEnd = new Date(oStart.getFullYear(), oStart.getMonth() + 1, 1, 0, 0, 0, 0),
+				oChartValues = {
+					Values: []
+				},
+				that = this;
+
+			return new Promise(function (res) {
+				aPeriodEndDates.push(new Date(oPeriodEnd.getTime()));
+				while (oPeriodEnd.getTime() <= oEnd.getTime()) {
+					oPeriodEnd.setMonth(oPeriodEnd.getMonth() + 1);
+					aPeriodEndDates.push(new Date(oPeriodEnd.getTime()));
+				}
+				// workaround: can't use the accumulator to collect the period values as the initial value is a promise
+				// so I made x a promise by itself and collect period values into oChartValues
+				// so I can cal x and after reducing is complete I can return oChartValues
+				var fReducer = aPeriodEndDates.reduce(function (oProm, oEndDate, i) {
+					return oProm.then(function () {
+						var oStartDate = new Date(oEndDate.getTime());
+						oStartDate.setMonth(oStartDate.getMonth() - 1);
+						return that.getPlannedAndActualValues(sLocationID, sResourceClass, oStartDate, oEndDate)
+							.then(function (oPeriodValues) {
+								var oChartPeriodValue = {
+									Date: [
+										oEndDate.getFullYear(),
+										("0" + (oEndDate.getMonth() + 1)).slice(-2),
+										("0" + oEndDate.getDate()).slice(-2)
+									].join("-"),
+									PV: parseFloat(oPeriodValues.planned).toFixed(0),
+									EV: parseFloat(oPeriodValues.earned).toFixed(0),
+									AC: parseFloat(oPeriodValues.actual).toFixed(0)
+								};
+								if (oChartValues.Values.length > 0) { // cumulate the values
+									oChartPeriodValue.PV = parseFloat(Number(oChartPeriodValue.PV) +
+										Number(oChartValues.Values[oChartValues.Values.length - 1].PV)).toFixed(3);
+									oChartPeriodValue.EV = parseFloat(Number(oChartPeriodValue.EV) +
+										Number(oChartValues.Values[oChartValues.Values.length - 1].EV)).toFixed(3);
+									oChartPeriodValue.AC = parseFloat(Number(oChartPeriodValue.AC) +
+										Number(oChartValues.Values[oChartValues.Values.length - 1].AC)).toFixed(3);
+								}
+								oChartValues.Values.push(oChartPeriodValue);
+							}).then(function () {
+								return Promise.resolve();
+							});
+					});
+				}, Promise.resolve());
+
+				fReducer.then(function () {
+					res(oChartValues);
+				});
+			});
 		},
 
 		_createViewModel: function () {
@@ -617,7 +721,7 @@ sap.ui.define([
 			}
 		},
 
-		setDataModel: function (pv, ev, ac, rc) {
+		setPeriodChart: function (pv, ev, ac, rc) {
 			var iDecimals = (rc === "2" || rc === "5") ? 2 : 0,
 				sLabel = (rc === "2" || rc === "5") ?
 				this.getResourceBundle().getText("chartLabelHours") : this.getResourceBundle().getText("chartLabelCost"),
@@ -626,12 +730,12 @@ sap.ui.define([
 				sTitle = "CPI " + cpi + " - SPI " + spi,
 				oJSONModel = new JSONModel({
 					"Values": [{
-						"Value": sLabel,
-						"PV": parseFloat(pv).toFixed(iDecimals),
-						"EV": parseFloat(ev).toFixed(iDecimals),
-						"AC": parseFloat(ac).toFixed(iDecimals),
-						"CV": parseFloat(ev - ac).toFixed(iDecimals),
-						"SV": parseFloat(ev - pv).toFixed(iDecimals)
+						Value: sLabel,
+						PV: parseFloat(pv).toFixed(iDecimals),
+						EV: parseFloat(ev).toFixed(iDecimals),
+						AC: parseFloat(ac).toFixed(iDecimals),
+						CV: parseFloat(ev - ac).toFixed(iDecimals),
+						SV: parseFloat(ev - pv).toFixed(iDecimals)
 					}]
 				}),
 				oVizFrame = this.byId("chartContainerVizFrame");
@@ -710,42 +814,20 @@ sap.ui.define([
 			}
 		},
 
-		setCumulativeDataModel: function () {
-			var oModel = this.getModel(),
+		setCumulativeChart: function (oChartValues) {
+			var oChartModel = new JSONModel(oChartValues),
+				oModel = this.getModel(),
 				sProjectPath = "/" + oModel.createKey("Projects", {
 					ID: this.getModel("appView").getProperty("/selectedProjectID")
 				}),
 				sCurrencyCode = oModel.createBindingContext(sProjectPath).getProperty("currency_code"),
 				sTitle = this.getResourceBundle().getText("forecastTitle", sCurrencyCode),
-				oJSONModel = new JSONModel({
-					"Values": [{
-						"Date": "2021-05-01",
-						"PV": "100",
-						"EV": "90",
-						"AC": "95"
-					}, {
-						"Date": "2021-06-01",
-						"PV": "200",
-						"EV": "180",
-						"AC": "190"
-					}, {
-						"Date": "2021-07-01",
-						"PV": "300",
-						"EV": "270",
-						"AC": "290"
-					}, {
-						"Date": "2021-08-01",
-						"PV": "500",
-						"EV": "470",
-						"AC": "590"
-					}]
-				}),
 				oVizFrame = this.byId("chartContainerVizFrame");
 
 			oVizFrame.destroyDataset();
 			oVizFrame.destroyFeeds();
 			oVizFrame.setVizType("timeseries_line");
-			oVizFrame.setModel(oJSONModel);
+			oVizFrame.setModel(oChartModel);
 			var oData = {
 				"dimensions": [{
 					"name": "Date",
