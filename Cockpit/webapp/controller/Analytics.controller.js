@@ -203,11 +203,15 @@ sap.ui.define([
 				that.byId("planDatePicker").setDateValue(oStart);
 				return that._getLatestEnd(sLocationID).then(function (oEnd) {
 					that.byId("actualDatePicker").setDateValue(oEnd);
-					return that._createPeriodValues(sLocationID, sResourceClass, oStart, oEnd)
-						.then(function (oChartValues) {
-							that.setCumulativeChart(oChartValues);
-							that.getModel("analyticsModel").setProperty("/busy", false);
-						});
+					if (oStart && oEnd) {
+						return that._createPeriodValues(sLocationID, sResourceClass, oStart, oEnd)
+							.then(function (oChartValues) {
+								that.setCumulativeChart(oChartValues);
+								that.getModel("analyticsModel").setProperty("/busy", false);
+							});
+					} else {
+						that.getModel("analyticsModel").setProperty("/busy", false);
+					}
 				});
 			});
 		},
@@ -651,16 +655,21 @@ sap.ui.define([
 										("0" + oEndDate.getDate()).slice(-2)
 									].join("-"),
 									PV: parseFloat(oPeriodValues.planned).toFixed(0),
+									PVcum: parseFloat(oPeriodValues.planned).toFixed(0),
 									EV: parseFloat(oPeriodValues.earned).toFixed(0),
-									AC: parseFloat(oPeriodValues.actual).toFixed(0)
+									EVcum: parseFloat(oPeriodValues.earned).toFixed(0),
+									AC: parseFloat(oPeriodValues.actual).toFixed(0),
+									ACcum: parseFloat(oPeriodValues.actual).toFixed(0),
+									EAC: "0"
 								};
-								if (oChartValues.Values.length > 0) { // cumulate the values
-									oChartPeriodValue.PV = parseFloat(Number(oChartPeriodValue.PV) +
-										Number(oChartValues.Values[oChartValues.Values.length - 1].PV)).toFixed(3);
-									oChartPeriodValue.EV = parseFloat(Number(oChartPeriodValue.EV) +
-										Number(oChartValues.Values[oChartValues.Values.length - 1].EV)).toFixed(3);
-									oChartPeriodValue.AC = parseFloat(Number(oChartPeriodValue.AC) +
-										Number(oChartValues.Values[oChartValues.Values.length - 1].AC)).toFixed(3);
+								if (oChartValues.Values.length > 0) {
+									// cumulate the values by adding the accumulated values of the last period
+									oChartPeriodValue.PVcum = parseFloat(Number(oChartPeriodValue.PV) +
+										Number(oChartValues.Values[oChartValues.Values.length - 1].PVcum)).toFixed(0);
+									oChartPeriodValue.EVcum = parseFloat(Number(oChartPeriodValue.EV) +
+										Number(oChartValues.Values[oChartValues.Values.length - 1].EVcum)).toFixed(0);
+									oChartPeriodValue.ACcum = parseFloat(Number(oChartPeriodValue.AC) +
+										Number(oChartValues.Values[oChartValues.Values.length - 1].ACcum)).toFixed(0);
 								}
 								oChartValues.Values.push(oChartPeriodValue);
 							}).then(function () {
@@ -670,9 +679,47 @@ sap.ui.define([
 				}, Promise.resolve());
 
 				fReducer.then(function () {
+					oChartValues = that._setEAC(oChartValues);
 					res(oChartValues);
 				});
 			});
+		},
+
+		_setEAC: function (oChartValues) {
+			var oNow = new Date(),
+				getActualsUntil = function (index) {
+					var mActuals = 0;
+					for (var i = 0; i <= index; i++) {
+						mActuals += Number(oChartValues.Values[i].AC);
+					}
+					return mActuals;
+				},
+				getPlannedFrom = function (index) {
+					var mPlanned = 0;
+					for (var i = index; i < oChartValues.Values.length; i++) {
+						mPlanned += Number(oChartValues.Values[i].PV);
+					}
+					return mPlanned;
+				},
+				oReturnValues = {
+					Values: []
+				};
+
+			oChartValues.Values.forEach(function (oPeriodValues, i) {
+				oReturnValues.Values.push(oPeriodValues);
+				if (oPeriodValues.AC === "0" && oPeriodValues.EV === "0") { // if no actuals the EAC stays the same
+					if (i > 0) {
+						oReturnValues.Values[i].EAC = oReturnValues.Values[i - 1].EAC;
+					}
+				} else {
+					if (i === oChartValues.Values.length - 1) { // no planned values in the last period
+						oReturnValues.Values[i].EAC = parseFloat(getActualsUntil(i)).toFixed(0);
+					} else {
+						oReturnValues.Values[i].EAC = parseFloat(getActualsUntil(i) + getPlannedFrom(i + 1)).toFixed(0);
+					}
+				}
+			});
+			return oReturnValues;
 		},
 
 		_createViewModel: function () {
@@ -835,14 +882,17 @@ sap.ui.define([
 					"dataType": "date"
 				}],
 				"measures": [{
-					"name": "PV",
-					"value": "{PV}"
+					"name": "PVcum",
+					"value": "{PVcum}"
 				}, {
-					"name": "EV",
-					"value": "{EV}"
+					"name": "EVcum",
+					"value": "{EVcum}"
 				}, {
-					"name": "AC",
-					"value": "{AC}"
+					"name": "ACcum",
+					"value": "{ACcum}"
+				}, {
+					"name": "EAC",
+					"value": "{EAC}"
 				}],
 				data: {
 					path: "/Values"
@@ -866,7 +916,7 @@ sap.ui.define([
 			var oFeedValueAxis = new FeedItem({
 				"uid": "valueAxis",
 				"type": "Measure",
-				"values": ["PV", "EV", "AC"]
+				"values": ["PVcum", "EVcum", "ACcum", "EAC"]
 			});
 			var oFeedTimeAxis = new FeedItem({
 				"uid": "timeAxis",
