@@ -179,6 +179,11 @@ sap.ui.define([
 							that.byId("removeCrews").setEnabled(false);
 							that.byId("addWorkers").setEnabled(false);
 							that.byId("removeWorkers").setEnabled(false);
+						} else {
+							// remove buttons are enabled based on item selection
+							that.byId("addEditForeman").setEnabled(true);
+							that.byId("addCrews").setEnabled(true);
+							that.byId("addWorkers").setEnabled(true);
 						}
 					},
 					dataRequested: function () {

@@ -362,7 +362,7 @@ entity Tasks : managed {
         shortText            : localized String(50) not null;
         description          : localized String;
         recipe               : association       to Recipes;         // the recipe the task is based on
-        //pulseStep			 : association		 to PulseSteps;
+        pulseStep			 : association		 to PulseSteps;
         UoM                  : association[1]    to UoMs;
         shift				 : association to Shifts;
         quantity             : Decimal(10, 3);
@@ -398,7 +398,7 @@ entity Tasks : managed {
 							        completed = 4; 
 							        approved = 5;
 								};
-        //buffer				 : Boolean; // e.g. drying time
+        buffer				 : Boolean; // e.g. drying time
         pinned				 : Boolean; // must not be moved
 		company				 : association to CompaniesForProjects;
         measurements         : composition of many Measurements     on measurements.task=$self;

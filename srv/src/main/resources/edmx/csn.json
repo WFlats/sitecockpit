@@ -7152,6 +7152,19 @@
             }
           ]
         },
+        "pulseStep": {
+          "@cds.persistence.name": "PULSESTEP",
+          "type": "cds.Association",
+          "target": "localized.my.site.cockpit.PulseSteps",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "pulseStep_ID"
+            }
+          ]
+        },
         "UoM": {
           "@cds.persistence.name": "UOM",
           "type": "cds.Association",
@@ -7415,6 +7428,10 @@
             }
           }
         },
+        "buffer": {
+          "@cds.persistence.name": "BUFFER",
+          "type": "cds.Boolean"
+        },
         "pinned": {
           "@cds.persistence.name": "PINNED",
           "type": "cds.Boolean"
@@ -7633,6 +7650,11 @@
         "recipe_ID": {
           "@cds.persistence.name": "RECIPE_ID",
           "@odata.foreignKey4": "recipe",
+          "type": "cds.UUID"
+        },
+        "pulseStep_ID": {
+          "@cds.persistence.name": "PULSESTEP_ID",
+          "@odata.foreignKey4": "pulseStep",
           "type": "cds.UUID"
         },
         "UoM_ID": {
@@ -16242,6 +16264,19 @@
             }
           ]
         },
+        "pulseStep": {
+          "@cds.persistence.name": "PULSESTEP",
+          "type": "cds.Association",
+          "target": "localized.scService.PulseSteps",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "pulseStep_ID"
+            }
+          ]
+        },
         "UoM": {
           "@cds.persistence.name": "UOM",
           "type": "cds.Association",
@@ -16505,6 +16540,10 @@
             }
           }
         },
+        "buffer": {
+          "@cds.persistence.name": "BUFFER",
+          "type": "cds.Boolean"
+        },
         "pinned": {
           "@cds.persistence.name": "PINNED",
           "type": "cds.Boolean"
@@ -16723,6 +16762,11 @@
         "recipe_ID": {
           "@cds.persistence.name": "RECIPE_ID",
           "@odata.foreignKey4": "recipe",
+          "type": "cds.UUID"
+        },
+        "pulseStep_ID": {
+          "@cds.persistence.name": "PULSESTEP_ID",
+          "@odata.foreignKey4": "pulseStep",
           "type": "cds.UUID"
         },
         "UoM_ID": {
@@ -24967,6 +25011,19 @@
             }
           ]
         },
+        "pulseStep": {
+          "@cds.persistence.name": "PULSESTEP",
+          "type": "cds.Association",
+          "target": "my.site.cockpit.PulseSteps",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "pulseStep_ID"
+            }
+          ]
+        },
         "UoM": {
           "@cds.persistence.name": "UOM",
           "type": "cds.Association",
@@ -25230,6 +25287,10 @@
             }
           }
         },
+        "buffer": {
+          "@cds.persistence.name": "BUFFER",
+          "type": "cds.Boolean"
+        },
         "pinned": {
           "@cds.persistence.name": "PINNED",
           "type": "cds.Boolean"
@@ -25448,6 +25509,11 @@
         "recipe_ID": {
           "@cds.persistence.name": "RECIPE_ID",
           "@odata.foreignKey4": "recipe",
+          "type": "cds.UUID"
+        },
+        "pulseStep_ID": {
+          "@cds.persistence.name": "PULSESTEP_ID",
+          "@odata.foreignKey4": "pulseStep",
           "type": "cds.UUID"
         },
         "UoM_ID": {
@@ -34836,6 +34902,19 @@
             }
           ]
         },
+        "pulseStep": {
+          "@cds.persistence.name": "PULSESTEP",
+          "type": "cds.Association",
+          "target": "scService.PulseSteps",
+          "keys": [
+            {
+              "ref": [
+                "ID"
+              ],
+              "$generatedFieldName": "pulseStep_ID"
+            }
+          ]
+        },
         "UoM": {
           "@cds.persistence.name": "UOM",
           "type": "cds.Association",
@@ -35099,6 +35178,10 @@
             }
           }
         },
+        "buffer": {
+          "@cds.persistence.name": "BUFFER",
+          "type": "cds.Boolean"
+        },
         "pinned": {
           "@cds.persistence.name": "PINNED",
           "type": "cds.Boolean"
@@ -35317,6 +35400,11 @@
         "recipe_ID": {
           "@cds.persistence.name": "RECIPE_ID",
           "@odata.foreignKey4": "recipe",
+          "type": "cds.UUID"
+        },
+        "pulseStep_ID": {
+          "@cds.persistence.name": "PULSESTEP_ID",
+          "@odata.foreignKey4": "pulseStep",
           "type": "cds.UUID"
         },
         "UoM_ID": {

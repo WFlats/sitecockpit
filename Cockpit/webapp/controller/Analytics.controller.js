@@ -217,29 +217,21 @@ sap.ui.define([
 		},
 
 		_getEarliestStart: function (sLocationID) {
-			var oModel = this.getModel(),
-				myArrayMin = function (arr) {
-					var len = arr.length;
-					var min = Infinity;
-					while (len--) {
-						if (arr[len].actualStart && arr[len].actualStart.getTime() < min) {
-							min = arr[len].actualStart.getTime();
-						}
-					}
-					return new Date(min);
-				};
+			var oModel = this.getModel();
 
 			return new Promise(function (resolve, reject) {
 				oModel.read("/Tasks", {
-					filters: [new Filter("location_ID", FilterOperator.EQ, sLocationID)],
-					sorter: new Sorter("actualStart", false),
+					filters: [
+						new Filter("location_ID", FilterOperator.EQ, sLocationID),
+						new Filter("actualStart", FilterOperator.NE, null)
+					],
+					sorters: [new Sorter("actualStart", false)],
 					urlParameters: {
-						$top: 100 // revisit
+						$top: 1
 					},
 					success: function (oData) {
 						if (oData && oData.results.length > 0) {
-							resolve(myArrayMin(oData.results)); // revisit
-							//resolve(oData.results[0].actualStart);
+							resolve(oData.results[0].actualStart);
 						} else {
 							resolve(undefined);
 						}
@@ -253,29 +245,18 @@ sap.ui.define([
 		},
 
 		_getLatestEnd: function (sLocationID) {
-			var oModel = this.getModel(),
-				myArrayMax = function (arr) {
-					var len = arr.length;
-					var max = -Infinity;
-					while (len--) {
-						if (arr[len].estimatedEnd.getTime() > max) {
-							max = arr[len].estimatedEnd.getTime();
-						}
-					}
-					return new Date(max);
-				};
+			var oModel = this.getModel();
 
 			return new Promise(function (resolve, reject) {
 				oModel.read("/Tasks", {
 					filters: [new Filter("location_ID", FilterOperator.EQ, sLocationID)],
-					sorter: new Sorter("estimatedEnd", true),
+					sorters: [new Sorter("estimatedEnd", true)],
 					urlParameters: {
-						$top: 100 // revisit
+						$top: 1
 					},
 					success: function (oData) {
 						if (oData && oData.results.length > 0) {
-							resolve(myArrayMax(oData.results)); // revisit: sorting not working
-							//resolve(oData.results[0].estimatedEnd);
+							resolve(oData.results[0].estimatedEnd);
 						} else {
 							resolve(undefined);
 						}
@@ -558,6 +539,7 @@ sap.ui.define([
 				if (oTask.plannedStart.getTime() >= oPeriodStart.getTime()) { // start within period, full value
 					return 1;
 				} else { // start planned before period
+					// oPeriodStart could be out of working time
 					mHoursPlannedInPeriod = this.getNetDurationHoursFromDates(oPeriodStart, oTask.plannedEnd, oShift);
 					mFactor = mHoursPlannedInPeriod / (oTask.quantity / oTask.plannedProductivity);
 					return mFactor;
@@ -583,7 +565,8 @@ sap.ui.define([
 				if (oSnapshotTask.plannedStart.getTime() >= oPeriodStart.getTime()) { // start within period, full value
 					return 1;
 				} else { // start before period
-					mHoursPlannedInPeriod = this.getNetDurationHoursFromDates(oPeriodStart, oSnapshotTask.plannedEnd, oShift);
+					mHoursPlannedInPeriod = this.getNetDurationHoursFromDates(oPeriodStart, oSnapshotTask.plannedEnd,
+						oShift);
 					mFactor = mHoursPlannedInPeriod / (oSnapshotTask.plannedQuantity / oSnapshotTask.plannedProductivity);
 					return mFactor;
 				}

@@ -475,6 +475,10 @@
           <End Role="Tasks" EntitySet="Tasks"/>
           <End Role="Recipes" EntitySet="Recipes"/>
         </AssociationSet>
+        <AssociationSet Name="Tasks_pulseStep" Association="scService.Tasks_pulseStep">
+          <End Role="Tasks" EntitySet="Tasks"/>
+          <End Role="PulseSteps" EntitySet="PulseSteps"/>
+        </AssociationSet>
         <AssociationSet Name="Tasks_UoM" Association="scService.Tasks_UoM">
           <End Role="Tasks" EntitySet="Tasks"/>
           <End Role="UoMs" EntitySet="UoMs"/>
@@ -1471,6 +1475,7 @@
         <Property Name="shortText" Type="Edm.String" MaxLength="50" Nullable="false"/>
         <Property Name="description" Type="Edm.String"/>
         <NavigationProperty Name="recipe" Relationship="scService.Tasks_recipe" FromRole="Tasks" ToRole="Recipes"/>
+        <NavigationProperty Name="pulseStep" Relationship="scService.Tasks_pulseStep" FromRole="Tasks" ToRole="PulseSteps"/>
         <NavigationProperty Name="UoM" Relationship="scService.Tasks_UoM" FromRole="Tasks" ToRole="UoMs"/>
         <NavigationProperty Name="shift" Relationship="scService.Tasks_shift" FromRole="Tasks" ToRole="Shifts"/>
         <Property Name="quantity" Type="Edm.Decimal" Scale="3" Precision="10"/>
@@ -1499,6 +1504,7 @@
         <Property Name="stopDuration" Type="Edm.Int32"/>
         <Property Name="waitDuration" Type="Edm.Int32"/>
         <Property Name="status" Type="Edm.Int32"/>
+        <Property Name="buffer" Type="Edm.Boolean"/>
         <Property Name="pinned" Type="Edm.Boolean"/>
         <NavigationProperty Name="company" Relationship="scService.Tasks_company" FromRole="Tasks" ToRole="CompaniesForProjects"/>
         <NavigationProperty Name="measurements" Relationship="scService.Measurements_task" FromRole="Tasks" ToRole="Measurements"/>
@@ -1520,6 +1526,7 @@
         <NavigationProperty Name="localized" Relationship="scService.Tasks_localized" FromRole="Tasks" ToRole="Tasks_texts"/>
         <Property Name="project_ID" Type="Edm.Guid"/>
         <Property Name="recipe_ID" Type="Edm.Guid"/>
+        <Property Name="pulseStep_ID" Type="Edm.Guid"/>
         <Property Name="UoM_ID" Type="Edm.Guid"/>
         <Property Name="shift_ID" Type="Edm.Guid"/>
         <Property Name="discipline_ID" Type="Edm.Guid"/>
@@ -2802,6 +2809,18 @@
           </Principal>
           <Dependent Role="Tasks">
             <PropertyRef Name="recipe_ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="Tasks_pulseStep">
+        <End Role="Tasks" Type="scService.Tasks" Multiplicity="*"/>
+        <End Role="PulseSteps" Type="scService.PulseSteps" Multiplicity="0..1"/>
+        <ReferentialConstraint>
+          <Principal Role="PulseSteps">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="Tasks">
+            <PropertyRef Name="pulseStep_ID"/>
           </Dependent>
         </ReferentialConstraint>
       </Association>

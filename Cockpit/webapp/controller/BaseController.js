@@ -196,18 +196,21 @@ sap.ui.define([
 				oAdjustedEndDate = new Date(oEndDate.getTime()),
 				mNetDuration = 0,
 				mRemainingShiftPartHours = 0,
-				iCurrentShiftPartIndex = this.getShiftPartIndexFromDate(oCurrentTime, oShift),
+				iCurrentShiftPartIndex,
 				iMsPerHour = 60 * 60 * 1000;
-			// oStartDate should be within a shift; for safety show a message
-			if (isNaN(iCurrentShiftPartIndex)) {
-				MessageToast.show("getNetduration: Start date is not in shift!");
-				return mNetDuration;
+			// if oStartDate or oEndDate is not in shift, adjust it
+			// this happens e.g. when a task is started/stopped outside of shifts or by a snapshot 
+			if (!this.inShift(oCurrentTime, oShift)) {
+				oCurrentTime = this.getNextShiftStart(oEndDate, oShift);
 			}
-			// if oEndDate is not in shift, adjust it to the end of the last shift
-			// this happens e.g. when a task is started/stopped outside of shifts
 			if (!this.inShift(oAdjustedEndDate, oShift)) {
-				oAdjustedEndDate = this.getShiftEnd(oEndDate, oShift);
+				oAdjustedEndDate = this.getPreviousShiftEnd(oEndDate, oShift);
 			}
+			iCurrentShiftPartIndex = this.getShiftPartIndexFromDate(oCurrentTime, oShift);
+			if (isNaN(iCurrentShiftPartIndex) || oCurrentTime.getTime() >= oAdjustedEndDate.getTime()) {
+				return 0;
+			}
+
 			while (oCurrentTime.getTime() < oAdjustedEndDate.getTime()) {
 				if (!oShift.shiftParts[iCurrentShiftPartIndex].breakTime) { // skip breaks
 					mRemainingShiftPartHours = this.getRemainingDurationHoursOfShiftPart(oCurrentTime, oShift.shiftParts[iCurrentShiftPartIndex]);

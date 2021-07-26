@@ -322,7 +322,10 @@ sap.ui.define([
 					that._refreshCrewList();
 					that.getModel("workForceView").setProperty("/crewSelected", false);
 					that.getModel("workForceView").setProperty("/busy", false);
-					that.updatePlannedLaborCostOfTasks(aSelectedTaskIDs);
+					that._fillOModelWithNewWorkers(aSelectedTaskIDs).then(function () {
+						that.updatePlannedLaborCostOfTasks(aSelectedTaskIDs);
+					});
+					//that.updatePlannedLaborCostOfTasks(aSelectedTaskIDs);
 				},
 				error: function (oError) {
 					Log.error("Error creating CrewsForTask: " + JSON.stringify(oError));
@@ -330,6 +333,30 @@ sap.ui.define([
 					that.getModel("workForceView").setProperty("/busy", false);
 				}
 			});
+		},
+
+		_fillOModelWithNewWorkers: function (aTaskIDs) {
+			// all tasks are locally available
+			var oModel = this.getModel();
+
+			return aTaskIDs.reduce(function (oProm, sTaskID) {
+				//return oProm.then(function () {
+				return new Promise(function () {
+					var aFilter = [new Filter("task_ID", sap.ui.model.FilterOperator.EQ, sTaskID)];
+					oModel.read("/CrewsForTask", {
+						filters: aFilter,
+						urlParameters: {
+							expand: "crew, crew/crewMembers",
+						},
+						success: function (oData) {
+							var x = 1;
+						},
+						error: function (oError) {
+							Log.error("Error reading crew/crewMembers of task");
+						}
+					});
+				});
+			}, Promise.resolve());
 		},
 
 		_refreshCrewList: function () {
